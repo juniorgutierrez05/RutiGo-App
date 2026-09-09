@@ -1,0 +1,10 @@
+{
+  "name": "RutiGo - Turismo en el Atlántico",
+  "description": "App móvil para organizar y promocionar rutas turísticas del departamento del Atlántico, Colombia, con mapas interactivos, geolocalización y valoraciones.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

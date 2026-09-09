@@ -1,0 +1,91 @@
+/**
+ * RutiGo Asset URLs
+ * High-fidelity 3D clay illustrations and curated Colombian Caribbean photography
+ */
+
+export const IMAGES = {
+  // Brand Mascots
+  mascot: {
+    // 3D Iguana with sombrero vueltiao & traveler backpack
+    iguanaMain:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBYUzmuNoSGf3RxfCQ6UjVXp9wGY6ONCUeB-9e5eiAKw5kRjG1194W3bGdxuvG7Uspkwl2bbVKNnarKWeThc7EpvRaIkij4EDfgTYe988aEXYPWYLDzGYahJHH7Byv5XZbILIDYSpZ6erol9GDQGRagAO-0F3QQypBzT1dpaiPdpvB4v5XXaNnnCSJMMp83vDq_dmWeVXvXdqoNcKXzhwUp2bkwGDRN7SIoYeK8JGNPnWa7GkOkcrn4',
+    iguanaSuitcase:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAMIu91XbxsoUWcAo2PsGGREJfT2Y-fSGHqcrBVrxPWjPF0hGFqp_9kMlyGyyqLNtymJeJ3D2yC8pi55Su52hTeICcNSqUrwCBaw1Dvl-d-xJhpKJ4no3mhBi8tvY9153yWh2dZKXbQWaENf4U5QLdPqu7t-YDpHqhXRWvnIwKRZ9dKRN0Q3UjXOoq8GJp0AP9X9x6aeR0sTFdLj25X9SfWmo1JwRmUCOIuq6NXcTlisibVJJ9TX7o6',
+    iguanaTip:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBMkFYwB4cY_LyAuS1VPKol2ihxaZP5CkBgdHwqUKDbdxuZTi2iRrHLDOkJPm7yTK96JUGNrH8hkOvUvRAW2xyIAGPkNyXRK9Qz0UbisNVT4E9Eix7PT-6_ynkZs-ebzkxs1FeLhIT9LZhjfTuMQud0ISAjNTPrGhWv8G6sa3SVpQcZ2Nti1OU-S3cDemj1F2Rhvp6ouCGy4QxiOgOnOG8b23V-1ucvrgOxM4lody7cFq1axs9yQ8Ji',
+    iguanaSmiling:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuA8q1lv0AEr4XIIpux7x--Q_2ZhC-1YtlkhLY-lBoiO8zDJ3p11dSzLAoSfzMkGtTsezqyUMmTYPUPiPcrR19m3VAtmS7C4y8ks1jQxbDe8e3CrcVKdEyKIIxB1pxP6xnrL5wOjSSApDsAi7OXwpUlUjy-jG-N8JndimEzK4aYEgwprbpfVG6QC9UJWH4N0GevTR0vvqcMSFCiKjIG7kxDA1Pq70JE9INm2-fSdW7wxUGE5PMxjVCv4',
+    iguanaMapIsland:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAzueqBbo1s0edResvAbMMmaopS6twPLqDhLkgzWNc4wXg6fUkPhQ63jLQG0c7_hJ12C3st9obJN320wPnrt-Y_UrIXRjDrav4wy84b6zEUwew6fXaw_La_TUYj5rYeSalRFz71LdWYnY0C3Fotp-9wjkFCpiY1cXse7fbItIizoLZQgT25Y4-dMCHbSe8UonsJd_29CxolBd2osMLODcSN3dRolVWsG0VgdYyGp0jxSJ3Pgy3kmn-3',
+    pelicanAvatar:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCB--tNkhV6E1iHMRWnHz48ij3RFvwBxS9zcAqL_7T8-j6RzWZlzT8W-se4unSZqBr4kpcAl5DBLCcEEkwh2daH74SlHNzjIKQbu_XeM3GQU024UlnMerWSIHSmXZ4nXfFWRj20GmUNAM9iHlF9rjMtMSPSlkiGcubLqXTan3dL8aEfiODgcJXf8GgNIpwua1KE1VWJX5oRd8opBTxfiNn6DY9EuuqC_HDAEe0bQsk6-W_lrxYo879I',
+  },
+
+  // Places & Routes Photography
+  usiacuri: {
+    aerialMurales:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAn1tHAKVJO8-mBHe7OI4FMrNy4SjpKS-Zi-y4TCTAEL-v2JAK0BswIEErqTffCcm2rlx3J2M9-7DF_B2k3kwGpAAzZ1yTOmVmdA8L_pN7ZaJfrIwYdkb18jhpNJ9pMwYCmo-Ox0k6kNiAj6Ejo3zBxXubBqer-bbzBTqld56mjhD0QGaPK1TMYW9iF2ou28ABYyZ7JFGChHxZxrxfdDwPGXmznphzYsQV4ZT7YW2fBGc8ZboxGp6cU',
+    iglesiaSantoDomingo:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDInZRyZQZpw7oKP8i98Wfv5p2FV8FKp5LPmKzmz7gU9D27xnHpWzn90j-zjmQgyqCvTHKFe8ydNaEzKCzUF-sfF7R784v886tFLxFFR0dqZvq5Aqg9DIo8mKJ68RhM2aw4i4uB5eOpyJ2H26dFktnV4pLXLQatlJd7lpkoUY5kUxO8pOjnsedVGH7hnbBrAonsb93tNryJ6EZVc4SNUtqY6jyZJETefvyyc_e6hwA8VI6F2s9hX4V1',
+    casaJulioFlorez:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCcC7hm32IKHfDBFmCRWy2WwFYys7ELJmhRP-Zd8fthFF2XpVOpMpOzJayJUSmy3wO04ixNNgS73x3f-BVjax7yk3ifeazuhDbIXYHBEA01-5IDwaHpWEQ7hoPqwndrbukz97I4dZ-ss79rwIci-69Ss_Etz6L4j6lOVlM7q-eWY51wuNWw8ZvBRItsqpm04GLPfz1ExpwBayyQ7g-uVOCYPU-eLaQ0_G0sB17yBEWkcKui1Ohi9lq4',
+    miradorCristal:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDZ1tkpgk53srVj-bhkFRW_lAIxjsTf1h4I_3Mn_moxMlPj0-bUfL6jxlLe-alFCPISS_fK6jBz4Aycyh5_jdAOT3xCQhD4rOUD2MotuY2Cuv-E5bRNmrPjcwcjWSRhTvvMzQr1h-UBvd1P1aV9fBTgb8UsB5OsnPlKaFBJ58_CAqExvEOe81gdJNF7OqQGwhM2Wz9PI6I5jULnO8eMut3hs0f5-SJBTkpHA3Wa5tAy2es49IyBd6_V',
+    artesaniasIraca:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDj4nmODWxZeKFzg0YlSfPUe87pEbTmTPrnbS_s6R6WYczY9aSIG4OfFDF9MqGDlkVvb6B9fFD993HgGu6o7zhoNNLIdezHTljRmuAJM1zf0hl0EyrbU5zIGaVx28gyREehnMAWiY59fpc3YWZ9a6v7BwjdjTvepL-BXeHMNvZQ5aDK3nUWx0g0FgGEYeoyXZJ5mAwqRFnPTMKxFt-G9o540KBT2tn-SEDKcAgZ71N1hM10lfmCUNKW',
+    pesebreAtlantico:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBaU3w0cLNsEDpuN6m6nQUgxABqlfTjKxNbkN-kWQPPZUzbB9tYKbYbuSktco9D_A2xD-KiVYitirtyLLf3KDnRgtssAg4Gkc-Pnzktfs77gcKbc-Ay_6hqWqukvmomTF3pyAzCqi1nGKefxtA9LrvF1aTbsGdqONmDTDClXIEbRw6o22-rynOFgN8pdkzcFJz6hBQtnaOwiE8Xj_oAeIp6MVUXNGpTib0Mnezg6cYipkMtfhS_MNOR',
+  },
+
+  puertoColombia: {
+    muelleHistorico:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAp2k1sno2amtH2m-LzuG8MMXAsk6SuTnHb6YHvXp342mkBNqeT2oK2WclM3JXYa7tdlN5NdXitF3LAv86vAcNAafWX8rKNMjPWlsLYVGLvg_DSP8v6u64rv9MG3S-TjfIYCHW6e6Oq_aQQTqjbObNO76ypjNjztDHHEH_PNHZria6owlTFCWpF0AYhlN11KKafQR4qMWgltgR67WI_R78Wht8Ggn5ZXo0PBae27myOmKHMgldLGZGD',
+    maleconDelMar:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuD_AbN3s7CSGyLAqA-cEJgoeNS5U60SSTpqyVEYNevjsmvloTxvkUhgKQijbYHr53RnINIzocPSBrnFDrolwexDIcbJ43yEp4je6wRLbdm6qsEoaysPIZakmEu_BtqkrqCWTT-yszlIz7aYyC5SVGUkdo46kEMqAaOo2roYPxUmA3XqphPrOeuqgqYH7Re6lgG0183Z-m8axCHmj1Qx29We75rccXM2OqFAEiCq0xdJ7X47WQTT0I22',
+    castilloSalgar:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBSaUl1ytTr-wejrP8yCt24IS4kUZkFLGjve9ihV4MbjAxtyD6K7YSYIoTkPKa4gUOW4k_G9MJYMD8PgZrzMvXipV8HYc7zz2BXsecUXt3Vh_14dDIpnEJabFDhjK3bL-YyJSBQ_KdwjchyNvIZr-aSFw4rDci4Cz0kGvWZEoWOmcJ2OZ9VjRJtcqOglC-1f6jMQjWjyPjiHvaHZEaXzDMEwORU48saVu9NJEohYbFXXAM6XabDma2s',
+    pradomarSurf:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAC8H4LQXwFfjNdXb8w6G08568-CoqA5NP7Ed55uzdt-AuZnhxXE17TPWdcxJwz4e3ykTHvxlvKvONuP0NlKRwYAkxcGJNFVp8nS1-KKgOuyLPNEdTokZHBIX4Av0CrFPYy-1rOYm7tWq0zG7wfTHn2ckxILlj2xbaYS4EewsfZseb9kGIwDTwahK92o4OSu-8DU4i_2o1YXAFexz_ku6ZB-YDkpfOEdoyp8YoHG7mVsjT6DOFaqNZt',
+    seafoodPlatter:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAJym3KsCmkZjN52nFP64-xPa1mBJpzFo_ao8jrsPzzRJJ8C6zQMsqJ_J9N4JEAMdjNlJfeKoYjg8wYeNjfawhi1gEKmVclgNdy5QPoF6wBq_PhdSB4sIN2QCac984SZ9jnFwgaUEbTxbTAww4URpa-3h4ofOENaPasvVMQKeFgameQMyiuES73YpGuLgNI_Gb-QdfX2AwZHlu9En60eb8ORAGL3B83vVgZo3u8YylffjUGxgExMQG4',
+  },
+
+  barranquilla: {
+    maleconRio:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDonuqLyRj5TGJ2Hi_t4q0HUmNRNn-6EdTOkLQg5uQ4dIt8IRlfZ_Kz_eU3VEEDaa7QdkaZNDEHgEseY3MGW1Dq1Hb9tJlE6OqfLT4vNCXHuIFyAb3x0Nkm9IzV3yf8iDcIG9pssB7Rlh8c8O9g1Kk8COVQiEcpW9OL8NPyxaKRmqDKwjJCoJOkKQ6RnPPCkCEYdADk-WaaiSlFbhP4iJkyBW-tR5AXjTPm8Wdvy15SVWrChcepoB8i',
+    bocasDeCeniza:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCLjLCLkF8-GxKlSeZtLUUCfYINa7oTX1YaZDsDxS3wshCMjtOZPFCuBJXzqek_AQPoP1wYzNQnX_2-LUU_YSbNthkqtm507cAAd0jnlXDM-gruumzTDHt5qNGuG41eTkCpzRO3L5CG1X2y8XQQl42N6t5HQrMjiw5urGY9DisW_Ul5QJrYwiUlfBiQUSLZGDdphOhIm_pcd__7NQQ6yyAaDwjE4TBuxIoI4mw6ip-Zhf6r5IfblMQg',
+    caimanDelRio:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBP9s0L0eNUY0dTwPcHUv-7jLQoubNCy1Ql6bZTg7fW4QPJ9q7y9IYPhUhpAdm0i7H4fzXm0q-va6isrRGAfnE-rKyGqD-k06VKEmONqroiOrrdnWb9wo-0YwQugnZtwASaUQA3wocWbVi6u0HfIsKst-qYdEtzxm5DifPhILDpcefQu02GcPbru8STscNZIabyMdNk3_SkFit2AS39j7RC7NMALnWX1D3Vzj7C2_MgtIRJ5SxfGuG2',
+  },
+
+  gastronomia: {
+    pastelPital:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDNE_8Em1m-mEvBWFsqjNNThsvbs9rNw5b4iYY4o83mj-OB4IB2JYM92lcR1aVcV8O9lCIWizEbRXAM9X-iwQs9Z2-PinXqlNLaqeFYnsqFffQ0vaDwOU3E61MQ0y-4br8hHFQcmkwsXqlQgvGAkWKkhjh4E1Exhe6VTgrDSkGuDBgAqR9icEBwLjsmpb9RYCxr6TxRd9g769_LtrkitDQUHoSTEGwl9gG3b8D6GE07CMMDnM5G70NZ',
+    arepaHuevo:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBi5I9wdUHEgTPvv9ja54OwGjIoKFw4ngBtUN0Tsgc7xkOwF7a_TF8JZjc4IEHU5-z4DnPKyDxwozxhQ0-jRd9cezeFc8D41Uf0ZCDvZVeN_YH4oQXJZ0tmfJ3azbyfbrmwtfyMv4XCbpxrrY9Odx4-vn9uoK49znr7ojVr8QvzzxW64ko0yJ_P9Z7y8ZUABiCYgKLHW5PCG40ts9RyFwViG9TzkIf3kE6nfO1p80BqoMkMfDl0dJPl',
+    nisperoDulces:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDRNLCsPWdn4LkRssys3yOr_R0rd8D9L6GiSQUoMv6QTbRG8GyAnCptdclKSKwiOTRH2tN_-VVxaqO1rLQ5m3CjDbvc8SERiY8C6g-_aymJG-ByhxfZyprL_JOujrxIxO8BI5WTjWP34kk-qr8NhC5ciqLqqKFXuTzGBaulffofu0P1f29JJTzcg-J-lAekDEzYF3fm0B35NDp_M9IUMbT5Ox4KlrY7FiNQS1ubs9B6lKGvXmRhijIT',
+    cazuelaCoco:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCgyBJNxwJ7K_h5BRwGO7ZKfu87ssspgJBMhHTHmVDXRLGmrHBLt8vY_KgSRrjHXLYwRBsPrl2Sq6sU7EHbakm8Jx-NvnnxRFSA-w2G8kQK5ILeczhTxjRxwTJbZWmk9XWYYf5167un0l7DhYkeA34-XQOJHAwRKuym_LukM-Cc3roZB7fRwmhDxbgDqFnz0gaf7yuSo1jesMJpLfrKzZvV4bHDswvzYccET3nxFKvgeLp6GmYTy3r3',
+    gourmetPlate3D:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuD3E-XkoFpa2pBxdytB9QNteb1ArIV6ixYFMdohmhZHmKCw-VRJDlawNxDvJO4fjItUlCS32aPHcOeHfZkysbWcUfe5Wx9SBYNkCTnHhVZkRT0ewPYbYfDEYBw88IGC4rgPufypndbNLKFHzJPcHOt7I0g2VgShUfHsWN8PWIwdKpd24HaF9FDp49pSjp97d1koyXNVC6NoNSU08wqtljAj9UdVau0wrUYwOrMS4VcZTvUaSTXDWN6a',
+  },
+
+  naturaleza: {
+    girasolesBaranoa:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBfAmXfS7lShoOGZ1mi4djgRxTIaAwLca3mphPyOjhiwVKn1UklcIF5E06ZsmykSZL8Cu9ZF0V7rwMaeNTWua6YrL-HBmu-zM6Fs5vbVx4matiIHqmdwDFwUfJB5Jgyzjlktax2wHbGE0ASj7X8cnmGmUI0jC0Hwlj4NeMjjJkvsDnS5FNk-ufcBphPKXPXC26zMlW17vrkxBUfsG59aVYk5imYcUfmCG65bt9OKx-O96Hdpu2ScGZi',
+    senderosPiojo:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuBj_-c4T8zSB5kediNQzmDJWCAv8VF78VKh2X3l0Xa9XBrR110KJyAPUOF9efdEO-bO9RJQP5H4B0tOSexp1k_Vv5GLykcf7VU_acurj2lhy3zCMt7xgT0bLBnP3pJMnDrLNEJwGQmFr1BrG4d4ZzQRR0rSadp_MqT2AQtl9XbdCl8rzNaX0UNfHCmGspvXzrbYgcd-OuA2e8nEa0GS_x2oBz3yE6bPs_nVuB6XuoH_ZC3C8ys5PFLJ',
+    palmaAmarga:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCy6KYCAcYsM8N8ZfubJWprXxzOx_oGvOgjvr53QNKwp_l3htKeuZJmm49CdhhFN5AoWQe5TdimiG-fybMQSZPwoY3A-urpi8KB5HI3-Kiwjk9GHXEdSYMqLGAlMhFglWAzi5ccmrc_fErg2ApSAC_uF1MxkeIiet5KZYfanlqBUl21KURh01y6V-RxmrSbpDlSqjQqOM_YOZTUyLG81etnQSqkNsbluxGhRicRqzE0C-LeVS6yX68U',
+  },
+
+  cultura: {
+    mascarasGalapa:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuA25QbOg4AwkJyW1MsDIorHZ4Gc-O8UiX_eHB7eL97IH9KrEN3uwoT4ouJduU-h8_WHw8GkmmK0Om5cN6c4KWEOJ24oD2FkRbSUIL5dedFrBHLJwwyfEbkoIDdM4XXvrg0sy9me8BhXjy0UdofHoa5TQYdZyd6RJ5ikqMbYAKsqo7rJJE57NEPIyyMPmtofwwbloqxJKyW24X_VUT1ZhaAuzwmL8i24gYnyxjvvohihQSTN5DprEmyo',
+  },
+
+  mapStyle3D:
+    'https://lh3.googleusercontent.com/aida-public/AB6AXuB4ZJ7nrtjAn2zjlAbs1lwiYlA587QLTZTggT3Tpq2eXEyc54-g5PEu132HwCJIgDJ6mnPu6AWYDjmoEWIjdstfWd12BoDdGAY7s1Ngn7u1kR2B4kqeaOfH0pJJ4PxYQXxJy2xGZDna6ewhjN3SD_VbXScoifwIPn7Ym0JieuLVHe5vM5_ZrKB7GInnwK9ihnYB0-wZkBUX3Uq5de7KxAnfqo6TCPZwKE8IQXRRlI5v_onwDWHOElJJ',
+};
