@@ -37,7 +37,7 @@ export const BottomNav: React.FC = () => {
   return (
     <nav
       aria-label="Navegación principal"
-      className="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto z-50 px-4 pb-3 flex justify-around items-center pointer-events-none"
+      className="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto z-50 px-4 flex justify-around items-center pointer-events-none"
     >
       <div className="w-full clay-card rounded-full h-[68px] flex items-center justify-around px-2 border-2 border-white pointer-events-auto shadow-2xl">
         {/* Tab 1: Inicio */}

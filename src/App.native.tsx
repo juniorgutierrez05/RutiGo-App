@@ -1,28 +1,43 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-export default function App() {
+function NativeShell() {
+  const insets = useSafeAreaInsets();
   const webSource = {
     uri: 'http://192.168.101.94:3000/index.html',
   };
 
   return (
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
+    >
+      <StatusBar style="dark" />
+      <WebView
+        originWhitelist={['*']}
+        source={webSource}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+        mixedContentMode="compatibility"
+        style={styles.webview}
+      />
+    </View>
+  );
+}
+
+export default function App() {
+  return (
     <SafeAreaProvider>
-      <View style={styles.container}>
-        <StatusBar style="dark" />
-        <WebView
-          originWhitelist={['*']}
-          source={webSource}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          startInLoadingState={true}
-          mixedContentMode="compatibility"
-          style={styles.webview}
-        />
-      </View>
+      <NativeShell />
     </SafeAreaProvider>
   );
 }

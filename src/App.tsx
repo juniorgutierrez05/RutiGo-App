@@ -71,9 +71,9 @@ const ScreenRouter: React.FC = () => {
 export default function App() {
   return (
     <AppProvider>
-      <div className="min-h-screen bg-[#F7F2EC] flex justify-center items-center">
+      <div className="min-h-screen bg-[#F7F2EC] flex justify-center items-center px-0">
         {/* Mobile Viewport Container */}
-        <div className="w-full max-w-md min-h-screen bg-background shadow-2xl relative overflow-x-hidden flex flex-col font-body text-on-surface">
+        <div className="mobile-shell w-full max-w-[420px] min-h-screen bg-background shadow-2xl relative overflow-x-hidden flex flex-col font-body text-on-surface">
           <ScreenRouter />
         </div>
       </div>
