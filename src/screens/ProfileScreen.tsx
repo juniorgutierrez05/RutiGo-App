@@ -10,16 +10,11 @@ import { IMAGES } from '../assets/images';
 export const ProfileScreen: React.FC = () => {
   const { currentUser, logout, navigateTo, goBack } = useApp();
 
-  const user = currentUser || {
-    id: 'user_1',
-    name: 'Valeria Arteta',
-    email: 'valeria.arteta@rutigo.co',
-    homeCity: 'Barranquilla',
-    avatarUrl: IMAGES.mascot.pelicanAvatar,
-    savedRoutes: ['route_usiacuri', 'route_mar_caribe'],
-    savedPlaces: ['place_usiacuri_murales', 'place_castillo_salgar'],
-    createdAt: '2026-01-15T10:00:00Z',
-  };
+  if (!currentUser) {
+    return <div className="w-full min-h-screen bg-mesh-caribbean p-6 text-center">Inicia sesión para ver tu perfil.</div>;
+  }
+
+  const user = currentUser;
 
   const badges = [
     { id: 'b1', name: 'Artesano', desc: 'Usiacurí', icon: 'palette', color: 'clay-badge-cultura' },
@@ -62,6 +57,15 @@ export const ProfileScreen: React.FC = () => {
 
       {/* MAIN CONTAINER */}
       <main className="px-5 pt-3 flex flex-col gap-4 flex-1">
+        {user.role === 'admin' && (
+          <button
+            onClick={() => navigateTo('admin')}
+            className="clay-card rounded-[22px] p-4 flex items-center justify-between text-left text-primary font-bold"
+          >
+            <span className="flex items-center gap-3"><span className="material-symbols-outlined">admin_panel_settings</span> Panel administrativo</span>
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+        )}
         {/* User Card */}
         <div className="clay-card rounded-[32px] p-6 text-center flex flex-col items-center shadow-lg relative overflow-hidden">
           {/* Top subtle Caribbean gradient background */}

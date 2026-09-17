@@ -14,15 +14,16 @@ export const NearbyRoutesScreen: React.FC = () => {
   const { routes, places, userLocation, navigateTo, goBack } = useApp();
 
   // Sort routes by distance to their first stop
-  const routesWithDistance = routes.map((route) => {
-    const firstPlace = places.find((p) => p.id === route.placeIds[0]) || places[0];
+  const routesWithDistance = routes.flatMap((route) => {
+    const firstPlace = places.find((p) => p.id === route.placeIds[0]);
+    if (!firstPlace) return [];
     const dist = calculateDistanceKm(userLocation, firstPlace.location);
-    return {
+    return [{
       ...route,
       distanceFromUser: dist,
       formattedDist: formatDistance(dist),
       travelEstimate: estimateTravelTimes(dist),
-    };
+    }];
   });
 
   routesWithDistance.sort((a, b) => a.distanceFromUser - b.distanceFromUser);

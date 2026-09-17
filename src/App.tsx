@@ -3,6 +3,7 @@
  * Main Application Component with Screen Navigator
  */
 import React from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AppProvider, useApp } from './store';
 import { SplashScreen } from './screens/SplashScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
@@ -22,6 +23,7 @@ import { FavoritesScreen } from './screens/FavoritesScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { NotificationsScreen } from './screens/NotificationsScreen';
 import { RecommendationsScreen } from './screens/RecommendationsScreen';
+import { AdminScreen } from './screens/AdminScreen';
 
 const ScreenRouter: React.FC = () => {
   const { currentScreen } = useApp();
@@ -63,20 +65,29 @@ const ScreenRouter: React.FC = () => {
       return <NotificationsScreen />;
     case 'recommendations':
       return <RecommendationsScreen />;
+    case 'admin':
+      return <AdminScreen />;
     default:
       return <HomeScreen />;
   }
 };
 
 export default function App() {
+  const googleClientId =
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOOGLE_WEB_CLIENT_ID) ||
+    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID) ||
+    '';
+
   return (
-    <AppProvider>
-      <div className="min-h-screen bg-[#F7F2EC] flex justify-center items-center px-0">
-        {/* Mobile Viewport Container */}
-        <div className="mobile-shell w-full max-w-[420px] min-h-screen bg-background shadow-2xl relative overflow-x-hidden flex flex-col font-body text-on-surface">
-          <ScreenRouter />
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <AppProvider>
+        <div className="min-h-screen bg-[#F7F2EC] flex justify-center items-center px-0">
+          {/* Mobile Viewport Container */}
+          <div className="mobile-shell w-full max-w-[420px] min-h-screen bg-background shadow-2xl relative overflow-x-hidden flex flex-col font-body text-on-surface">
+            <ScreenRouter />
+          </div>
         </div>
-      </div>
-    </AppProvider>
+      </AppProvider>
+    </GoogleOAuthProvider>
   );
 }

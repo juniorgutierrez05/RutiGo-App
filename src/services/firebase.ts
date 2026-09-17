@@ -27,6 +27,16 @@ const STORAGE_KEYS = {
   SEARCH_HISTORY: 'rutigo_search_history',
 };
 
+const API_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
+  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) ||
+  'http://localhost:3001';
+
+type AuthApiResponse = {
+  token: string;
+  user: User;
+};
+
 // ============================================================================
 // TODO: CONFIGURACIÓN OFICIAL DE FIREBASE (PRODUCCIÓN)
 // ============================================================================
@@ -123,25 +133,21 @@ export async function registerWithEmail(
   return newUser;
 }
 
-export async function loginWithGoogle(): Promise<User> {
-  // TODO: conectar a Firebase Auth:
-  // const result = await signInWithPopup(auth, googleProvider);
-  // const user = result.user;
-  // return { id: user.uid, name: user.displayName || 'Explorador RutiGo', email: user.email || '', ... };
+export async function loginWithGoogle(idToken: string): Promise<User> {
+  const response = await fetch(`${API_URL}/api/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken }),
+  });
 
-  await new Promise((res) => setTimeout(res, 300));
-  const googleUser: User = {
-    id: 'user_google_atlantico',
-    name: 'Valeria Arteta (Google)',
-    email: 'valeria.arteta.google@gmail.com',
-    homeCity: 'Barranquilla',
-    avatarUrl: INITIAL_USER.avatarUrl,
-    savedRoutes: ['route_usiacuri', 'route_mar_caribe'],
-    savedPlaces: ['place_usiacuri_murales', 'place_castillo_salgar'],
-    createdAt: new Date().toISOString(),
-  };
-  setStored(STORAGE_KEYS.USER, googleUser);
-  return googleUser;
+  if (!response.ok) {
+    throw new Error('No se pudo iniciar sesión con Google');
+  }
+
+  const data = (await response.json()) as AuthApiResponse;
+  setStored(STORAGE_KEYS.USER, data.user);
+  setStored('rutigo_auth_token', data.token);
+  return data.user;
 }
 
 export async function logoutUser(): Promise<void> {

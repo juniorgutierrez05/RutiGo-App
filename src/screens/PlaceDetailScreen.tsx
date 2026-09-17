@@ -22,25 +22,11 @@ export const PlaceDetailScreen: React.FC = () => {
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [showReviewModal, setShowReviewModal] = useState(false);
 
-  const place = selectedPlace || {
-    id: 'place_tubara_cascadas',
-    name: 'Pozos y Cascadas de Tubará',
-    description:
-      'Un oasis escondido en el corazón del Atlántico. Senderos rodeados de bosque seco tropical que conducen a piscinas naturales de aguas cristalinas ideales para refrescarse y conectar con la biodiversidad caribeña.',
-    category: 'naturaleza' as const,
-    municipality: 'Tubará',
-    location: { lat: 10.8789, lng: -74.9819 },
-    address: 'Vía al Morro, Tubará, Atlántico',
-    schedule: 'Martes a Domingo: 7:00 AM - 5:00 PM',
-    images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCJJw5Z8cg30pkAQ5M0Vk3vwoiYzN3FWU99r49j_2MjhQqR6got53Wa6UIOQQhJn6j2pIXQzqhUHRa9ksve3osFKYs14WYxngLnY4k6gm7K83lO6F2YD4lPJ8i-GkIPtIWL1K7S9RxjT6FmaCa6GTR4olYMQprOOsAlVwNkLMLAExNddcF9HKnc0k3SIK6-E4tMnGaWOOwoUDfoO19mnLnJ17NlUeGXM40OJmrEaAPQaPcw7a1q0xfv',
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCVtjmV-x80Z8itKsjtVh49L1z5Qv8-6ZBGoMj2Lxb-rjXmwuLBYQbWKQi-GbnOQ7NHRvcLXQa4IK6hmwzz2sQyVkC5ms9ZM-KWJb3ab4V8R45n-UOp8_Lzl9fcbbTObbxNLS2gOv16FYfBcSZnHHAuN_yN_AObDRvx18g6eNC5ppAXOgHZilakQjA3dE9cOuxP1i3zKNpc9fjPjUrCU-gHxHSz3Rzrn8BkSuD3ez-ffgr53mOXdAL3',
-    ],
-    avgRating: 4.8,
-    reviewCount: 234,
-    priceNote: 'Entrada $10.000 COP / Persona',
-    createdAt: '2026-01-10T08:00:00Z',
-  };
+  const place = selectedPlace;
+
+  if (!place) {
+    return <div className="w-full min-h-screen bg-mesh-caribbean p-6 text-center">Lugar no encontrado.</div>;
+  }
 
   const isFav = isFavorite('place', place.id);
 

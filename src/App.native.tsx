@@ -7,7 +7,7 @@ import { WebView } from 'react-native-webview';
 function NativeShell() {
   const insets = useSafeAreaInsets();
   const webSource = {
-    uri: 'http://192.168.101.94:3000/index.html',
+    uri: process.env.EXPO_PUBLIC_WEB_URL || 'http://192.168.1.38:3000/index.html',
   };
 
   return (

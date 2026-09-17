@@ -18,7 +18,7 @@ export const InteractiveMapScreen: React.FC = () => {
     refreshLocation,
   } = useApp();
 
-  const [activePlace, setActivePlace] = useState<Place>(selectedPlace || places[0]);
+  const [activePlace, setActivePlace] = useState<Place | null>(selectedPlace || places[0] || null);
   const [mapCategory, setMapCategory] = useState<CategoryType | 'todas'>('todas');
   const [selectedMunicipality, setSelectedMunicipality] = useState<string>('Todos');
 
@@ -29,6 +29,10 @@ export const InteractiveMapScreen: React.FC = () => {
       selectedMunicipality === 'Todos' || p.municipality === selectedMunicipality;
     return matchCat && matchMuni;
   });
+
+  if (!activePlace) {
+    return <div className="relative w-full h-screen bg-[#DDE9F0] flex items-center justify-center p-6 text-center">No hay lugares turísticos publicados todavía.</div>;
+  }
 
   // Calculate distance & time for active selected place
   const distKm = calculateDistanceKm(userLocation, activePlace.location);

@@ -12,13 +12,7 @@ interface AddReviewModalProps {
 
 export const AddReviewModal: React.FC<AddReviewModalProps> = ({ placeId, onClose }) => {
   const { addReview, places } = useApp();
-  const currentPlace = places.find((p) => p.id === placeId) || {
-    name: 'Pozos y Cascadas de Tubará',
-    municipality: 'Tubará',
-    images: [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuCJJw5Z8cg30pkAQ5M0Vk3vwoiYzN3FWU99r49j_2MjhQqR6got53Wa6UIOQQhJn6j2pIXQzqhUHRa9ksve3osFKYs14WYxngLnY4k6gm7K83lO6F2YD4lPJ8i-GkIPtIWL1K7S9RxjT6FmaCa6GTR4olYMQprOOsAlVwNkLMLAExNddcF9HKnc0k3SIK6-E4tMnGaWOOwoUDfoO19mnLnJ17NlUeGXM40OJmrEaAPQaPcw7a1q0xfv',
-    ],
-  };
+  const currentPlace = places.find((p) => p.id === placeId);
 
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
@@ -32,6 +26,7 @@ export const AddReviewModal: React.FC<AddReviewModalProps> = ({ placeId, onClose
     'https://lh3.googleusercontent.com/aida-public/AB6AXuCVtjmV-x80Z8itKsjtVh49L1z5Qv8-6ZBGoMj2Lxb-rjXmwuLBYQbWKQi-GbnOQ7NHRvcLXQa4IK6hmwzz2sQyVkC5ms9ZM-KWJb3ab4V8R45n-UOp8_Lzl9fcbbTObbxNLS2gOv16FYfBcSZnHHAuN_yN_AObDRvx18g6eNC5ppAXOgHZilakQjA3dE9cOuxP1i3zKNpc9fjPjUrCU-gHxHSz3Rzrn8BkSuD3ez-ffgr53mOXdAL3',
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const highlightsOptions = [
     { label: 'Hermosos paisajes', icon: 'nature_people' },
@@ -76,15 +71,27 @@ export const AddReviewModal: React.FC<AddReviewModalProps> = ({ placeId, onClose
     e.preventDefault();
     try {
       setIsSubmitting(true);
+      setErrorMessage('');
       const textToSubmit = comment.trim() || '¡Excelente visita en el Atlántico!';
       await addReview(placeId, rating, textToSubmit, photos[0]);
       onClose();
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'No se pudo publicar la reseña.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (!currentPlace) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-5">
+        <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+          <p className="font-bold text-on-surface">Lugar no encontrado.</p>
+          <button type="button" onClick={onClose} className="mt-4 rounded-full bg-primary px-5 py-2 font-bold text-white">Cerrar</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-0 sm:p-4 overflow-y-auto">
@@ -120,6 +127,11 @@ export const AddReviewModal: React.FC<AddReviewModalProps> = ({ placeId, onClose
 
         {/* Scrollable Flow Container */}
         <form onSubmit={handleSubmit} className="px-5 flex flex-col gap-4 mt-2 z-10">
+          {errorMessage && (
+            <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {errorMessage}
+            </div>
+          )}
           {/* Context Place Card (Miniature Clay Capsule) */}
           <section className="clay-card rounded-[24px] p-3 flex items-center gap-3">
             <div className="relative w-14 h-14 rounded-[18px] overflow-hidden shrink-0 shadow-md border-2 border-white">

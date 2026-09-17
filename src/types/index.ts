@@ -8,6 +8,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  role?: 'tourist' | 'admin';
   homeCity: string;
   avatarUrl: string;
   savedRoutes: string[];
@@ -100,4 +101,5 @@ export type ScreenName =
   | 'favorites'
   | 'settings'
   | 'notifications'
-  | 'recommendations';
+  | 'recommendations'
+  | 'admin';

@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Route, Place, Review, NotificationItem, CategoryType, ScreenName, PlaceLocation } from '../types';
-import * as fb from '../services/firebase';
+import * as fb from '../services/api';
 import { getCurrentCoordinates, ATLANTICO_MUNICIPALITIES } from '../services/locationService';
 
 interface AppContextType {
@@ -18,7 +18,7 @@ interface AppContextType {
   // Authentication
   currentUser: User | null;
   login: (email: string, pass: string) => Promise<void>;
-  loginGoogle: () => Promise<void>;
+  loginGoogle: (idToken: string) => Promise<void>;
   register: (name: string, email: string, pass: string, homeCity: string) => Promise<void>;
   logout: () => Promise<void>;
 
@@ -66,6 +66,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Auth
   const [currentUser, setCurrentUser] = useState<User | null>(fb.getCurrentUser());
 
+  useEffect(() => {
+    let cancelled = false;
+    if (currentUser) {
+      fb.validateSession().catch(async () => {
+        await fb.logoutUser();
+        if (!cancelled) setCurrentUser(null);
+      });
+    }
+    return () => { cancelled = true; };
+  }, []);
+
   // Core Data
   const [routes, setRoutes] = useState<Route[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
@@ -98,7 +109,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         fb.getRoutes(),
         fb.getPlaces(),
         fb.getReviews(),
-        fb.getNotifications(),
+        currentUser ? fb.getNotifications() : Promise.resolve([]),
       ]);
       setRoutes(allRoutes);
       setPlaces(allPlaces);
@@ -110,7 +121,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setUserLocation(coords);
     }
     loadInitialData();
-  }, []);
+  }, [currentUser]);
 
   const refreshLocation = async () => {
     const coords = await getCurrentCoordinates();
@@ -148,13 +159,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const login = async (email: string, pass: string) => {
     const user = await fb.loginWithEmail(email, pass);
     setCurrentUser(user);
-    navigateTo('home');
+    navigateTo(user.role === 'admin' ? 'admin' : 'home');
   };
 
-  const loginGoogle = async () => {
-    const user = await fb.loginWithGoogle();
+  const loginGoogle = async (idToken: string) => {
+    const user = await fb.loginWithGoogle(idToken);
     setCurrentUser(user);
-    navigateTo('home');
+    navigateTo(user.role === 'admin' ? 'admin' : 'home');
   };
 
   const register = async (name: string, email: string, pass: string, homeCity: string) => {
@@ -201,8 +212,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setReviews((prev) => [newRev, ...prev]);
 
     // Refresh places to get updated avgRating
-    const updatedPlaces = await fb.getPlaces();
-    setPlaces(updatedPlaces);
+    try {
+      const updatedPlaces = await fb.getPlaces();
+      setPlaces(updatedPlaces);
+    } catch (refreshError) {
+      console.warn('La reseña se guardó, pero no se pudo actualizar el catálogo:', refreshError);
+    }
   };
 
   const editReview = async (reviewId: string, rating: number, comment: string) => {

@@ -129,6 +129,7 @@ export const ReviewsScreen: React.FC = () => {
             icon="rate_review"
             onClick={() => {
               if (!currentUser) navigateTo('login');
+              else if (places.length === 0) return;
               else setShowAddModal(true);
             }}
           >
@@ -137,7 +138,7 @@ export const ReviewsScreen: React.FC = () => {
         </div>
       </div>
 
-      {showAddModal && (
+      {showAddModal && places.length > 0 && (
         <AddReviewModal
           placeId={selectedPlaceId === 'all' ? places[0].id : selectedPlaceId}
           onClose={() => setShowAddModal(false)}

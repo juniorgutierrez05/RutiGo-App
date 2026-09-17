@@ -1,0 +1,106 @@
+erDiagram
+    USERS ||--o{ USER_FAVORITES : saves
+    USERS ||--o{ REVIEWS : writes
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ ADMIN_AUDIT_LOG : performs
+    MUNICIPALITIES ||--o{ PLACES : contains
+    PLACES ||--o{ PLACE_IMAGES : has
+    PLACES ||--o{ ROUTE_PLACES : includes
+    ROUTES ||--o{ ROUTE_PLACES : contains
+    PLACES ||--o{ REVIEWS : receives
+    ROUTES ||--o{ REVIEWS : receives
+    ROUTES ||--o{ ROUTE_MUNICIPALITIES : crosses
+    MUNICIPALITIES ||--o{ ROUTE_MUNICIPALITIES : crossed_by
+    ROUTES ||--o{ ROUTE_HIGHLIGHTS : has
+
+    USERS {
+        bigint id PK
+        varchar name
+        varchar email UK
+        varchar password_hash
+        enum role
+        enum status
+        varchar home_city
+        varchar avatar_url
+        datetime created_at
+        datetime blocked_at
+    }
+    MUNICIPALITIES {
+        bigint id PK
+        varchar name UK
+        varchar department
+        decimal latitude
+        decimal longitude
+    }
+    PLACES {
+        bigint id PK
+        bigint municipality_id FK
+        varchar name
+        enum category
+        text description
+        decimal latitude
+        decimal longitude
+        decimal average_rating
+        int review_count
+        datetime deleted_at
+    }
+    PLACE_IMAGES {
+        bigint id PK
+        bigint place_id FK
+        varchar image_url
+        int sort_order
+    }
+    ROUTES {
+        bigint id PK
+        varchar name
+        enum category
+        text description
+        enum difficulty
+        decimal distance_km
+        decimal average_rating
+        int review_count
+        datetime deleted_at
+    }
+    ROUTE_PLACES {
+        bigint route_id FK
+        bigint place_id FK
+        int stop_order
+    }
+    ROUTE_MUNICIPALITIES {
+        bigint route_id FK
+        bigint municipality_id FK
+    }
+    ROUTE_HIGHLIGHTS {
+        bigint id PK
+        bigint route_id FK
+        varchar highlight
+        int sort_order
+    }
+    REVIEWS {
+        bigint id PK
+        bigint user_id FK
+        bigint place_id FK
+        bigint route_id FK
+        tinyint rating
+        text comment
+        datetime deleted_at
+    }
+    USER_FAVORITES {
+        bigint user_id FK
+        bigint place_id FK
+        bigint route_id FK
+    }
+    NOTIFICATIONS {
+        bigint id PK
+        bigint user_id FK
+        varchar related_type
+        bigint related_id
+        boolean is_read
+    }
+    ADMIN_AUDIT_LOG {
+        bigint id PK
+        bigint admin_user_id FK
+        varchar action
+        varchar entity_type
+        bigint entity_id
+    }

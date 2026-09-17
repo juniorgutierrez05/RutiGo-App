@@ -20,35 +20,11 @@ export const RouteDetailScreen: React.FC = () => {
     isFavorite,
   } = useApp();
 
-  const route = selectedRoute || {
-    id: 'route_usiacuri',
-    name: 'Ruta del Tejido & Color: Usiacurí Mágico',
-    subtitle: 'Usiacurí — Baranoa',
-    description:
-      'Descubre el pueblo más pacífico del Atlántico con techos pintados de aves caribeñas y tejido ancestral en palma de iraca.',
-    category: 'cultura',
-    municipalities: ['Usiacurí', 'Baranoa'],
-    durationEstimate: '6 horas',
-    distanceKm: 42,
-    difficulty: 'Fácil',
-    coverImageUrl: IMAGES.usiacuri.aerialMurales,
-    placeIds: [
-      'place_iglesia_santo_domingo',
-      'place_casa_museo_julio_florez',
-      'place_mirador_cristal',
-      'place_centro_artesanal_iraca',
-    ],
-    avgRating: 4.9,
-    reviewCount: 340,
-    priceSuggested: 'Gratis / Autoguiado',
-    highlights: [
-      'Macromurales en techos en 360°',
-      'Talleres de maestras de iraca',
-      'Mirador de cristal en la montaña',
-    ],
-    tips: 'Lleva calzado cómodo para las escalinatas del mirador. Aceptan efectivo y transferencias en el centro artesanal.',
-    createdAt: '2026-01-18T08:00:00Z',
-  };
+  const route = selectedRoute;
+
+  if (!route) {
+    return <div className="w-full min-h-screen bg-background p-6 text-center">Ruta no encontrada.</div>;
+  }
 
   // Get place objects for this route's stops
   const routePlaces = route.placeIds
