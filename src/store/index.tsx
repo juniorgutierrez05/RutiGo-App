@@ -64,18 +64,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [screenHistory, setScreenHistory] = useState<ScreenName[]>(['splash']);
 
   // Auth
-  const [currentUser, setCurrentUser] = useState<User | null>(fb.getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    fb.getCurrentUser().then((user) => {
+      if (!cancelled) setCurrentUser(user);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
     if (currentUser) {
       fb.validateSession().catch(async () => {
         await fb.logoutUser();
-        if (!cancelled) setCurrentUser(null);
+        setCurrentUser(null);
       });
     }
-    return () => { cancelled = true; };
-  }, []);
+  }, [currentUser]);
 
   // Core Data
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -139,7 +145,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setScreenHistory((prev) => [...prev, screen]);
     setCurrentScreen(screen);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const goBack = () => {
@@ -149,7 +154,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const prevScreen = newHistory[newHistory.length - 1];
       setScreenHistory(newHistory);
       setCurrentScreen(prevScreen);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       setCurrentScreen('home');
     }

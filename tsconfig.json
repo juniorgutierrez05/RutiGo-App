@@ -23,5 +23,25 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "extends": "expo/tsconfig.base"
+  "extends": "expo/tsconfig.base",
+  "include": [
+    "expo-entry.js",
+    "src/App.native.tsx",
+    "src/NativeRouter.tsx",
+    "src/**/*.native.tsx",
+    "src/services/api.ts",
+    "src/services/locationService.ts",
+    "src/store/index.tsx",
+    "src/types/**/*.ts",
+    "src/assets/**/*.ts"
+  ],
+  "exclude": [
+    "src/App.tsx",
+    "src/main.tsx",
+    "src/index.css",
+    "src/vite-env.d.ts",
+    "src/components/**",
+    "src/screens/**",
+    "src/services/firebase.ts"
+  ]
 }

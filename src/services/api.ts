@@ -1,36 +1,39 @@
 import { Place, Route, Review, NotificationItem, User } from '../types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const configuredApiUrl =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
   (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) ||
-  'http://localhost:3001';
-const browserHost = typeof window !== 'undefined' ? window.location.hostname : '';
-const API_URL = browserHost && browserHost !== 'localhost' && browserHost !== '127.0.0.1'
-  ? `http://${browserHost}:3001`
-  : configuredApiUrl;
+  'http://192.168.1.38:3001';
+const API_URL = configuredApiUrl.replace(/\/$/, '');
 
 const USER_KEY = 'rutigo_user';
 const TOKEN_KEY = 'rutigo_auth_token';
 type AuthApiResponse = { token: string; user: User };
 
-function storedUser(): User | null {
-  if (typeof window === 'undefined') return null;
-  if (!window.localStorage.getItem(TOKEN_KEY)) return null;
-  try { const value = window.localStorage.getItem(USER_KEY); return value ? JSON.parse(value) : null; } catch { return null; }
+async function storedUser(): Promise<User | null> {
+  if (!(await AsyncStorage.getItem(TOKEN_KEY))) return null;
+  try { const value = await AsyncStorage.getItem(USER_KEY); return value ? JSON.parse(value) : null; } catch { return null; }
 }
-function saveSession(data: AuthApiResponse): User {
-  window.localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-  window.localStorage.setItem(TOKEN_KEY, data.token);
+async function saveSession(data: AuthApiResponse): Promise<User> {
+  await Promise.all([
+    AsyncStorage.setItem(USER_KEY, JSON.stringify(data.user)),
+    AsyncStorage.setItem(TOKEN_KEY, data.token),
+  ]);
   return data.user;
 }
-function getToken(): string | null { return typeof window === 'undefined' ? null : window.localStorage.getItem(TOKEN_KEY); }
+function getToken(): Promise<string | null> { return AsyncStorage.getItem(TOKEN_KEY); }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
-  const authToken = getToken();
+  const authToken = await getToken();
   if (authToken) headers.set('Authorization', `Bearer ${authToken}`);
-  const response = await fetch(`${API_URL}${path}`, { ...options, headers });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, { ...options, headers });
+  } catch {
+    throw new Error(`No se pudo conectar con RutiGo API en ${API_URL}. Comprueba que el servidor esté activo y que el teléfono esté en la misma red Wi-Fi.`);
+  }
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { message?: string } | null;
     throw new Error(body?.message || `API error ${response.status}`);
@@ -56,8 +59,10 @@ function mapRoute(value: any): Route {
 export async function loginWithEmail(email: string, password: string): Promise<User> { return saveSession(await request<AuthApiResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) })); }
 export async function registerWithEmail(name: string, email: string, password: string, homeCity: string): Promise<User> { return saveSession(await request<AuthApiResponse>('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, homeCity }) })); }
 export async function loginWithGoogle(idToken: string): Promise<User> { return saveSession(await request<AuthApiResponse>('/api/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) })); }
-export async function logoutUser(): Promise<void> { if (typeof window !== 'undefined') { window.localStorage.removeItem(USER_KEY); window.localStorage.removeItem(TOKEN_KEY); } }
-export function getCurrentUser(): User | null { return storedUser(); }
+export async function logoutUser(): Promise<void> {
+  await Promise.all([AsyncStorage.removeItem(USER_KEY), AsyncStorage.removeItem(TOKEN_KEY)]);
+}
+export async function getCurrentUser(): Promise<User | null> { return storedUser(); }
 export async function validateSession(): Promise<void> { await request('/api/me'); }
 export async function getPlaces(): Promise<Place[]> { return (await request<any[]>('/api/places?limit=100')).map(mapPlace); }
 export async function getRoutes(): Promise<Route[]> { return (await request<any[]>('/api/routes?limit=100')).map(mapRoute); }
@@ -80,7 +85,7 @@ export async function toggleFavorite(type: 'route' | 'place', id: string, user: 
   const exists = saved.includes(id);
   if (exists) await request(`/api/favorites/${type}/${id}`, { method: 'DELETE' }); else await request('/api/favorites', { method: 'POST', body: JSON.stringify({ type, id: Number(id) }) });
   const updated = { ...user, ...(type === 'route' ? { savedRoutes: exists ? saved.filter((item) => item !== id) : [...saved, id] } : { savedPlaces: exists ? saved.filter((item) => item !== id) : [...saved, id] }) };
-  if (typeof window !== 'undefined') window.localStorage.setItem(USER_KEY, JSON.stringify(updated));
+  await AsyncStorage.setItem(USER_KEY, JSON.stringify(updated));
   return updated;
 }
 export async function getNotifications(): Promise<NotificationItem[]> { return (await request<any[]>('/api/notifications')).map((value) => ({ id: String(value.id), userId: String(value.user_id), type: value.type, title: value.title, body: value.body, read: Boolean(value.is_read), relatedId: value.related_id ? String(value.related_id) : undefined, createdAt: value.created_at })); }

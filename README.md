@@ -4,7 +4,7 @@
 
 ---
 
-## 🎨 Design System & Estética (Soft 3D / Claymorphism)
+## 🎨 Design System & Estética (React Native)
 
 El diseño sigue estrictamente los tokens del sistema visual de **Google Stitch**:
 
@@ -20,26 +20,11 @@ El diseño sigue estrictamente los tokens del sistema visual de **Google Stitch*
 
 ---
 
-## 📱 Pantallas Implementadas
+## 📱 Experiencia nativa
 
-1. **Splash Screen:** Mascota 3D Iguana con sombrero vueltiao y mochila viajera, sol 3D volumétrico, y barra de carga caribeña.
-2. **Onboarding (3 pasos):** Carrusel interactivo con ilustraciones 3D, badges de categorías, indicadores y botón de inicio.
-3. **Autenticación (Login & Registro):** Formularios táctiles con validación, selector de municipios y botón de Google Sign-In.
-4. **Inicio (Home):** Barra de estado departamental, buscador flotante, 4 categorías culturales, Hero Card de la ruta de la semana, carrusel de lugares cercanos y tip de la mascota.
-5. **Explorar por Categoría:** Vista segmentada por Cultura, Gastronomía, Naturaleza e Historia, con filtros de municipios.
-6. **Búsqueda & Historial:** Barra de búsqueda en vivo con etiquetas populares y gestión de búsquedas recientes.
-7. **Resultados de Búsqueda:** Filtros por Todos, Rutas y Lugares con conteo dinámico y distancias.
-8. **Detalle de Ruta:** Banner full-bleed, estadísticas (duración, km, dificultad, costo), puntos destacados, tips de viaje e itinerario secuencial interactivo.
-9. **Detalle de Lugar:** Galería deslizable de fotografías, información práctica (dirección, horarios, tarifas), cálculo de distancia GPS en tiempo real y reseñas.
-10. **Mapa Interactivo:** Mapa vectorizado del Departamento del Atlántico con pines 3D por categoría, beacon de ubicación GPS del usuario y tarjetas flotantes.
-11. **Rutas Más Cercanas:** Ordenamiento automático de rutas según la proximidad geográfica del usuario.
-12. **Comunidad & Reseñas:** Listado de valoraciones ciudadanas con fotos, fecha y opciones para editar/eliminar reseñas propias.
-13. **Modal Calificar:** Selector interactivo de 1 a 5 estrellas, comentario y adjunto de fotografías.
-14. **Perfil del Usuario:** Estadísticas de rutas recorridas, lugares favoritos y accesos directos.
-15. **Favoritos (Guardados):** Pestañas separadas de Rutas y Lugares con persistencia.
-16. **Configuración:** Preferencias de municipio base, notificaciones y caché offline.
-17. **Notificaciones:** Centro de avisos de nuevas rutas, atardeceres y valoraciones.
-18. **Recomendaciones Inteligentes:** Planes curados para fines de semana, atardeceres y aventura ecológica.
+La entrada de producción es `expo-entry.js` y monta `src/App.native.tsx` directamente. La experiencia actual incluye catálogo de rutas y lugares, búsqueda, filtros por categoría, favoritos locales, perfil, mapa nativo de Google Maps, ubicación del dispositivo y navegación hacia el GPS externo.
+
+No se usa WebView, React DOM, Vite ni Google Maps web.
 
 ---
 
@@ -61,35 +46,16 @@ npm install
 Crea un archivo `.env` en la raíz del proyecto tomando como plantilla `.env.example`:
 
 ```env
-# ==========================================
-# FIREBASE CONFIGURATION
-# ==========================================
-VITE_FIREBASE_API_KEY=AIzaSyTuClaveDeApiFirebase
-VITE_FIREBASE_AUTH_DOMAIN=rutigo-atlantico.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=rutigo-atlantico
-VITE_FIREBASE_STORAGE_BUCKET=rutigo-atlantico.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
-VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
-
-# ==========================================
-# GOOGLE MAPS PLATFORM
-# ==========================================
-VITE_GOOGLE_MAPS_API_KEY=AIzaSyTuClaveDeGoogleMaps
+# URL del backend accesible desde el dispositivo o emulador
+EXPO_PUBLIC_API_URL=http://192.168.1.38:3001
 ```
 
 ### 3. Ejecutar la Aplicación
 
-#### Modo Web / Prototipo (Vite):
+#### React Native con Expo:
 ```bash
-npm run dev
-```
-La aplicación estará disponible en `http://localhost:3000`.
-
-#### Modo React Native con Expo:
-Para ejecutar en dispositivos móviles Android o iOS mediante **Expo Go**:
-```bash
-# Iniciar servidor de desarrollo de Expo
-npx expo start
+# Arrancar Metro
+npm start
 
 # Para correr directamente en emulador Android
 npx expo run:android
@@ -100,9 +66,9 @@ npx expo run:ios
 
 ---
 
-## 🗄️ Modelo de Datos Firestore
+## 🗄️ Modelo de datos
 
-El servicio `/src/services/firebase.ts` incluye las funciones preparadas para conectar a **Cloud Firestore**:
+La app nativa consume el backend HTTP de `server/` mediante `/src/services/api.ts`:
 
 ```typescript
 // Colecciones principales:
@@ -111,31 +77,6 @@ El servicio `/src/services/firebase.ts` incluye las funciones preparadas para co
 // places/{placeId} -> { name, description, category, municipality, location: { lat, lng }, schedule, images: [], avgRating, reviewCount }
 // reviews/{reviewId} -> { placeId, userId, userName, userAvatar, rating, comment, photoUrl, createdAt }
 // notifications/{notifId} -> { userId, type, title, body, read, relatedId, createdAt }
-```
-
-### Reglas de Seguridad Sugeridas (`firestore.rules`):
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /places/{placeId} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.token.admin == true;
-    }
-    match /routes/{routeId} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.token.admin == true;
-    }
-    match /reviews/{reviewId} {
-      allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
-    }
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
 ```
 
 ---

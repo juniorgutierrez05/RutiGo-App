@@ -7,11 +7,6 @@
     "userInterfaceStyle": "light",
     "scheme": "rutigo",
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFFCF8"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.rutigo.app"
@@ -22,12 +17,16 @@
         "backgroundColor": "#FFFCF8"
       }
     },
-    "web": {
-      "bundler": "metro"
-    },
     "plugins": [
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-location",
+      [
+        "react-native-maps",
+        {
+          "androidGoogleMapsApiKey": "AIzaSyAvX0Vs49lCXa4-HAo8HVlEAiG6eZ8ZfDY",
+          "iosGoogleMapsApiKey": "AIzaSyBE2j1yA3z2NshDCG_wgDqLKhRtxfnSnW0"
+        }
+      ]
     ]
   }
 }

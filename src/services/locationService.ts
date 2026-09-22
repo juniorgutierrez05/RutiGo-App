@@ -3,6 +3,7 @@
  * Real GPS coordinates, Haversine distance calculations, and Atlántico municipalities
  */
 import { PlaceLocation } from '../types';
+import * as Location from 'expo-location';
 
 export const ATLANTICO_MUNICIPALITIES: Record<string, PlaceLocation> = {
   'Puerto Colombia': { lat: 10.9882, lng: -74.9554 },
@@ -75,23 +76,14 @@ export function estimateTravelTimes(distanceKm: number): {
  * Requests user device geolocation with safety fallback
  */
 export function getCurrentCoordinates(): Promise<PlaceLocation> {
-  return new Promise((resolve) => {
-    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        () => {
-          // Fallback to Puerto Colombia coastal reference
-          resolve(ATLANTICO_MUNICIPALITIES['Puerto Colombia']);
-        },
-        { timeout: 6000, enableHighAccuracy: true }
-      );
-    } else {
-      resolve(ATLANTICO_MUNICIPALITIES['Puerto Colombia']);
-    }
-  });
+  return Location.requestForegroundPermissionsAsync()
+    .then(({ status }) => {
+      if (status !== Location.PermissionStatus.GRANTED) {
+        return ATLANTICO_MUNICIPALITIES['Puerto Colombia'];
+      }
+      return Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })
+        .then(({ coords }) => ({ lat: coords.latitude, lng: coords.longitude }))
+        .catch(() => ATLANTICO_MUNICIPALITIES['Puerto Colombia']);
+    })
+    .catch(() => ATLANTICO_MUNICIPALITIES['Puerto Colombia']);
 }
