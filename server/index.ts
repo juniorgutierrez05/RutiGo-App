@@ -19,7 +19,7 @@ import {
 } from './catalog.js';
 
 const app = express();
-const port = Number(process.env.API_PORT || 3001);
+const port = Number(process.env.PORT || process.env.API_PORT || 3001);
 
 async function closeDatabase() {
   await pool.end();
