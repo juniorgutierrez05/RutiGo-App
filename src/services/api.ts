@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const configuredApiUrl =
   (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) ||
-  'http://192.168.1.38:3001';
+  'https://app-d50c9e72-22b8-450f-ac61-2dd77700dfeb.cleverapps.io';
 const API_URL = configuredApiUrl.replace(/\/$/, '');
 
 const USER_KEY = 'rutigo_user';
