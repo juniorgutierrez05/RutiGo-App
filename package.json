@@ -7,6 +7,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
+    "android:apk": "eas build --platform android --profile preview",
     "ios": "expo run:ios",
     "server:dev": "tsx watch server/index.ts",
     "server:start": "tsx server/index.ts",
@@ -32,6 +33,7 @@
     "react-native-safe-area-context": "~5.7.0",
     "react-native-svg": "15.15.4",
     "sharp": "^0.34.3",
+    "tsx": "^4.23.15",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -40,7 +42,6 @@
     "@types/node": "^22.14.0",
     "@types/react": "~19.2.4",
     "esbuild": "^0.25.0",
-    "tsx": "^4.21.0",
     "typescript": "~6.0.3"
   }
 }
