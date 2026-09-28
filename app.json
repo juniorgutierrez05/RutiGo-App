@@ -15,7 +15,11 @@
       "package": "com.rutigo.app",
       "adaptiveIcon": {
         "backgroundColor": "#FFFCF8"
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-status-bar",
@@ -27,6 +31,12 @@
           "iosGoogleMapsApiKey": "AIzaSyBE2j1yA3z2NshDCG_wgDqLKhRtxfnSnW0"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0834d2ee-652d-497a-9444-b68d09d03518"
+      }
+    },
+    "owner": "juniorgutierrez"
   }
 }
