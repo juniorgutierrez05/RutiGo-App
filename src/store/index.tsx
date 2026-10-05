@@ -3,7 +3,7 @@
  * Provides React Context store with persistence and asynchronous sync
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, Route, Place, Review, NotificationItem, CategoryType, ScreenName, PlaceLocation } from '../types';
 import * as fb from '../services/api';
 import { getCurrentCoordinates, ATLANTICO_MUNICIPALITIES } from '../services/locationService';
@@ -129,10 +129,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     loadInitialData();
   }, [currentUser]);
 
-  const refreshLocation = async () => {
+  const refreshLocation = useCallback(async () => {
     const coords = await getCurrentCoordinates();
     setUserLocation(coords);
-  };
+  }, []);
 
   // Navigation handlers
   const navigateTo = (

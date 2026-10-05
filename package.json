@@ -7,7 +7,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
-    "android:apk": "eas build --platform android --profile preview",
+    "android:apk": "npx eas build --platform android --profile preview",
     "ios": "expo run:ios",
     "server:dev": "tsx watch server/index.ts",
     "server:start": "tsx server/index.ts",

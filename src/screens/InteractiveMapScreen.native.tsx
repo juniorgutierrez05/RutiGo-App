@@ -8,11 +8,14 @@ export function InteractiveMapScreen() {
   const { places, selectedPlace, userLocation, navigateTo, refreshLocation } = useApp();
   const [active, setActive] = useState<Place | null>(selectedPlace || places[0] || null);
   const [showRoute, setShowRoute] = useState(false);
+  const [routeCoords, setRouteCoords] = useState<{latitude: number, longitude: number}[]>([]);
   const mapRef = useRef<MapView | null>(null);
 
   useEffect(() => { refreshLocation(); }, [refreshLocation]);
 
   useEffect(() => {
+    setShowRoute(false);
+    setRouteCoords([]);
     if (active && mapRef.current) {
       mapRef.current.animateToRegion({
         latitude: active.location.lat,
@@ -23,7 +26,7 @@ export function InteractiveMapScreen() {
     }
   }, [active]);
 
-  const directions = () => {
+  const directions = async () => {
     if (!active) return;
     setShowRoute(true);
     if (mapRef.current) {
@@ -33,6 +36,26 @@ export function InteractiveMapScreen() {
         latitudeDelta: Math.abs(userLocation.lat - active.location.lat) * 1.8 + 0.08,
         longitudeDelta: Math.abs(userLocation.lng - active.location.lng) * 1.8 + 0.08,
       }, 500);
+    }
+
+    try {
+      const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${active.location.lng},${active.location.lat}?geometries=geojson`);
+      const data = await res.json();
+      
+      if (data.routes && data.routes.length > 0) {
+        const coords = data.routes[0].geometry.coordinates;
+        setRouteCoords(coords.map((c: [number, number]) => ({ latitude: c[1], longitude: c[0] })));
+      } else {
+        setRouteCoords([
+          { latitude: userLocation.lat, longitude: userLocation.lng },
+          { latitude: active.location.lat, longitude: active.location.lng },
+        ]);
+      }
+    } catch (e) {
+      setRouteCoords([
+        { latitude: userLocation.lat, longitude: userLocation.lng },
+        { latitude: active.location.lat, longitude: active.location.lng },
+      ]);
     }
   };
 
@@ -57,12 +80,9 @@ export function InteractiveMapScreen() {
             onPress={() => setActive(place)}
           />
         ))}
-        {showRoute && active && (
+        {showRoute && active && routeCoords.length > 0 && (
           <Polyline
-            coordinates={[
-              { latitude: userLocation.lat, longitude: userLocation.lng },
-              { latitude: active.location.lat, longitude: active.location.lng },
-            ]}
+            coordinates={routeCoords}
             strokeColor="#FF7A59"
             strokeWidth={4}
           />
