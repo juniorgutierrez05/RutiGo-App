@@ -1,17 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useApp } from '../store';
 import { Place } from '../types';
 
 export function InteractiveMapScreen() {
   const { places, selectedPlace, userLocation, navigateTo, refreshLocation } = useApp();
+  const insets = useSafeAreaInsets();
   const [active, setActive] = useState<Place | null>(selectedPlace || places[0] || null);
   const [showRoute, setShowRoute] = useState(false);
+  const [loadingRoute, setLoadingRoute] = useState(false);
   const [routeCoords, setRouteCoords] = useState<{latitude: number, longitude: number}[]>([]);
   const mapRef = useRef<MapView | null>(null);
 
-  useEffect(() => { refreshLocation(); }, [refreshLocation]);
+  useEffect(() => {
+    refreshLocation();
+  }, []);
 
   useEffect(() => {
     setShowRoute(false);
@@ -26,9 +31,45 @@ export function InteractiveMapScreen() {
     }
   }, [active]);
 
+  const fetchStreetRoute = async (
+    start: { lat: number; lng: number },
+    dest: { lat: number; lng: number }
+  ): Promise<{ latitude: number; longitude: number }[] | null> => {
+    const endpoints = [
+      `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`,
+      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`,
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        const res = await fetch(url, {
+          signal: controller.signal,
+          headers: { 'Accept': 'application/json' },
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+          const coords = data.routes[0].geometry.coordinates;
+          if (Array.isArray(coords) && coords.length > 1) {
+            return coords.map((c: [number, number]) => ({ latitude: c[1], longitude: c[0] }));
+          }
+        }
+      } catch {
+        // Continuar al siguiente endpoint si hay error de red o timeout
+      }
+    }
+    return null;
+  };
+
   const directions = async () => {
     if (!active) return;
+    setLoadingRoute(true);
     setShowRoute(true);
+
     if (mapRef.current) {
       mapRef.current.animateToRegion({
         latitude: (userLocation.lat + active.location.lat) / 2,
@@ -39,24 +80,41 @@ export function InteractiveMapScreen() {
     }
 
     try {
-      const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${active.location.lng},${active.location.lat}?geometries=geojson`);
-      const data = await res.json();
-      
-      if (data.routes && data.routes.length > 0) {
-        const coords = data.routes[0].geometry.coordinates;
-        setRouteCoords(coords.map((c: [number, number]) => ({ latitude: c[1], longitude: c[0] })));
+      const coords = await fetchStreetRoute(userLocation, active.location);
+      if (coords && coords.length > 1) {
+        setRouteCoords(coords);
       } else {
-        setRouteCoords([
-          { latitude: userLocation.lat, longitude: userLocation.lng },
-          { latitude: active.location.lat, longitude: active.location.lng },
-        ]);
+        Alert.alert(
+          'Aviso de ruta',
+          'No se pudo conectar al servidor de navegación para trazar las calles. Puedes iniciar la navegación directa en Google Maps.',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: 'Abrir Google Maps', onPress: openExternalGoogleMaps },
+          ]
+        );
       }
-    } catch (e) {
-      setRouteCoords([
-        { latitude: userLocation.lat, longitude: userLocation.lng },
-        { latitude: active.location.lat, longitude: active.location.lng },
-      ]);
+    } catch {
+      Alert.alert(
+        'Error',
+        'Ocurrió un problema obteniendo la ruta. Puedes usar Google Maps directamente.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Abrir Google Maps', onPress: openExternalGoogleMaps },
+        ]
+      );
+    } finally {
+      setLoadingRoute(false);
     }
+  };
+
+  const openExternalGoogleMaps = () => {
+    if (!active) return;
+    const { lat, lng } = active.location;
+    const label = encodeURIComponent(active.name);
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}&travelmode=driving`;
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Error', 'No se pudo abrir Google Maps en el dispositivo.');
+    });
   };
 
   return (
@@ -69,7 +127,6 @@ export function InteractiveMapScreen() {
         showsUserLocation
         showsMyLocationButton
       >
-        <Marker coordinate={{ latitude: userLocation.lat, longitude: userLocation.lng }} title="Tu ubicación" pinColor="#00AEB7" />
         {places.map((place) => (
           <Marker
             key={place.id}
@@ -84,27 +141,47 @@ export function InteractiveMapScreen() {
           <Polyline
             coordinates={routeCoords}
             strokeColor="#FF7A59"
-            strokeWidth={4}
+            strokeWidth={5}
           />
         )}
       </MapView>
 
-      <View style={styles.header}>
-        <Pressable onPress={() => navigateTo('home')}><Text style={styles.back}>‹</Text></Pressable>
-        <View>
+      <View style={[styles.header, { top: Math.max(insets.top, 20) + 8 }]}>
+        <Pressable onPress={() => navigateTo('home')} hitSlop={8}><Text style={styles.back}>‹</Text></Pressable>
+        <View style={styles.headerTitleWrap}>
           <Text style={styles.title}>Mapa turístico</Text>
           <Text style={styles.subtitle}>{places.length} puntos · Atlántico</Text>
         </View>
       </View>
 
       {active && (
-        <View style={styles.card}>
+        <View style={[styles.card, { bottom: Math.max(insets.bottom, 12) + 12 }]}>
           <Text style={styles.municipality}>{active.municipality}</Text>
           <Text style={styles.name}>{active.name}</Text>
           <Text style={styles.description} numberOfLines={1}>{active.description}</Text>
-          <Pressable style={styles.button} onPress={directions}>
-            <Text style={styles.buttonText}>{showRoute ? 'Ruta en RutiGo' : 'Iniciar recorrido'}</Text>
-          </Pressable>
+          
+          <View style={styles.buttonRow}>
+            <Pressable
+              style={[styles.button, styles.primaryButton]}
+              onPress={directions}
+              disabled={loadingRoute}
+            >
+              {loadingRoute ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.buttonText}>
+                  {showRoute && routeCoords.length > 0 ? 'Recalcular ruta' : 'Ver ruta por calles'}
+                </Text>
+              )}
+            </Pressable>
+
+            <Pressable
+              style={[styles.button, styles.mapsButton]}
+              onPress={openExternalGoogleMaps}
+            >
+              <Text style={styles.mapsButtonText}>Google Maps ↗</Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </View>
@@ -113,14 +190,53 @@ export function InteractiveMapScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  header: { position: 'absolute', top: 18, left: 16, right: 16, backgroundColor: '#FFFFFFEE', borderRadius: 18, padding: 13, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  back: { color: '#FF7A59', fontSize: 34 },
+  header: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    backgroundColor: '#FFFFFFFA',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    shadowColor: '#1E1927',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#F0E4DC',
+  },
+  headerTitleWrap: {
+    flex: 1,
+  },
+  back: { color: '#FF7A59', fontSize: 32, marginTop: -2 },
   title: { color: '#1E1927', fontSize: 17, fontWeight: '900' },
-  subtitle: { color: '#806F69', fontSize: 11, marginTop: 2 },
-  card: { position: 'absolute', bottom: 22, left: 16, right: 16, backgroundColor: '#FFFFFFF5', padding: 16, borderRadius: 20, borderWidth: 1, borderColor: '#F0E4DC' },
+  subtitle: { color: '#806F69', fontSize: 11, marginTop: 1 },
+  card: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    backgroundColor: '#FFFFFFFA',
+    padding: 16,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#F0E4DC',
+    shadowColor: '#1E1927',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
+  },
   municipality: { color: '#FF7A59', fontSize: 10, fontWeight: '900', textTransform: 'uppercase' },
   name: { color: '#1E1927', fontSize: 18, fontWeight: '900', marginTop: 3 },
   description: { color: '#806F69', fontSize: 12, marginTop: 4 },
-  button: { backgroundColor: '#FF7A59', borderRadius: 14, paddingVertical: 13, alignItems: 'center', marginTop: 12 },
-  buttonText: { color: '#FFFFFF', fontWeight: '900' },
+  buttonRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  button: { flex: 1, borderRadius: 14, paddingVertical: 13, alignItems: 'center', justifyContent: 'center' },
+  primaryButton: { backgroundColor: '#FF7A59', flex: 1.3 },
+  mapsButton: { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: '#00AEB7' },
+  buttonText: { color: '#FFFFFF', fontWeight: '900', fontSize: 13 },
+  mapsButtonText: { color: '#00AEB7', fontWeight: '900', fontSize: 13 },
 });

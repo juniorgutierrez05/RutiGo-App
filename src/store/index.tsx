@@ -13,7 +13,7 @@ interface AppContextType {
   currentScreen: ScreenName;
   screenHistory: ScreenName[];
   navigateTo: (screen: ScreenName, params?: { routeId?: string; placeId?: string; category?: CategoryType }) => void;
-  goBack: () => void;
+  goBack: () => boolean;
 
   // Authentication
   currentUser: User | null;
@@ -134,7 +134,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setUserLocation(coords);
   }, []);
 
-  // Navigation handlers
   const navigateTo = (
     screen: ScreenName,
     params?: { routeId?: string; placeId?: string; category?: CategoryType }
@@ -143,20 +142,39 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (params?.placeId) setSelectedPlaceId(params.placeId);
     if (params?.category) setActiveCategory(params.category);
 
-    setScreenHistory((prev) => [...prev, screen]);
+    setScreenHistory((prev) => {
+      // Si navegamos a 'home' desde pantallas de inicio, reiniciamos el stack en 'home'
+      if (screen === 'home') {
+        return ['home'];
+      }
+      // Evitar empujar dos veces la misma pantalla consecutiva
+      if (prev[prev.length - 1] === screen) {
+        return prev;
+      }
+      // Si venimos de splash u onboarding a login, reemplazamos en vez de apilar
+      if (prev.length === 1 && (prev[0] === 'splash' || prev[0] === 'onboarding')) {
+        return [screen];
+      }
+      return [...prev, screen];
+    });
     setCurrentScreen(screen);
   };
 
-  const goBack = () => {
+  const goBack = (): boolean => {
     if (screenHistory.length > 1) {
       const newHistory = [...screenHistory];
       newHistory.pop();
       const prevScreen = newHistory[newHistory.length - 1];
       setScreenHistory(newHistory);
       setCurrentScreen(prevScreen);
-    } else {
-      setCurrentScreen('home');
+      return true;
     }
+    if (currentScreen !== 'home') {
+      setScreenHistory(['home']);
+      setCurrentScreen('home');
+      return true;
+    }
+    return false;
   };
 
   // Auth Handlers

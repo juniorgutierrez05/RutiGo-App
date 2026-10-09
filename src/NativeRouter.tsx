@@ -1,5 +1,5 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useEffect } from 'react';
+import { BackHandler, View } from 'react-native';
 import { useApp } from './store';
 import { SplashScreen } from './screens/SplashScreen.native';
 import { OnboardingScreen } from './screens/OnboardingScreen.native';
@@ -22,7 +22,22 @@ import { RecommendationsScreen } from './screens/RecommendationsScreen.native';
 import { AdminScreen } from './screens/AdminScreen.native';
 
 export function NativeRouter() {
-  const { currentScreen } = useApp();
+  const { currentScreen, goBack } = useApp();
+
+  useEffect(() => {
+    const onBackPress = () => {
+      // Si la pantalla actual puede retroceder en la pila interna, consumimos el evento (true)
+      // Si ya estamos en 'home' o no hay a dónde retroceder, retornamos false para salir de la app
+      return goBack();
+    };
+
+    const backHandlerSubscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      onBackPress
+    );
+
+    return () => backHandlerSubscription.remove();
+  }, [goBack]);
   switch (currentScreen) {
     case 'splash': return <SplashScreen />;
     case 'onboarding': return <OnboardingScreen />;

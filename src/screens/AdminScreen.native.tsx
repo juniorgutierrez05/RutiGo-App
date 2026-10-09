@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../components/Button.native';
 import { Card } from '../components/Card.native';
 import { Chip } from '../components/Chip.native';
@@ -78,6 +79,7 @@ function routeToInput(route: ReturnType<typeof useApp>['routes'][number]): api.R
 
 export function AdminScreen() {
   const { currentUser, places, routes, goBack, logout, navigateTo } = useApp();
+  const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<Tab>('summary');
   const [users, setUsers] = useState<api.AdminUser[]>([]);
   const [municipalities, setMunicipalities] = useState<api.Municipality[]>([]);
@@ -121,7 +123,15 @@ export function AdminScreen() {
 
   if (currentUser?.role !== 'admin') {
     return (
-      <View style={styles.permissionRoot}>
+      <View
+        style={[
+          styles.permissionRoot,
+          {
+            paddingTop: Math.max(insets.top, 20) + 20,
+            paddingBottom: Math.max(insets.bottom, 16) + 20,
+          },
+        ]}
+      >
         <Text style={styles.permissionTitle}>Sin permisos</Text>
         <Text style={styles.permissionBody}>No tienes permisos para acceder al panel administrativo.</Text>
         <Button fullWidth onPress={() => navigateTo('home')}>Volver al inicio</Button>
@@ -444,8 +454,17 @@ export function AdminScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Pressable onPress={goBack}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: Math.max(insets.top, 20) + 10,
+            paddingBottom: Math.max(insets.bottom, 16) + 30,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Pressable onPress={goBack} hitSlop={8}>
           <Text style={styles.back}>‹ Volver</Text>
         </Pressable>
         <Text style={styles.eyebrow}>PANEL ADMIN</Text>
@@ -488,13 +507,13 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#FFFCF8' },
-  content: { padding: 20, paddingBottom: 40 },
-  back: { color: '#FF7A59', fontSize: 15, fontWeight: '800', marginBottom: 12 },
+  content: { paddingHorizontal: 16 },
+  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800', marginBottom: 12 },
   eyebrow: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1.4 },
-  title: { color: '#1E1927', fontSize: 29, fontWeight: '900', marginTop: 5 },
-  subtitle: { color: '#806F69', fontSize: 14, lineHeight: 21, marginTop: 8 },
+  title: { color: '#1E1927', fontSize: 26, fontWeight: '900', marginTop: 4 },
+  subtitle: { color: '#806F69', fontSize: 14, lineHeight: 21, marginTop: 6 },
   message: { marginTop: 14, padding: 12, borderRadius: 12, backgroundColor: '#FFF0EB', color: '#7C3427', fontWeight: '700' },
-  tabRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 18, marginBottom: 18 },
+  tabRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16, marginBottom: 16 },
   tab: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#F0E4DC' },
   activeTab: { backgroundColor: '#FF7A59', borderColor: '#FF7A59' },
   tabText: { color: '#1E1927', fontWeight: '800', fontSize: 12 },
@@ -514,7 +533,7 @@ const styles = StyleSheet.create({
   userRole: { color: '#00AEB7', fontSize: 11, fontWeight: '800', marginTop: 6 },
   formSection: { gap: 16 },
   formTitle: { color: '#1E1927', fontSize: 20, fontWeight: '900', marginBottom: 12 },
-  twoCols: { flexDirection: 'row', gap: 12 },
+  twoCols: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' },
   column: { flex: 1, gap: 8 },
   label: { color: '#1E1927', fontSize: 12, fontWeight: '800', marginBottom: 6 },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
