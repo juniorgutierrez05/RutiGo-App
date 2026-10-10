@@ -1,5 +1,7 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { IMAGES } from '../assets/images';
@@ -30,11 +32,17 @@ export function TopAppBar({
       <View style={styles.left}>
         {showBack ? (
           <Pressable style={styles.circle} onPress={onBack || goBack} hitSlop={6}>
-            <Text style={styles.back}>‹</Text>
+            <Ionicons name="chevron-back" size={24} color="#1E1927" />
           </Pressable>
         ) : (
           <Pressable style={styles.avatar} onPress={() => navigateTo('profile')} hitSlop={6}>
-            <Image source={{ uri: IMAGES.mascot.pelicanAvatar }} style={styles.image} />
+            <Image
+              source={IMAGES.mascot.pelicanAvatar}
+              style={styles.image}
+              contentFit="cover"
+              transition={200}
+              cachePolicy="memory-disk"
+            />
           </Pressable>
         )}
         <View style={styles.titleWrap}>
@@ -46,7 +54,7 @@ export function TopAppBar({
         {trailing}
         {showNotifications && (
           <Pressable style={styles.circle} onPress={() => navigateTo('notifications')} hitSlop={6}>
-            <Text style={styles.bell}>♢</Text>
+            <Ionicons name="notifications-outline" size={20} color="#FF7A59" />
             {unreadNotifsCount > 0 && <View style={styles.dot} />}
           </Pressable>
         )}

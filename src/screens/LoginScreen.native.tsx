@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../store';
 import { Button } from '../components/Button.native';
 import { Card } from '../components/Card.native';
@@ -11,15 +12,21 @@ export function LoginScreen() {
   const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
-    if (!email || !password) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
       return Alert.alert('Campos incompletos', 'Ingresa tu correo y contraseña.');
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return Alert.alert('Correo inválido', 'Por favor ingresa un correo electrónico válido.');
     }
     try {
       setBusy(true);
-      await login(email, password);
+      await login(trimmedEmail, password);
     } catch (error) {
       Alert.alert('No se pudo iniciar sesión', error instanceof Error ? error.message : 'Revisa tus datos.');
     } finally {
@@ -57,16 +64,31 @@ export function LoginScreen() {
             value={password}
             onChangeText={setPassword}
             placeholder="••••••••"
-            secureTextEntry
+            secureTextEntry={!showPassword}
             autoCapitalize="none"
+            rightElement={
+              <Pressable
+                onPress={() => setShowPassword((prev) => !prev)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+              >
+                <Ionicons
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color="#806F69"
+                />
+              </Pressable>
+            }
           />
           <View style={styles.buttons}>
-            <Button fullWidth size="lg" onPress={submit}>
+            <Button fullWidth size="lg" onPress={submit} disabled={busy}>
               {busy ? 'Cargando...' : 'Iniciar sesión'}
             </Button>
             <Button
               fullWidth
               variant="outline"
+              disabled={busy}
               onPress={() => Alert.alert('Google', 'Configura Google Auth nativo para activar este acceso.')}
             >
               Continuar con Google

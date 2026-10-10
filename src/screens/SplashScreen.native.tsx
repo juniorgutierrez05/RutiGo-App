@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { IMAGES } from '../assets/images';
@@ -36,14 +37,20 @@ export function SplashScreen() {
       onPress={() => navigateTo('onboarding')}
     >
       <View style={styles.header}>
-        <Text style={styles.pill}>◉ Caribe Colombiano</Text>
-        <Text style={styles.pill}>● Atlántico</Text>
+        <Text style={styles.pill}>Caribe Colombiano</Text>
+        <Text style={styles.pill}>Atlántico</Text>
       </View>
 
       <View style={styles.center}>
         <View style={[styles.art, { width: artSize, height: artSize }]}>
           <Text style={styles.sun}>☀</Text>
-          <Image source={{ uri: IMAGES.mascot.iguanaMain }} style={{ width: mascotSize, height: mascotSize }} />
+          <Image
+            source={IMAGES.mascot.iguanaMain}
+            style={{ width: mascotSize, height: mascotSize }}
+            contentFit="contain"
+            transition={200}
+            cachePolicy="memory-disk"
+          />
         </View>
         <Text style={styles.logo}>
           Ruti<Text style={styles.accent}>Go</Text>

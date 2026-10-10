@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../components/Button.native';
 import { Card } from '../components/Card.native';
@@ -464,8 +465,9 @@ export function AdminScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Pressable onPress={goBack} hitSlop={8}>
-          <Text style={styles.back}>‹ Volver</Text>
+        <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+          <Text style={styles.back}>Volver</Text>
         </Pressable>
         <Text style={styles.eyebrow}>PANEL ADMIN</Text>
         <Text style={styles.title}>Administración</Text>
@@ -508,7 +510,8 @@ function StatCard({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#FFFCF8' },
   content: { paddingHorizontal: 16 },
-  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800', marginBottom: 12 },
+  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
+  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
   eyebrow: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1.4 },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900', marginTop: 4 },
   subtitle: { color: '#806F69', fontSize: 14, lineHeight: 21, marginTop: 6 },

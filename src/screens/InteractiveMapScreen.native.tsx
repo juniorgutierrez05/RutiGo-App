@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useApp } from '../store';
 import { Place } from '../types';
 
 export function InteractiveMapScreen() {
-  const { places, selectedPlace, userLocation, navigateTo, refreshLocation } = useApp();
+  const { places, selectedPlace, userLocation, navigateTo, goBack, refreshLocation } = useApp();
   const insets = useSafeAreaInsets();
   const [active, setActive] = useState<Place | null>(selectedPlace || places[0] || null);
   const [showRoute, setShowRoute] = useState(false);
@@ -147,7 +148,9 @@ export function InteractiveMapScreen() {
       </MapView>
 
       <View style={[styles.header, { top: Math.max(insets.top, 20) + 8 }]}>
-        <Pressable onPress={() => navigateTo('home')} hitSlop={8}><Text style={styles.back}>‹</Text></Pressable>
+        <Pressable onPress={goBack} hitSlop={8}>
+          <Ionicons name="chevron-back" size={26} color="#FF7A59" />
+        </Pressable>
         <View style={styles.headerTitleWrap}>
           <Text style={styles.title}>Mapa turístico</Text>
           <Text style={styles.subtitle}>{places.length} puntos · Atlántico</Text>
@@ -179,7 +182,10 @@ export function InteractiveMapScreen() {
               style={[styles.button, styles.mapsButton]}
               onPress={openExternalGoogleMaps}
             >
-              <Text style={styles.mapsButtonText}>Google Maps ↗</Text>
+              <View style={styles.mapsBtnRow}>
+                <Text style={styles.mapsButtonText}>Google Maps</Text>
+                <Ionicons name="open-outline" size={14} color="#00AEB7" />
+              </View>
             </Pressable>
           </View>
         </View>
@@ -239,4 +245,5 @@ const styles = StyleSheet.create({
   mapsButton: { backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: '#00AEB7' },
   buttonText: { color: '#FFFFFF', fontWeight: '900', fontSize: 13 },
   mapsButtonText: { color: '#00AEB7', fontWeight: '900', fontSize: 13 },
+  mapsBtnRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 });

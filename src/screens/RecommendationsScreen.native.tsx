@@ -1,5 +1,7 @@
 import React from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 
@@ -20,7 +22,8 @@ export function RecommendationsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Text style={styles.back}>‹ Volver</Text>
+        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Text style={styles.eyebrow}>INSPIRACIÓN LOCAL</Text>
       <Text style={styles.title}>Recomendaciones</Text>
@@ -31,7 +34,13 @@ export function RecommendationsScreen() {
           style={styles.card}
           onPress={() => navigateTo('route_detail', { routeId: route.id })}
         >
-          <Image source={{ uri: route.coverImageUrl }} style={styles.image} />
+          <Image
+            source={route.coverImageUrl}
+            style={styles.image}
+            contentFit="cover"
+            transition={200}
+            cachePolicy="memory-disk"
+          />
           <View style={styles.shade} />
           <View style={styles.overlay}>
             <Text style={styles.tag}>PLAN RUTIGO</Text>
@@ -47,7 +56,7 @@ export function RecommendationsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#FFFCF8' },
   content: { paddingHorizontal: 16 },
-  backButton: { marginBottom: 12 },
+  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
   back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
   eyebrow: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1.4 },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900', marginTop: 4 },

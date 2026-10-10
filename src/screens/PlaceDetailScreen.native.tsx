@@ -1,5 +1,7 @@
 import React from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { Button } from '../components/Button.native';
@@ -35,9 +37,16 @@ export function PlaceDetailScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Text style={styles.back}>‹ Volver</Text>
+        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Text style={styles.back}>Volver</Text>
       </Pressable>
-      <Image source={{ uri: selectedPlace.images[0] }} style={styles.cover} />
+      <Image
+        source={selectedPlace.images[0]}
+        style={styles.cover}
+        contentFit="cover"
+        transition={200}
+        cachePolicy="memory-disk"
+      />
       <Text style={styles.category}>{selectedPlace.municipality.toUpperCase()}</Text>
       <Text style={styles.title}>{selectedPlace.name}</Text>
       <View style={styles.rating}>
@@ -48,9 +57,18 @@ export function PlaceDetailScreen() {
       
       <View style={styles.info}>
         <Text style={styles.infoTitle}>Información práctica</Text>
-        <Text style={styles.infoText}>⌖ {selectedPlace.address || 'Dirección disponible en el mapa'}</Text>
-        <Text style={styles.infoText}>◷ {selectedPlace.schedule || 'Consulta el horario antes de visitar'}</Text>
-        <Text style={styles.infoText}>◉ {selectedPlace.estimatedTime || 'Tiempo estimado por confirmar'}</Text>
+        <View style={styles.infoRow}>
+          <Ionicons name="location-outline" size={16} color="#FF7A59" />
+          <Text style={styles.infoText}>{selectedPlace.address || 'Dirección disponible en el mapa'}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Ionicons name="time-outline" size={16} color="#FF7A59" />
+          <Text style={styles.infoText}>{selectedPlace.schedule || 'Consulta el horario antes de visitar'}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Ionicons name="hourglass-outline" size={16} color="#FF7A59" />
+          <Text style={styles.infoText}>{selectedPlace.estimatedTime || 'Tiempo estimado por confirmar'}</Text>
+        </View>
       </View>
 
       <View style={styles.actions}>
@@ -71,7 +89,7 @@ export function PlaceDetailScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#FFFCF8' },
   content: { paddingHorizontal: 16 },
-  backButton: { marginBottom: 12 },
+  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
   back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
   cover: { width: '100%', height: 210, borderRadius: 22, marginBottom: 16 },
   category: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1 },
@@ -80,8 +98,9 @@ const styles = StyleSheet.create({
   rating: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
   distance: { color: '#00AEB7', fontSize: 13, fontWeight: '800' },
   info: { marginTop: 18, padding: 16, borderRadius: 18, backgroundColor: '#FFF0EB' },
-  infoTitle: { color: '#1E1927', fontSize: 16, fontWeight: '900', marginBottom: 6 },
-  infoText: { color: '#58423C', fontSize: 13, marginTop: 6, lineHeight: 18 },
+  infoTitle: { color: '#1E1927', fontSize: 16, fontWeight: '900', marginBottom: 8 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
+  infoText: { color: '#58423C', fontSize: 13, flex: 1, lineHeight: 18 },
   actions: { gap: 10, marginTop: 18 },
   empty: { flex: 1, padding: 25, backgroundColor: '#FFFCF8' },
 });

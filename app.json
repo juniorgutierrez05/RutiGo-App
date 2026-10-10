@@ -30,7 +30,9 @@
           "androidGoogleMapsApiKey": "AIzaSyAvX0Vs49lCXa4-HAo8HVlEAiG6eZ8ZfDY",
           "iosGoogleMapsApiKey": "AIzaSyBE2j1yA3z2NshDCG_wgDqLKhRtxfnSnW0"
         }
-      ]
+      ],
+      "expo-image",
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {

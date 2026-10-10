@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, Route, Place, Review, NotificationItem, CategoryType, ScreenName, PlaceLocation } from '../types';
-import * as fb from '../services/api';
+import * as api from '../services/api';
 import { getCurrentCoordinates, ATLANTICO_MUNICIPALITIES } from '../services/locationService';
 
 interface AppContextType {
@@ -54,6 +54,8 @@ interface AppContextType {
   deleteReview: (reviewId: string) => Promise<void>;
   markNotificationRead: (id: string) => Promise<void>;
   unreadNotifsCount: number;
+  isLoading: boolean;
+  refreshData: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -68,7 +70,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     let cancelled = false;
-    fb.getCurrentUser().then((user) => {
+    api.getCurrentUser().then((user) => {
       if (!cancelled) setCurrentUser(user);
     });
     return () => { cancelled = true; };
@@ -76,8 +78,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     if (currentUser) {
-      fb.validateSession().catch(async () => {
-        await fb.logoutUser();
+      api.validateSession().catch(async () => {
+        await api.logoutUser();
         setCurrentUser(null);
       });
     }
@@ -107,27 +109,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Geolocation
   const [userLocation, setUserLocation] = useState<PlaceLocation>(ATLANTICO_MUNICIPALITIES['Puerto Colombia']);
   const [locationName, setLocationName] = useState<string>('Puerto Colombia');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Initial fetch
-  useEffect(() => {
-    async function loadInitialData() {
+  const refreshData = useCallback(async () => {
+    setIsLoading(true);
+    try {
       const [allRoutes, allPlaces, allReviews, allNotifs] = await Promise.all([
-        fb.getRoutes(),
-        fb.getPlaces(),
-        fb.getReviews(),
-        currentUser ? fb.getNotifications() : Promise.resolve([]),
+        api.getRoutes(),
+        api.getPlaces(),
+        api.getReviews(),
+        currentUser ? api.getNotifications() : Promise.resolve([]),
       ]);
       setRoutes(allRoutes);
       setPlaces(allPlaces);
       setReviews(allReviews);
       setNotifications(allNotifs);
+    } catch (e) {
+      console.warn('Error refreshing data:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUser]);
 
-      // Attempt coordinates
+  // Initial fetch
+  useEffect(() => {
+    refreshData().then(async () => {
       const coords = await getCurrentCoordinates();
       setUserLocation(coords);
-    }
-    loadInitialData();
-  }, [currentUser]);
+    });
+  }, [refreshData]);
 
   const refreshLocation = useCallback(async () => {
     const coords = await getCurrentCoordinates();
@@ -179,25 +189,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Auth Handlers
   const login = async (email: string, pass: string) => {
-    const user = await fb.loginWithEmail(email, pass);
+    const user = await api.loginWithEmail(email, pass);
     setCurrentUser(user);
     navigateTo(user.role === 'admin' ? 'admin' : 'home');
   };
 
   const loginGoogle = async (idToken: string) => {
-    const user = await fb.loginWithGoogle(idToken);
+    const user = await api.loginWithGoogle(idToken);
     setCurrentUser(user);
     navigateTo(user.role === 'admin' ? 'admin' : 'home');
   };
 
   const register = async (name: string, email: string, pass: string, homeCity: string) => {
-    const user = await fb.registerWithEmail(name, email, pass, homeCity);
+    const user = await api.registerWithEmail(name, email, pass, homeCity);
     setCurrentUser(user);
     navigateTo('home');
   };
 
   const logout = async () => {
-    await fb.logoutUser();
+    await api.logoutUser();
     setCurrentUser(null);
     navigateTo('login');
   };
@@ -208,7 +218,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       navigateTo('login');
       return;
     }
-    const updated = await fb.toggleFavorite(type, id, currentUser);
+    const updated = await api.toggleFavorite(type, id, currentUser);
     setCurrentUser(updated);
   };
 
@@ -222,7 +232,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Reviews CRUD
   const addReview = async (placeId: string, rating: number, comment: string, photoUrl?: string) => {
     if (!currentUser) return;
-    const newRev = await fb.createReview({
+    const newRev = await api.createReview({
       placeId,
       userId: currentUser.id,
       userName: currentUser.name,
@@ -235,7 +245,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     // Refresh places to get updated avgRating
     try {
-      const updatedPlaces = await fb.getPlaces();
+      const updatedPlaces = await api.getPlaces();
       setPlaces(updatedPlaces);
     } catch (refreshError) {
       console.warn('La reseña se guardó, pero no se pudo actualizar el catálogo:', refreshError);
@@ -243,16 +253,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const editReview = async (reviewId: string, rating: number, comment: string) => {
-    const updatedRev = await fb.updateReview(reviewId, rating, comment);
+    const updatedRev = await api.updateReview(reviewId, rating, comment);
     setReviews((prev) => prev.map((r) => (r.id === reviewId ? updatedRev : r)));
-    const updatedPlaces = await fb.getPlaces();
+    const updatedPlaces = await api.getPlaces();
     setPlaces(updatedPlaces);
   };
 
   const deleteReview = async (reviewId: string) => {
-    await fb.deleteReview(reviewId);
+    await api.deleteReview(reviewId);
     setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-    const updatedPlaces = await fb.getPlaces();
+    const updatedPlaces = await api.getPlaces();
     setPlaces(updatedPlaces);
   };
 
@@ -273,7 +283,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Notifications
   const markNotificationRead = async (id: string) => {
-    await fb.markNotificationAsRead(id);
+    await api.markNotificationAsRead(id);
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
@@ -319,6 +329,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deleteReview,
         markNotificationRead,
         unreadNotifsCount,
+        isLoading,
+        refreshData,
       }}
     >
       {children}

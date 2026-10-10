@@ -1,5 +1,7 @@
 import React from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { Button } from '../components/Button.native';
@@ -30,9 +32,16 @@ export function RouteDetailScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Text style={styles.back}>‹ Volver</Text>
+        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Text style={styles.back}>Volver</Text>
       </Pressable>
-      <Image source={{ uri: selectedRoute.coverImageUrl }} style={styles.cover} />
+      <Image
+        source={selectedRoute.coverImageUrl}
+        style={styles.cover}
+        contentFit="cover"
+        transition={200}
+        cachePolicy="memory-disk"
+      />
       <Text style={styles.category}>{selectedRoute.category.toUpperCase()}</Text>
       <Text style={styles.title}>{selectedRoute.name}</Text>
       <Text style={styles.subtitle}>{selectedRoute.description}</Text>
@@ -82,7 +91,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#FFFCF8' },
   content: { paddingHorizontal: 16 },
-  backButton: { marginBottom: 12 },
+  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
   back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
   cover: { width: '100%', height: 210, borderRadius: 22, marginBottom: 16 },
   category: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1 },

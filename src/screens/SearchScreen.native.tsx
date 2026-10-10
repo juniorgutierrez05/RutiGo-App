@@ -1,25 +1,37 @@
-import React, { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { BottomNav } from '../components/BottomNav.native';
 
 export function SearchScreen() {
-  const { places, routes, navigateTo, searchQuery, setSearchQuery, addRecentSearch, recentSearches } = useApp();
+  const { places, routes, navigateTo, goBack, searchQuery, setSearchQuery, addRecentSearch, recentSearches } = useApp();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState(searchQuery);
-  const normalized = query.toLowerCase();
 
-  const placeResults = places.filter((place) =>
-    `${place.name} ${place.municipality} ${place.description}`.toLowerCase().includes(normalized)
-  );
-  const routeResults = routes.filter((route) =>
-    `${route.name} ${route.description}`.toLowerCase().includes(normalized)
-  );
+  const normalized = query.trim().toLowerCase();
+
+  const placeResults = useMemo(() => {
+    if (!normalized) return [];
+    return places.filter((place) =>
+      `${place.name} ${place.municipality} ${place.description}`.toLowerCase().includes(normalized)
+    );
+  }, [places, normalized]);
+
+  const routeResults = useMemo(() => {
+    if (!normalized) return [];
+    return routes.filter((route) =>
+      `${route.name} ${route.description}`.toLowerCase().includes(normalized)
+    );
+  }, [routes, normalized]);
 
   const submit = () => {
-    setSearchQuery(query);
-    addRecentSearch(query);
+    if (query.trim()) {
+      setSearchQuery(query);
+      addRecentSearch(query);
+    }
   };
 
   return (
@@ -33,16 +45,17 @@ export function SearchScreen() {
           },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Pressable onPress={() => navigateTo('home')} hitSlop={8}>
-            <Text style={styles.back}>‹</Text>
+          <Pressable onPress={goBack} hitSlop={8}>
+            <Ionicons name="chevron-back" size={28} color="#FF7A59" />
           </Pressable>
           <Text style={styles.title}>Buscar</Text>
         </View>
 
         <View style={styles.inputWrap}>
-          <Text style={styles.icon}>⌕</Text>
+          <Ionicons name="search-outline" size={20} color="#FF7A59" style={styles.inputIcon} />
           <TextInput
             autoFocus
             value={query}
@@ -51,7 +64,13 @@ export function SearchScreen() {
             placeholder="Rutas, lugares, gastronomía..."
             placeholderTextColor="#806F69"
             style={styles.input}
+            returnKeyType="search"
           />
+          {Boolean(query) && (
+            <Pressable onPress={() => setQuery('')} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color="#C4B7B0" />
+            </Pressable>
+          )}
         </View>
 
         {!query && (
@@ -59,7 +78,10 @@ export function SearchScreen() {
             <Text style={styles.label}>Búsquedas recientes</Text>
             {recentSearches.map((term) => (
               <Pressable key={term} style={styles.recent} onPress={() => setQuery(term)}>
-                <Text style={styles.recentText}>◷ {term}</Text>
+                <View style={styles.recentRow}>
+                  <Ionicons name="time-outline" size={16} color="#806F69" />
+                  <Text style={styles.recentText}>{term}</Text>
+                </View>
               </Pressable>
             ))}
           </>
@@ -87,7 +109,13 @@ export function SearchScreen() {
                 style={styles.result}
                 onPress={() => navigateTo('place_detail', { placeId: place.id })}
               >
-                <Image source={{ uri: place.images[0] }} style={styles.thumb} />
+                <Image
+                  source={place.images[0]}
+                  style={styles.thumb}
+                  contentFit="cover"
+                  transition={200}
+                  cachePolicy="memory-disk"
+                />
                 <View style={styles.resultInfo}>
                   <Text style={styles.type}>LUGAR · {place.municipality.toUpperCase()}</Text>
                   <Text style={styles.name}>{place.name}</Text>
@@ -124,10 +152,11 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  icon: { color: '#FF7A59', fontSize: 24, marginRight: 8 },
+  inputIcon: { marginRight: 8 },
   input: { flex: 1, color: '#1E1927', fontSize: 15 },
   label: { color: '#1E1927', fontSize: 16, fontWeight: '900', marginTop: 22, marginBottom: 10 },
   recent: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F0E4DC' },
+  recentRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   recentText: { color: '#806F69', fontSize: 14 },
   result: {
     padding: 12,

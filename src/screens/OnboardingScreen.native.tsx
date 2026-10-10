@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { IMAGES } from '../assets/images';
@@ -62,7 +63,13 @@ export function OnboardingScreen() {
 
       <View style={styles.main}>
         <View style={[styles.art, { width: artSize, height: artSize }]}>
-          <Image source={{ uri: step.image }} style={{ width: imageSize, height: imageSize, borderRadius: 18 }} />
+          <Image
+            source={step.image}
+            style={{ width: imageSize, height: imageSize, borderRadius: 18 }}
+            contentFit="contain"
+            transition={200}
+            cachePolicy="memory-disk"
+          />
           <Text style={styles.badge}>{step.badge}</Text>
         </View>
         <Text style={styles.title}>

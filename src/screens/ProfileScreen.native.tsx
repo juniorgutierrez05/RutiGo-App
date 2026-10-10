@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { BottomNav } from '../components/BottomNav.native';
@@ -27,16 +28,16 @@ export function ProfileScreen() {
         <Text style={styles.email}>{currentUser?.email || 'Explora como invitado'}</Text>
 
         <View style={styles.stats}>
-          <Stat value={`${currentUser?.savedRoutes.length || 0}`} label="rutas guardadas" />
-          <Stat value={`${currentUser?.savedPlaces.length || 0}`} label="lugares guardados" />
+          <Stat value={`${currentUser?.savedRoutes?.length || 0}`} label="rutas guardadas" />
+          <Stat value={`${currentUser?.savedPlaces?.length || 0}`} label="lugares guardados" />
         </View>
 
         <View style={styles.menuGroup}>
-          <Menu label="Mis favoritos" onPress={() => navigateTo('favorites')} />
-          <Menu label="Notificaciones" onPress={() => navigateTo('notifications')} />
-          <Menu label="Configuración" onPress={() => navigateTo('settings')} />
+          <Menu icon="heart-outline" label="Mis favoritos" onPress={() => navigateTo('favorites')} />
+          <Menu icon="notifications-outline" label="Notificaciones" onPress={() => navigateTo('notifications')} />
+          <Menu icon="settings-outline" label="Configuración" onPress={() => navigateTo('settings')} />
           {currentUser?.role === 'admin' && (
-            <Menu label="Administración" onPress={() => navigateTo('admin')} />
+            <Menu icon="shield-checkmark-outline" label="Administración" onPress={() => navigateTo('admin')} />
           )}
         </View>
 
@@ -64,11 +65,14 @@ function Stat({ value, label }: { value: string; label: string }) {
   );
 }
 
-function Menu({ label, onPress }: { label: string; onPress: () => void }) {
+function Menu({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
   return (
     <Pressable style={styles.menu} onPress={onPress}>
-      <Text style={styles.menuText}>{label}</Text>
-      <Text style={styles.arrow}>›</Text>
+      <View style={styles.menuLeft}>
+        <Ionicons name={icon} size={20} color="#FF7A59" />
+        <Text style={styles.menuText}>{label}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color="#C4B7B0" />
     </Pressable>
   );
 }
@@ -128,8 +132,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  menuLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   menuText: { color: '#1E1927', fontSize: 15, fontWeight: '800' },
-  arrow: { color: '#FF7A59', fontSize: 22, marginTop: -2 },
   logout: {
     width: '100%',
     borderRadius: 14,

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import bcrypt from 'bcryptjs';
+import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
 import { checkDatabaseConnection, pool } from './db.js';
 import {
@@ -15,7 +16,7 @@ import {
   type AuthenticatedRequest,
 } from './auth.js';
 import {
-  createPlace, createRoute, deletePlace, deleteRoute, listPlaces, listRoutes, placeSchema, routeSchema, updatePlace, updateRoute,
+  createPlace, createRoute, deletePlace, deleteRoute, getPlaceById, getRouteById, listPlaces, listRoutes, placeSchema, routeSchema, updatePlace, updateRoute,
 } from './catalog.js';
 
 const app = express();
@@ -38,6 +39,25 @@ app.use((request, response, next) => {
   return next();
 });
 app.use(express.json({ limit: '1mb' }));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 500,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { message: 'Demasiadas solicitudes. Intenta de nuevo más tarde.' },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 25,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { message: 'Demasiados intentos de acceso. Espera 15 minutos antes de reintentar.' },
+});
+
+app.use('/api', apiLimiter);
+app.use('/api/auth', authLimiter);
 
 const idSchema = z.coerce.number().int().positive();
 const pageSchema = z.coerce.number().int().min(1).max(10000).default(1);
@@ -110,9 +130,25 @@ app.get('/api/places', async (request, response) => {
   return response.json(await listPlaces(query));
 });
 
+app.get('/api/places/:id', async (request, response) => {
+  const parsedId = idSchema.safeParse(request.params.id);
+  if (!parsedId.success) return response.status(400).json({ message: 'ID de lugar inválido' });
+  const place = await getPlaceById(parsedId.data);
+  if (!place) return response.status(404).json({ message: 'Lugar no encontrado' });
+  return response.json(place);
+});
+
 app.get('/api/routes', async (request, response) => {
   const query = { category: typeof request.query.category === 'string' ? request.query.category : undefined, search: typeof request.query.search === 'string' ? request.query.search.trim() : undefined, page: pageSchema.parse(request.query.page), limit: limitSchema.parse(request.query.limit) };
   return response.json(await listRoutes(query));
+});
+
+app.get('/api/routes/:id', async (request, response) => {
+  const parsedId = idSchema.safeParse(request.params.id);
+  if (!parsedId.success) return response.status(400).json({ message: 'ID de ruta inválido' });
+  const route = await getRouteById(parsedId.data);
+  if (!route) return response.status(404).json({ message: 'Ruta no encontrada' });
+  return response.json(route);
 });
 
 app.post('/api/favorites', requireAuth, async (request: AuthenticatedRequest, response) => {

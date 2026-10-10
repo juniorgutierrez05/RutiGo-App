@@ -1,5 +1,6 @@
 import React from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 
@@ -13,7 +14,7 @@ export function SettingsScreen() {
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.value}>{value}</Text>
       </View>
-      <Text style={styles.arrow}>›</Text>
+      <Ionicons name="chevron-forward" size={18} color="#C4B7B0" />
     </Pressable>
   );
 
@@ -30,7 +31,8 @@ export function SettingsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Text style={styles.back}>‹ Volver</Text>
+        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Text style={styles.title}>Configuración</Text>
       {setting('Municipio base', locationName, () =>
@@ -50,7 +52,7 @@ export function SettingsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#FFFCF8' },
   content: { paddingHorizontal: 16 },
-  backButton: { marginBottom: 12 },
+  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
   back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900', marginBottom: 18 },
   item: {

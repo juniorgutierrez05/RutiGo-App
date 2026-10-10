@@ -1,33 +1,30 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { RatingStars } from '../components/RatingStars.native';
-import { createReview } from '../services/api';
 
 export function ReviewsScreen() {
-  const { selectedPlace, currentUser, reviews, goBack } = useApp();
+  const { selectedPlace, currentUser, reviews, addReview, goBack } = useApp();
   const insets = useSafeAreaInsets();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const publish = async () => {
     if (!currentUser || !selectedPlace || !comment.trim()) {
       return Alert.alert('Completa tu reseña', 'Escribe un comentario para publicar.');
     }
     try {
-      await createReview({
-        placeId: selectedPlace.id,
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userAvatar: currentUser.avatarUrl,
-        rating,
-        comment,
-      });
+      setBusy(true);
+      await addReview(selectedPlace.id, rating, comment.trim());
       setComment('');
       Alert.alert('Reseña publicada', 'Gracias por compartir tu experiencia.');
-    } catch {
-      Alert.alert('Error', 'No se pudo publicar la reseña.');
+    } catch (error) {
+      Alert.alert('Error', error instanceof Error ? error.message : 'No se pudo publicar la reseña.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -46,18 +43,26 @@ export function ReviewsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Text style={styles.back}>‹ Volver</Text>
+        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Text style={styles.title}>Reseñas</Text>
       <Text style={styles.subtitle}>{selectedPlace?.name || 'Experiencias de viajeros'}</Text>
 
-      {visible.map((review) => (
-        <View key={review.id} style={styles.review}>
-          <Text style={styles.author}>{review.userName}</Text>
-          <RatingStars rating={review.rating} size="sm" />
-          <Text style={styles.comment}>{review.comment}</Text>
+      {visible.length > 0 ? (
+        visible.map((review) => (
+          <View key={review.id} style={styles.review}>
+            <Text style={styles.author}>{review.userName}</Text>
+            <RatingStars rating={review.rating} size="sm" />
+            <Text style={styles.comment}>{review.comment}</Text>
+          </View>
+        ))
+      ) : (
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyText}>Aún no hay reseñas para este lugar.</Text>
+          <Text style={styles.emptySubText}>Sé el primero en compartir tu experiencia con la comunidad.</Text>
         </View>
-      ))}
+      )}
 
       {currentUser && (
         <View style={styles.form}>
@@ -71,8 +76,8 @@ export function ReviewsScreen() {
             multiline
             style={styles.input}
           />
-          <Pressable style={styles.button} onPress={publish}>
-            <Text style={styles.buttonText}>Publicar reseña</Text>
+          <Pressable style={[styles.button, busy && styles.buttonDisabled]} onPress={publish} disabled={busy}>
+            <Text style={styles.buttonText}>{busy ? 'Publicando...' : 'Publicar reseña'}</Text>
           </Pressable>
         </View>
       )}
@@ -83,7 +88,7 @@ export function ReviewsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#FFFCF8' },
   content: { paddingHorizontal: 16 },
-  backButton: { marginBottom: 12 },
+  backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
   back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900' },
   subtitle: { color: '#806F69', fontSize: 14, marginTop: 4, marginBottom: 18 },
@@ -127,5 +132,19 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
   buttonText: { color: '#FFFFFF', fontWeight: '900', fontSize: 14 },
+  emptyCard: {
+    padding: 24,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#F0E4DC',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  emptyText: { color: '#1E1927', fontSize: 15, fontWeight: '800' },
+  emptySubText: { color: '#806F69', fontSize: 13, textAlign: 'center', marginTop: 4 },
 });

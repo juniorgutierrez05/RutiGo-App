@@ -1,5 +1,7 @@
-import React from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { BottomNav } from '../components/BottomNav.native';
@@ -19,9 +21,18 @@ export function HomeScreen() {
     userLocation,
     toggleFavorite,
     isFavorite,
+    isLoading,
+    refreshData,
   } = useApp();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
   const featuredRoute = routes[0];
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshData();
+    setRefreshing(false);
+  };
 
   const select = (category: CategoryType) => {
     setActiveCategory(category);
@@ -38,9 +49,17 @@ export function HomeScreen() {
           { paddingBottom: 24 },
         ]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#FF7A59']}
+            tintColor="#FF7A59"
+          />
+        }
       >
         <Pressable style={styles.search} onPress={() => navigateTo('search')}>
-          <Text style={styles.searchIcon}>⌕</Text>
+          <Ionicons name="search-outline" size={20} color="#FF7A59" style={styles.searchIcon} />
           <Text style={styles.searchText}>Buscar rutas, gastronomía, lugares...</Text>
         </Pressable>
 
@@ -62,7 +81,7 @@ export function HomeScreen() {
           <Chip label="Historia" category="historia" selected={activeCategory === 'historia'} onClick={() => select('historia')} />
         </ScrollView>
 
-        {featuredRoute && (
+        {featuredRoute ? (
           <View style={styles.featuredSection}>
             <View style={styles.heading}>
               <Text style={styles.sectionTitle}>Ruta de la semana</Text>
@@ -71,7 +90,13 @@ export function HomeScreen() {
             <View style={styles.featuredCardWrap}>
               <Card rounded="2xl" padding="none" interactive onPress={() => navigateTo('route_detail', { routeId: featuredRoute.id })}>
                 <View style={styles.routeImageWrap}>
-                  <Image source={{ uri: featuredRoute.coverImageUrl }} style={styles.routeImage} />
+                  <Image
+                    source={featuredRoute.coverImageUrl}
+                    style={styles.routeImage}
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
+                  />
                   <View style={styles.routeShade} />
                   <View style={styles.routeText}>
                     <Text style={styles.routeTag}>IMPERDIBLE</Text>
@@ -83,13 +108,23 @@ export function HomeScreen() {
                     hitSlop={8}
                     onPress={() => toggleFavorite('route', featuredRoute.id)}
                   >
-                    <Text style={styles.favoriteText}>{isFavorite('route', featuredRoute.id) ? '♥' : '♡'}</Text>
+                    <Ionicons
+                      name={isFavorite('route', featuredRoute.id) ? 'heart' : 'heart-outline'}
+                      size={20}
+                      color={isFavorite('route', featuredRoute.id) ? '#FF4D4D' : '#806F69'}
+                    />
                   </Pressable>
                 </View>
               </Card>
             </View>
           </View>
-        )}
+        ) : isLoading ? (
+          <View style={[styles.featuredCardWrap, { marginTop: 16 }]}>
+            <View style={[styles.routeImageWrap, styles.skeletonBox]}>
+              <ActivityIndicator color="#FF7A59" size="large" />
+            </View>
+          </View>
+        ) : null}
 
         <View style={styles.heading}>
           <Text style={styles.sectionTitle}>Lugares cercanos</Text>
@@ -98,23 +133,42 @@ export function HomeScreen() {
           </Pressable>
         </View>
 
-        {places.slice(0, 6).map((place) => (
-          <Pressable
-            key={place.id}
-            style={styles.place}
-            onPress={() => navigateTo('place_detail', { placeId: place.id })}
-          >
-            <Image source={{ uri: place.images[0] }} style={styles.placeImage} />
-            <View style={styles.placeInfo}>
-              <Text style={styles.municipality}>{place.municipality.toUpperCase()}</Text>
-              <Text style={styles.placeName} numberOfLines={1}>{place.name}</Text>
-              <Text style={styles.placeDescription} numberOfLines={2}>{place.description}</Text>
-              <Text style={styles.distance}>
-                {formatDistance(calculateDistanceKm(userLocation, place.location))} · ★ {place.avgRating.toFixed(1)}
-              </Text>
-            </View>
-          </Pressable>
-        ))}
+        {places.length === 0 && isLoading ? (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator color="#FF7A59" size="small" />
+            <Text style={styles.loadingText}>Cargando experiencias...</Text>
+          </View>
+        ) : (
+          places.slice(0, 6).map((place) => (
+            <Pressable
+              key={place.id}
+              style={styles.place}
+              onPress={() => navigateTo('place_detail', { placeId: place.id })}
+            >
+              <Image
+                source={place.images[0]}
+                style={styles.placeImage}
+                contentFit="cover"
+                transition={200}
+                cachePolicy="memory-disk"
+              />
+              <View style={styles.placeInfo}>
+                <Text style={styles.municipality}>{place.municipality.toUpperCase()}</Text>
+                <Text style={styles.placeName} numberOfLines={1}>{place.name}</Text>
+                <Text style={styles.placeDescription} numberOfLines={2}>{place.description}</Text>
+                <View style={styles.metaRow}>
+                  <Text style={styles.distance}>
+                    {formatDistance(calculateDistanceKm(userLocation, place.location))}
+                  </Text>
+                  <View style={styles.ratingBadge}>
+                    <Ionicons name="star" size={11} color="#F59E0B" />
+                    <Text style={styles.ratingText}>{place.avgRating.toFixed(1)}</Text>
+                  </View>
+                </View>
+              </View>
+            </Pressable>
+          ))
+        )}
       </ScrollView>
 
       <BottomNav />
@@ -292,6 +346,37 @@ const styles = StyleSheet.create({
     color: '#00AEB7',
     fontSize: 11,
     fontWeight: '800',
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginTop: 6,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  ratingText: {
+    color: '#806F69',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  skeletonBox: {
+    backgroundColor: '#F3ECE6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingWrap: {
+    paddingVertical: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  loadingText: {
+    color: '#806F69',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

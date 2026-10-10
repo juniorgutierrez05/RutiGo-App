@@ -69,6 +69,32 @@ export async function listRoutes(query: { category?: string; search?: string; pa
   return rows;
 }
 
+export async function getPlaceById(id: number) {
+  const [rows] = await pool.execute(
+    `SELECT p.*, m.name AS municipality,
+      COALESCE((SELECT JSON_ARRAYAGG(JSON_OBJECT('url', pi.image_url, 'altText', pi.alt_text))
+           FROM place_images pi WHERE pi.place_id = p.id), JSON_ARRAY()) AS images
+     FROM places p JOIN municipalities m ON m.id = p.municipality_id
+     WHERE p.id = ? AND p.deleted_at IS NULL LIMIT 1`,
+    [id]
+  );
+  const list = rows as unknown[];
+  return (list[0] as Record<string, unknown>) || null;
+}
+
+export async function getRouteById(id: number) {
+  const [rows] = await pool.execute(
+    `SELECT r.*,
+       COALESCE((SELECT JSON_ARRAYAGG(m.name) FROM route_municipalities rm JOIN municipalities m ON m.id = rm.municipality_id WHERE rm.route_id = r.id), JSON_ARRAY()) AS municipalities,
+      COALESCE((SELECT JSON_ARRAYAGG(rp.place_id) FROM route_places rp WHERE rp.route_id = r.id), JSON_ARRAY()) AS place_ids,
+      COALESCE((SELECT JSON_ARRAYAGG(rh.highlight) FROM route_highlights rh WHERE rh.route_id = r.id), JSON_ARRAY()) AS highlights
+     FROM routes r WHERE r.id = ? AND r.deleted_at IS NULL LIMIT 1`,
+    [id]
+  );
+  const list = rows as unknown[];
+  return (list[0] as Record<string, unknown>) || null;
+}
+
 async function replacePlaceImages(placeId: number, images: z.infer<typeof placeSchema>['images']) {
   await pool.execute('DELETE FROM place_images WHERE place_id = ?', [placeId]);
   for (const [index, image] of images.entries()) {

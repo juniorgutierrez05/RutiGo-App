@@ -1,14 +1,23 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 
-const NAV_ITEMS = [
-  { key: 'home', icon: '⌂', label: 'Inicio', target: 'home' as const },
-  { key: 'explore', icon: '⌕', label: 'Explorar', target: 'explore_category' as const },
-  { key: 'map', icon: '⌖', label: 'Mapa', target: 'interactive_map' as const },
-  { key: 'saved', icon: '♡', label: 'Guardados', target: 'favorites' as const },
-  { key: 'profile', icon: '◉', label: 'Perfil', target: 'profile' as const },
+type NavKey = 'home' | 'explore' | 'map' | 'saved' | 'profile';
+
+const NAV_ITEMS: {
+  key: NavKey;
+  activeIcon: keyof typeof Ionicons.glyphMap;
+  inactiveIcon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  target: 'home' | 'explore_category' | 'interactive_map' | 'favorites' | 'profile';
+}[] = [
+  { key: 'home', activeIcon: 'home', inactiveIcon: 'home-outline', label: 'Inicio', target: 'home' },
+  { key: 'explore', activeIcon: 'compass', inactiveIcon: 'compass-outline', label: 'Explorar', target: 'explore_category' },
+  { key: 'map', activeIcon: 'map', inactiveIcon: 'map-outline', label: 'Mapa', target: 'interactive_map' },
+  { key: 'saved', activeIcon: 'heart', inactiveIcon: 'heart-outline', label: 'Guardados', target: 'favorites' },
+  { key: 'profile', activeIcon: 'person', inactiveIcon: 'person-outline', label: 'Perfil', target: 'profile' },
 ];
 
 export function BottomNav() {
@@ -16,7 +25,7 @@ export function BottomNav() {
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 8);
 
-  const active =
+  const active: NavKey =
     currentScreen === 'interactive_map' || currentScreen === 'nearby_routes'
       ? 'map'
       : currentScreen === 'favorites'
@@ -29,17 +38,24 @@ export function BottomNav() {
 
   return (
     <View style={[styles.nav, { height: 60 + bottomPadding, paddingBottom: bottomPadding }]}>
-      {NAV_ITEMS.map(({ key, icon, label, target }) => (
-        <Pressable
-          key={key}
-          style={styles.item}
-          hitSlop={6}
-          onPress={() => navigateTo(target)}
-        >
-          <Text style={[styles.icon, active === key && styles.active]}>{icon}</Text>
-          <Text style={[styles.label, active === key && styles.active]}>{label}</Text>
-        </Pressable>
-      ))}
+      {NAV_ITEMS.map(({ key, activeIcon, inactiveIcon, label, target }) => {
+        const isCurrent = active === key;
+        return (
+          <Pressable
+            key={key}
+            style={styles.item}
+            hitSlop={6}
+            onPress={() => navigateTo(target)}
+          >
+            <Ionicons
+              name={isCurrent ? activeIcon : inactiveIcon}
+              size={22}
+              color={isCurrent ? '#FF7A59' : '#806F69'}
+            />
+            <Text style={[styles.label, isCurrent && styles.active]}>{label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

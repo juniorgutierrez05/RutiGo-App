@@ -1,5 +1,6 @@
 import { Place, Route, Review, NotificationItem, User } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 const configuredApiUrl =
   (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) ||
@@ -8,32 +9,67 @@ const API_URL = configuredApiUrl.replace(/\/$/, '');
 
 const USER_KEY = 'rutigo_user';
 const TOKEN_KEY = 'rutigo_auth_token';
+const CACHED_PLACES_KEY = 'rutigo_cached_places';
+const CACHED_ROUTES_KEY = 'rutigo_cached_routes';
+
 type AuthApiResponse = { token: string; user: User };
 
-async function storedUser(): Promise<User | null> {
-  if (!(await AsyncStorage.getItem(TOKEN_KEY))) return null;
-  try { const value = await AsyncStorage.getItem(USER_KEY); return value ? JSON.parse(value) : null; } catch { return null; }
+async function getToken(): Promise<string | null> {
+  try {
+    const secureVal = await SecureStore.getItemAsync(TOKEN_KEY);
+    if (secureVal) return secureVal;
+  } catch {
+    // SecureStore fallback para entornos no nativos
+  }
+  return AsyncStorage.getItem(TOKEN_KEY);
 }
+
+async function storedUser(): Promise<User | null> {
+  const token = await getToken();
+  if (!token) return null;
+  try {
+    const value = await AsyncStorage.getItem(USER_KEY);
+    return value ? (JSON.parse(value) as User) : null;
+  } catch {
+    return null;
+  }
+}
+
 async function saveSession(data: AuthApiResponse): Promise<User> {
-  await Promise.all([
-    AsyncStorage.setItem(USER_KEY, JSON.stringify(data.user)),
-    AsyncStorage.setItem(TOKEN_KEY, data.token),
-  ]);
+  await AsyncStorage.setItem(USER_KEY, JSON.stringify(data.user));
+  try {
+    await SecureStore.setItemAsync(TOKEN_KEY, data.token);
+  } catch {
+    await AsyncStorage.setItem(TOKEN_KEY, data.token);
+  }
   return data.user;
 }
-function getToken(): Promise<string | null> { return AsyncStorage.getItem(TOKEN_KEY); }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 12000): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
   const authToken = await getToken();
   if (authToken) headers.set('Authorization', `Bearer ${authToken}`);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   let response: Response;
   try {
-    response = await fetch(`${API_URL}${path}`, { ...options, headers });
-  } catch {
-    throw new Error(`No se pudo conectar con RutiGo API en ${API_URL}. Comprueba que el servidor esté activo y que el teléfono esté en la misma red Wi-Fi.`);
+    response = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers,
+      signal: options.signal || controller.signal,
+    });
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw new Error('La conexión con RutiGo tardó demasiado. Comprueba tu señal de internet.');
+    }
+    throw new Error('No se pudo conectar con el servidor de RutiGo. Comprueba tu conexión a internet.');
+  } finally {
+    clearTimeout(timer);
   }
+
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { message?: string } | null;
     throw new Error(body?.message || `API error ${response.status}`);
@@ -60,14 +96,64 @@ export async function loginWithEmail(email: string, password: string): Promise<U
 export async function registerWithEmail(name: string, email: string, password: string, homeCity: string): Promise<User> { return saveSession(await request<AuthApiResponse>('/api/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, homeCity }) })); }
 export async function loginWithGoogle(idToken: string): Promise<User> { return saveSession(await request<AuthApiResponse>('/api/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) })); }
 export async function logoutUser(): Promise<void> {
-  await Promise.all([AsyncStorage.removeItem(USER_KEY), AsyncStorage.removeItem(TOKEN_KEY)]);
+  await AsyncStorage.removeItem(USER_KEY);
+  try {
+    await SecureStore.deleteItemAsync(TOKEN_KEY);
+  } catch {
+    // ignore
+  }
+  await AsyncStorage.removeItem(TOKEN_KEY);
 }
 export async function getCurrentUser(): Promise<User | null> { return storedUser(); }
 export async function validateSession(): Promise<void> { await request('/api/me'); }
-export async function getPlaces(): Promise<Place[]> { return (await request<any[]>('/api/places?limit=100')).map(mapPlace); }
-export async function getRoutes(): Promise<Route[]> { return (await request<any[]>('/api/routes?limit=100')).map(mapRoute); }
-export async function getPlaceById(id: string): Promise<Place | undefined> { return (await getPlaces()).find((place) => place.id === id); }
-export async function getRouteById(id: string): Promise<Route | undefined> { return (await getRoutes()).find((route) => route.id === id); }
+
+export async function getPlaces(): Promise<Place[]> {
+  try {
+    const places = (await request<any[]>('/api/places?limit=100')).map(mapPlace);
+    AsyncStorage.setItem(CACHED_PLACES_KEY, JSON.stringify(places)).catch(() => {});
+    return places;
+  } catch (error) {
+    const cached = await AsyncStorage.getItem(CACHED_PLACES_KEY).catch(() => null);
+    if (cached) {
+      try {
+        return JSON.parse(cached) as Place[];
+      } catch {}
+    }
+    throw error;
+  }
+}
+
+export async function getRoutes(): Promise<Route[]> {
+  try {
+    const routes = (await request<any[]>('/api/routes?limit=100')).map(mapRoute);
+    AsyncStorage.setItem(CACHED_ROUTES_KEY, JSON.stringify(routes)).catch(() => {});
+    return routes;
+  } catch (error) {
+    const cached = await AsyncStorage.getItem(CACHED_ROUTES_KEY).catch(() => null);
+    if (cached) {
+      try {
+        return JSON.parse(cached) as Route[];
+      } catch {}
+    }
+    throw error;
+  }
+}
+export async function getPlaceById(id: string): Promise<Place | undefined> {
+  try {
+    const raw = await request<any>(`/api/places/${encodeURIComponent(id)}`);
+    return mapPlace(raw);
+  } catch {
+    return undefined;
+  }
+}
+export async function getRouteById(id: string): Promise<Route | undefined> {
+  try {
+    const raw = await request<any>(`/api/routes/${encodeURIComponent(id)}`);
+    return mapRoute(raw);
+  } catch {
+    return undefined;
+  }
+}
 
 export async function getReviews(placeOrRouteId?: string): Promise<Review[]> {
   const query = placeOrRouteId ? `?placeId=${encodeURIComponent(placeOrRouteId)}` : '';
