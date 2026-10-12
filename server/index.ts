@@ -40,6 +40,51 @@ app.use((request, response, next) => {
 });
 app.use(express.json({ limit: '1mb' }));
 
+// Middleware de auditoría y diagnóstico de peticiones HTTP en tiempo real
+app.use((request, response, next) => {
+  const start = Date.now();
+  const ip = (request.headers['x-forwarded-for'] as string) || request.socket.remoteAddress || 'local';
+
+  response.on('finish', () => {
+    const duration = Date.now() - start;
+    const status = response.statusCode;
+    const time = new Date().toLocaleTimeString('es-CO', { hour12: false });
+
+    // Colores ANSI para terminal
+    const statusColor =
+      status >= 500
+        ? '\x1b[31m' // Rojo (error de servidor)
+        : status >= 400
+        ? '\x1b[33m' // Amarillo (error cliente)
+        : status >= 300
+        ? '\x1b[36m' // Cyan (redirección)
+        : '\x1b[32m'; // Verde (éxito)
+    const reset = '\x1b[0m';
+    const methodColor = '\x1b[35m'; // Magenta
+    const grey = '\x1b[90m';
+
+    console.log(
+      `[${grey}${time}${reset}] ${methodColor}${request.method.padEnd(6)}${reset} ${request.originalUrl} -> ${statusColor}${status}${reset} (${duration}ms) ${grey}[${ip}]${reset}`
+    );
+  });
+  next();
+});
+
+// Endpoint de telemetría: recibe eventos y errores del cliente móvil
+app.post('/api/logs', (request, response) => {
+  const { level = 'info', tag = 'APP', message, details } = request.body || {};
+  const time = new Date().toLocaleTimeString('es-CO', { hour12: false });
+  const reset = '\x1b[0m';
+  const tagColor = '\x1b[36m'; // Cyan
+  const levelColor = level === 'error' ? '\x1b[31m' : level === 'warn' ? '\x1b[33m' : '\x1b[32m';
+  const detailsStr = details ? ` | ${JSON.stringify(details)}` : '';
+
+  console.log(
+    `[${time}] ${levelColor}[CLIENT:${String(level).toUpperCase()}]${reset} ${tagColor}[${tag}]${reset} ${message || ''}${detailsStr}`
+  );
+  return response.status(200).json({ ok: true });
+});
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 500,
