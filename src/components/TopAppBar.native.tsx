@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { IMAGES } from '../assets/images';
+import { theme } from '../theme/expressiveTheme';
 
 type TopAppBarProps = {
   title?: string;
@@ -67,9 +68,9 @@ const styles = StyleSheet.create({
   bar: {
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: '#FFFFFFFA',
+    backgroundColor: theme.isAndroid ? '#FFFDFBFA' : '#FFFFFFFA',
     borderBottomWidth: 1,
-    borderBottomColor: '#F0E4DC',
+    borderBottomColor: theme.isAndroid ? '#F4EAE3' : '#F0E4DC',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -110,10 +111,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.isAndroid ? '#F7EEE9' : '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: theme.isAndroid ? 0 : 1,
     borderColor: '#F0E4DC',
   },
   back: {
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#FF7A59',
-    fontSize: 15,
+    fontSize: 15.5,
     fontWeight: '900',
   },
   subtitle: {
