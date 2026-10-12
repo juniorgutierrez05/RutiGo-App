@@ -91,7 +91,7 @@ export function ExploreCategoryScreen() {
           styles.content,
           {
             paddingTop: Math.max(insets.top, 20) + 10,
-            paddingBottom: 24,
+            paddingBottom: Math.max(insets.bottom, 12) + 84,
           },
         ]}
         showsVerticalScrollIndicator={false}

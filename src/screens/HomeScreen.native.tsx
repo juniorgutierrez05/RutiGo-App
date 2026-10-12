@@ -10,6 +10,7 @@ import { Chip } from '../components/Chip.native';
 import { TopAppBar } from '../components/TopAppBar.native';
 import { calculateDistanceKm, formatDistance } from '../services/locationService';
 import { CategoryType } from '../types';
+import { theme } from '../theme/expressiveTheme';
 
 export function HomeScreen() {
   const {
@@ -46,7 +47,7 @@ export function HomeScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: 24 },
+          { paddingBottom: Math.max(insets.bottom, 12) + 84 },
         ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -59,8 +60,13 @@ export function HomeScreen() {
         }
       >
         <Pressable style={styles.search} onPress={() => navigateTo('search')}>
-          <Ionicons name="search-outline" size={20} color="#FF7A59" style={styles.searchIcon} />
-          <Text style={styles.searchText}>Buscar rutas, gastronomía, lugares...</Text>
+          <View style={styles.searchLeading}>
+            <Ionicons name="search" size={20} color="#FF7A59" />
+            <Text style={styles.searchText}>Buscar rutas, gastronomía, lugares...</Text>
+          </View>
+          <View style={styles.searchTrailing}>
+            <Ionicons name="options-outline" size={18} color="#806F69" />
+          </View>
         </Pressable>
 
         <View style={styles.heading}>
@@ -75,10 +81,10 @@ export function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.chips}
         >
-          <Chip label="Cultura" category="cultura" selected={activeCategory === 'cultura'} onClick={() => select('cultura')} />
-          <Chip label="Gastronomía" category="gastronomia" selected={activeCategory === 'gastronomia'} onClick={() => select('gastronomia')} />
-          <Chip label="Naturaleza" category="naturaleza" selected={activeCategory === 'naturaleza'} onClick={() => select('naturaleza')} />
-          <Chip label="Historia" category="historia" selected={activeCategory === 'historia'} onClick={() => select('historia')} />
+          <Chip label="Cultura" icon="🏛️" category="cultura" selected={activeCategory === 'cultura'} onClick={() => select('cultura')} />
+          <Chip label="Gastronomía" icon="🍲" category="gastronomia" selected={activeCategory === 'gastronomia'} onClick={() => select('gastronomia')} />
+          <Chip label="Naturaleza" icon="🌿" category="naturaleza" selected={activeCategory === 'naturaleza'} onClick={() => select('naturaleza')} />
+          <Chip label="Historia" icon="📜" category="historia" selected={activeCategory === 'historia'} onClick={() => select('historia')} />
         </ScrollView>
 
         {featuredRoute ? (
@@ -99,9 +105,20 @@ export function HomeScreen() {
                   />
                   <View style={styles.routeShade} />
                   <View style={styles.routeText}>
-                    <Text style={styles.routeTag}>IMPERDIBLE</Text>
+                    <View style={styles.badgeContainer}>
+                      <Text style={styles.routeTag}>★ IMPERDIBLE</Text>
+                    </View>
                     <Text style={styles.routeName} numberOfLines={2}>{featuredRoute.name}</Text>
-                    <Text style={styles.routeMeta}>{featuredRoute.durationEstimate} · {featuredRoute.distanceKm} km</Text>
+                    <View style={styles.featuredPillsRow}>
+                      <View style={styles.heroPill}>
+                        <Ionicons name="time-outline" size={13} color="#FFFFFF" />
+                        <Text style={styles.heroPillText}>{featuredRoute.durationEstimate}</Text>
+                      </View>
+                      <View style={styles.heroPill}>
+                        <Ionicons name="navigate-outline" size={13} color="#FFFFFF" />
+                        <Text style={styles.heroPillText}>{featuredRoute.distanceKm} km</Text>
+                      </View>
+                    </View>
                   </View>
                   <Pressable
                     style={styles.favorite}
@@ -153,16 +170,23 @@ export function HomeScreen() {
                 cachePolicy="memory-disk"
               />
               <View style={styles.placeInfo}>
-                <Text style={styles.municipality}>{place.municipality.toUpperCase()}</Text>
+                <View style={styles.placeHeaderRow}>
+                  <View style={styles.muniBadge}>
+                    <Text style={styles.municipality}>{place.municipality.toUpperCase()}</Text>
+                  </View>
+                  <View style={styles.ratingBadge}>
+                    <Ionicons name="star" size={11} color="#D97706" />
+                    <Text style={styles.ratingText}>{place.avgRating.toFixed(1)}</Text>
+                  </View>
+                </View>
                 <Text style={styles.placeName} numberOfLines={1}>{place.name}</Text>
                 <Text style={styles.placeDescription} numberOfLines={2}>{place.description}</Text>
                 <View style={styles.metaRow}>
-                  <Text style={styles.distance}>
-                    {formatDistance(calculateDistanceKm(userLocation, place.location))}
-                  </Text>
-                  <View style={styles.ratingBadge}>
-                    <Ionicons name="star" size={11} color="#F59E0B" />
-                    <Text style={styles.ratingText}>{place.avgRating.toFixed(1)}</Text>
+                  <View style={styles.distanceBadge}>
+                    <Ionicons name="location-outline" size={12} color="#006E73" />
+                    <Text style={styles.distance}>
+                      {formatDistance(calculateDistanceKm(userLocation, place.location))}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -187,28 +211,39 @@ const styles = StyleSheet.create({
   search: {
     marginHorizontal: 16,
     marginTop: 10,
-    height: 50,
+    height: 56,
     paddingHorizontal: 16,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
+    borderRadius: 28,
+    backgroundColor: theme.isAndroid ? '#F7ECE6' : '#FFFFFF',
+    borderWidth: theme.isAndroid ? 0 : 1,
     borderColor: '#F0E4DC',
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#1E1927',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    justifyContent: 'space-between',
+    shadowColor: '#2B1712',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: theme.isAndroid ? 0.08 : 0.04,
+    shadowRadius: 8,
+    elevation: theme.isAndroid ? 4 : 2,
   },
-  searchIcon: {
-    color: '#FF7A59',
-    fontSize: 24,
-    marginRight: 10,
+  searchLeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  searchTrailing: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: theme.isAndroid ? '#EDE0D8' : '#F5ECE6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchText: {
     color: '#806F69',
     fontSize: 14,
+    fontWeight: '600',
     flex: 1,
   },
   heading: {
@@ -243,7 +278,7 @@ const styles = StyleSheet.create({
   routeImageWrap: {
     height: 200,
     position: 'relative',
-    borderRadius: 24,
+    borderRadius: theme.shapes.card,
     overflow: 'hidden',
   },
   routeImage: {
@@ -260,23 +295,44 @@ const styles = StyleSheet.create({
     right: 56,
     bottom: 16,
   },
+  badgeContainer: {
+    backgroundColor: '#FFDBD2',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
   routeTag: {
-    color: '#FFD6A5',
-    fontSize: 10,
+    color: '#7C2106',
+    fontSize: 10.5,
     fontWeight: '900',
-    letterSpacing: 1,
+    letterSpacing: 0.8,
   },
   routeName: {
     color: '#FFFFFF',
     fontSize: 19,
     fontWeight: '900',
-    marginTop: 4,
+    marginTop: 2,
   },
-  routeMeta: {
+  featuredPillsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
+  },
+  heroPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.48)',
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  heroPillText: {
     color: '#FFFFFF',
     fontSize: 12,
-    marginTop: 4,
-    opacity: 0.9,
+    fontWeight: '700',
   },
   favorite: {
     position: 'absolute',
@@ -294,58 +350,71 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  favoriteText: {
-    color: '#FF7A59',
-    fontSize: 22,
-    marginTop: -2,
-  },
   place: {
     marginHorizontal: 16,
     marginBottom: 12,
-    padding: 10,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: theme.shapes.card,
+    backgroundColor: theme.isAndroid ? '#FFFDFB' : '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: theme.isAndroid ? '#F4EAE3' : '#F0E4DC',
     flexDirection: 'row',
-    shadowColor: '#1E1927',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    alignItems: 'center',
+    ...theme.elevation.card,
   },
   placeImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 14,
+    width: 96,
+    height: 96,
+    borderRadius: theme.isAndroid ? 22 : 16,
   },
   placeInfo: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingLeft: 12,
     justifyContent: 'center',
   },
+  placeHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  muniBadge: {
+    backgroundColor: theme.isAndroid ? '#FFDBD2' : '#FFF0EB',
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 8,
+  },
   municipality: {
-    color: '#FF7A59',
+    color: theme.isAndroid ? '#7C2106' : '#FF7A59',
     fontSize: 10,
     fontWeight: '900',
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 8,
+  },
+  ratingText: {
+    color: '#92400E',
+    fontSize: 11,
+    fontWeight: '900',
   },
   placeName: {
     color: '#1E1927',
-    fontSize: 15,
+    fontSize: 15.5,
     fontWeight: '900',
-    marginTop: 3,
+    marginTop: 2,
   },
   placeDescription: {
     color: '#806F69',
     fontSize: 12,
-    marginTop: 3,
+    marginTop: 2,
     lineHeight: 16,
-  },
-  distance: {
-    color: '#00AEB7',
-    fontSize: 11,
-    fontWeight: '800',
   },
   metaRow: {
     flexDirection: 'row',
@@ -353,13 +422,17 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 6,
   },
-  ratingBadge: {
+  distanceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+    backgroundColor: theme.isAndroid ? '#D2F7F9' : '#E5FAF8',
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 8,
   },
-  ratingText: {
-    color: '#806F69',
+  distance: {
+    color: '#006E73',
     fontSize: 11,
     fontWeight: '800',
   },
