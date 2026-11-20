@@ -43,15 +43,21 @@ export function RegisterScreen() {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
       <ScrollView
         contentContainerStyle={[
           styles.content,
           {
             paddingTop: Math.max(insets.top, 20) + 20,
             paddingBottom: Math.max(insets.bottom, 16) + 20,
+            flexGrow: 1,
           },
         ]}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.eyebrow}>RUTIGO</Text>

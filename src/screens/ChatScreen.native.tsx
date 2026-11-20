@@ -1,7 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  BackHandler,
+  Easing,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -50,7 +54,66 @@ export function ChatScreen() {
   ]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const listRef = useRef<FlatList>(null);
+
+  // Animación de apertura y cierre estilo App Launch de iOS / Android
+  const openAnim = useRef(new Animated.Value(0)).current; // 0 = punto de origen FAB, 1 = pantalla completa
+
+  useEffect(() => {
+    // Apertura suave con resorte físico
+    Animated.spring(openAnim, {
+      toValue: 1,
+      friction: 8,
+      tension: 65,
+      useNativeDriver: true,
+    }).start();
+
+    // Interceptar botón físico de atrás en Android para que siempre ejecute la animación de salida
+    const onBackPress = () => {
+      handleClose();
+      return true;
+    };
+
+    const backSub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => backSub.remove();
+  }, [openAnim]);
+
+  // Listener para el teclado: ajustar dinámicamente padding y desplazar el chat
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, () => {
+      setIsKeyboardVisible(true);
+      setTimeout(() => {
+        listRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const handleClose = () => {
+    if (isClosing) return;
+    setIsClosing(true);
+    Animated.timing(openAnim, {
+      toValue: 0,
+      duration: 220,
+      easing: Easing.bezier(0.36, 0, 0.66, -0.04),
+      useNativeDriver: true,
+    }).start(() => {
+      goBack();
+    });
+  };
 
   const handleSend = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
@@ -163,106 +226,152 @@ export function ChatScreen() {
     );
   };
 
+  const screenScale = openAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.65, 1],
+  });
+
+  const screenTranslateX = openAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [80, 0],
+  });
+
+  const screenTranslateY = openAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [140, 0],
+  });
+
+  const screenOpacity = openAnim.interpolate({
+    inputRange: [0, 0.25, 1],
+    outputRange: [0, 0.95, 1],
+  });
+
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    <Animated.View
+      style={[
+        styles.root,
+        {
+          opacity: screenOpacity,
+          transform: [
+            { translateX: screenTranslateX },
+            { translateY: screenTranslateY },
+            { scale: screenScale },
+          ],
+        },
+      ]}
     >
-      {/* Header oficial con la mascota Ruti */}
-      <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 6 }]}>
-        <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={26} color="#E60124" />
-        </Pressable>
-
-        <Image
-          source={IMAGES.brand.officialMascot}
-          style={styles.headerMascot}
-          contentFit="contain"
-          transition={150}
-        />
-
-        <View style={styles.headerInfo}>
-          <View style={styles.nameRow}>
-            <Text style={styles.headerTitle}>Ruti</Text>
-            <View style={styles.onlineBadge} />
-            <Text style={styles.onlineText}>En línea</Text>
-          </View>
-          <Text style={styles.headerSubtitle}>Guía Turístico IA del Atlántico</Text>
-        </View>
-      </View>
-
-      {/* Lista de mensajes */}
-      <FlatList
-        ref={listRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessageItem}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
-        onLayout={() => listRef.current?.scrollToEnd({ animated: true })}
-        ListFooterComponent={
-          loading ? (
-            <View style={styles.typingContainer}>
-              <Image
-                source={IMAGES.brand.officialIcon}
-                style={styles.botAvatarSmall}
-                contentFit="cover"
-              />
-              <View style={styles.typingBubble}>
-                <ActivityIndicator size="small" color="#E60124" />
-                <Text style={styles.typingText}>Ruti está pensando su recomendación...</Text>
-              </View>
-            </View>
-          ) : undefined
-        }
-      />
-
-      {/* Sugerencias rápidas */}
-      <View style={styles.promptsContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.promptsScroll}
-        >
-          {QUICK_PROMPTS.map((prompt, i) => (
-            <Pressable
-              key={i}
-              style={styles.promptChip}
-              onPress={() => handleSend(prompt)}
-            >
-              <Text style={styles.promptText}>{prompt}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Barra de entrada de texto */}
-      <View
-        style={[
-          styles.inputBar,
-          { paddingBottom: Math.max(insets.bottom, 12) + 6 },
-        ]}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <TextInput
-          style={styles.input}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Pregúntale a Ruti sobre el Atlántico..."
-          placeholderTextColor="#8A8A8A"
-          multiline
-          maxLength={300}
+        {/* Header oficial con la mascota Ruti */}
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 6 }]}>
+          <Pressable onPress={handleClose} hitSlop={8} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={26} color="#E60124" />
+          </Pressable>
+
+          <Image
+            source={IMAGES.brand.officialMascot}
+            style={styles.headerMascot}
+            contentFit="contain"
+            transition={150}
+          />
+
+          <View style={styles.headerInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.headerTitle}>Ruti</Text>
+              <View style={styles.onlineBadge} />
+              <Text style={styles.onlineText}>En línea</Text>
+            </View>
+            <Text style={styles.headerSubtitle}>Guía Turístico IA del Atlántico</Text>
+          </View>
+        </View>
+
+        {/* Lista de mensajes */}
+        <FlatList
+          ref={listRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessageItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
+          onLayout={() => listRef.current?.scrollToEnd({ animated: true })}
+          ListFooterComponent={
+            loading ? (
+              <View style={styles.typingContainer}>
+                <Image
+                  source={IMAGES.brand.officialIcon}
+                  style={styles.botAvatarSmall}
+                  contentFit="cover"
+                />
+                <View style={styles.typingBubble}>
+                  <ActivityIndicator size="small" color="#E60124" />
+                  <Text style={styles.typingText}>Ruti está pensando su recomendación...</Text>
+                </View>
+              </View>
+            ) : undefined
+          }
         />
-        <Pressable
-          style={[styles.sendButton, (!inputText.trim() || loading) && styles.sendDisabled]}
-          onPress={() => handleSend()}
-          disabled={!inputText.trim() || loading}
+
+        {/* Sugerencias rápidas */}
+        <View style={styles.promptsContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.promptsScroll}
+          >
+            {QUICK_PROMPTS.map((prompt, i) => (
+              <Pressable
+                key={i}
+                style={styles.promptChip}
+                onPress={() => handleSend(prompt)}
+              >
+                <Text style={styles.promptText}>{prompt}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Barra de entrada de texto (desplazable con el teclado) */}
+        <View
+          style={[
+            styles.inputBar,
+            {
+              paddingBottom: isKeyboardVisible
+                ? 10
+                : Math.max(insets.bottom, 12) + 6,
+            },
+          ]}
         >
-          <Ionicons name="send" size={18} color="#FFFFFF" />
-        </Pressable>
-      </View>
-    </KeyboardAvoidingView>
+          <TextInput
+            style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Pregúntale a Ruti sobre el Atlántico..."
+            placeholderTextColor="#8A8A8A"
+            multiline
+            maxLength={300}
+            onFocus={() => {
+              setTimeout(() => {
+                listRef.current?.scrollToEnd({ animated: true });
+              }, 120);
+            }}
+          />
+          <Pressable
+            style={[styles.sendButton, (!inputText.trim() || loading) && styles.sendDisabled]}
+            onPress={() => handleSend()}
+            disabled={!inputText.trim() || loading}
+          >
+            <Ionicons name="send" size={18} color="#FFFFFF" />
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+    </Animated.View>
   );
 }
 
@@ -270,6 +379,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  keyboardContainer: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',

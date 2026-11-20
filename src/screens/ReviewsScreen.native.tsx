@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
@@ -31,57 +41,64 @@ export function ReviewsScreen() {
   const visible = reviews.filter((review) => review.placeId === selectedPlace?.id);
 
   return (
-    <ScrollView
+    <KeyboardAvoidingView
       style={styles.root}
-      contentContainerStyle={[
-        styles.content,
-        {
-          paddingTop: Math.max(insets.top, 20) + 10,
-          paddingBottom: Math.max(insets.bottom, 16) + 24,
-        },
-      ]}
-      showsVerticalScrollIndicator={false}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-      <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={20} color="#E60124" />
-        <Text style={styles.back}>Volver</Text>
-      </Pressable>
-      <Text style={styles.title}>Reseñas</Text>
-      <Text style={styles.subtitle}>{selectedPlace?.name || 'Experiencias de viajeros'}</Text>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: Math.max(insets.top, 20) + 10,
+            paddingBottom: Math.max(insets.bottom, 16) + 24,
+            flexGrow: 1,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={20} color="#E60124" />
+          <Text style={styles.back}>Volver</Text>
+        </Pressable>
+        <Text style={styles.title}>Reseñas</Text>
+        <Text style={styles.subtitle}>{selectedPlace?.name || 'Experiencias de viajeros'}</Text>
 
-      {visible.length > 0 ? (
-        visible.map((review) => (
-          <View key={review.id} style={styles.review}>
-            <Text style={styles.author}>{review.userName}</Text>
-            <RatingStars rating={review.rating} size="sm" />
-            <Text style={styles.comment}>{review.comment}</Text>
+        {visible.length > 0 ? (
+          visible.map((review) => (
+            <View key={review.id} style={styles.review}>
+              <Text style={styles.author}>{review.userName}</Text>
+              <RatingStars rating={review.rating} size="sm" />
+              <Text style={styles.comment}>{review.comment}</Text>
+            </View>
+          ))
+        ) : (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyText}>Aún no hay reseñas para este lugar.</Text>
+            <Text style={styles.emptySubText}>Sé el primero en compartir tu experiencia con la comunidad.</Text>
           </View>
-        ))
-      ) : (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyText}>Aún no hay reseñas para este lugar.</Text>
-          <Text style={styles.emptySubText}>Sé el primero en compartir tu experiencia con la comunidad.</Text>
-        </View>
-      )}
+        )}
 
-      {currentUser && (
-        <View style={styles.form}>
-          <Text style={styles.formTitle}>Comparte tu experiencia</Text>
-          <RatingStars rating={rating} interactive onChange={setRating} size="lg" />
-          <TextInput
-            value={comment}
-            onChangeText={setComment}
-            placeholder="Cuéntanos cómo fue tu visita..."
-            placeholderTextColor="#806F69"
-            multiline
-            style={styles.input}
-          />
-          <Pressable style={[styles.button, busy && styles.buttonDisabled]} onPress={publish} disabled={busy}>
-            <Text style={styles.buttonText}>{busy ? 'Publicando...' : 'Publicar reseña'}</Text>
-          </Pressable>
-        </View>
-      )}
-    </ScrollView>
+        {currentUser && (
+          <View style={styles.form}>
+            <Text style={styles.formTitle}>Comparte tu experiencia</Text>
+            <RatingStars rating={rating} interactive onChange={setRating} size="lg" />
+            <TextInput
+              value={comment}
+              onChangeText={setComment}
+              placeholder="Cuéntanos cómo fue tu visita..."
+              placeholderTextColor="#806F69"
+              multiline
+              style={styles.input}
+            />
+            <Pressable style={[styles.button, busy && styles.buttonDisabled]} onPress={publish} disabled={busy}>
+              <Text style={styles.buttonText}>{busy ? 'Publicando...' : 'Publicar reseña'}</Text>
+            </Pressable>
+          </View>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

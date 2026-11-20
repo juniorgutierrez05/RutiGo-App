@@ -1,5 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,13 +44,18 @@ export function SearchScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
       <ScrollView
         contentContainerStyle={[
           styles.content,
           {
             paddingTop: Math.max(insets.top, 20) + 10,
             paddingBottom: Math.max(insets.bottom, 12) + 84,
+            flexGrow: 1,
           },
         ]}
         showsVerticalScrollIndicator={false}
@@ -127,7 +141,7 @@ export function SearchScreen() {
         )}
       </ScrollView>
       <BottomNav />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

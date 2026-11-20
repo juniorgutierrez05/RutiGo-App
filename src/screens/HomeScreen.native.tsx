@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Animated,
+  Easing,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -40,6 +50,66 @@ export function HomeScreen() {
     setActiveCategory(category);
     navigateTo('explore_category', { category });
   };
+
+  // Animación del botón flotante de Ruti:
+  // Visible expandido durante los primeros 5 segundos; luego se contrae suavemente en una bolita flotante circular.
+  const fabAnim = useRef(new Animated.Value(1)).current; // 1 = expandido (pill), 0 = bolita circular
+  const fabPressScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Animated.timing(fabAnim, {
+        toValue: 0,
+        duration: 750,
+        easing: Easing.bezier(0.16, 1, 0.3, 1),
+        useNativeDriver: false, // se animan width, padding y opacidades
+      }).start();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [fabAnim]);
+
+  const handlePressFab = () => {
+    Animated.sequence([
+      Animated.timing(fabPressScale, {
+        toValue: 0.88,
+        duration: 90,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fabPressScale, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      navigateTo('chat');
+    });
+  };
+
+  const fabWidth = fabAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [56, 212],
+  });
+
+  const textWidth = fabAnim.interpolate({
+    inputRange: [0, 0.35, 1],
+    outputRange: [0, 0, 116],
+  });
+
+  const textOpacity = fabAnim.interpolate({
+    inputRange: [0, 0.45, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const sparkleOpacity = fabAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const miniBadgeOpacity = fabAnim.interpolate({
+    inputRange: [0, 0.35, 1],
+    outputRange: [1, 0, 0],
+  });
 
   return (
     <View style={styles.root}>
@@ -196,26 +266,60 @@ export function HomeScreen() {
         )}
       </ScrollView>
 
-      {/* Botón flotante del Asistente Turístico Ruti */}
-      <Pressable
+      {/* Botón flotante animado de Ruti (pastilla 5 seg -> bolita flotante circular) */}
+      <Animated.View
         style={[
           styles.chatFab,
-          { bottom: Math.max(insets.bottom, 12) + 80 },
+          {
+            bottom: Math.max(insets.bottom, 12) + 80,
+            width: fabWidth,
+            transform: [{ scale: fabPressScale }],
+          },
         ]}
-        onPress={() => navigateTo('chat')}
-        hitSlop={6}
       >
-        <Image
-          source={IMAGES.brand.officialIcon}
-          style={styles.chatFabIcon}
-          contentFit="cover"
-        />
-        <View style={styles.chatFabTextContainer}>
-          <Text style={styles.chatFabTitle}>Pregúntale a Ruti</Text>
-          <Text style={styles.chatFabSub}>Guía IA del Atlántico</Text>
-        </View>
-        <Ionicons name="sparkles" size={16} color="#FFD200" />
-      </Pressable>
+        <Pressable
+          style={styles.chatFabPressable}
+          onPress={handlePressFab}
+          hitSlop={6}
+          accessibilityLabel="Pregúntale a Ruti"
+        >
+          <View style={styles.chatFabIconWrap}>
+            <Image
+              source={IMAGES.brand.officialIcon}
+              style={styles.chatFabIcon}
+              contentFit="cover"
+            />
+            {/* Pequeña insignia dorada cuando queda como bolita */}
+            <Animated.View
+              style={[styles.miniSparkleBadge, { opacity: miniBadgeOpacity }]}
+              pointerEvents="none"
+            >
+              <Ionicons name="sparkles" size={8} color="#FFD200" />
+            </Animated.View>
+          </View>
+
+          <Animated.View
+            style={[
+              styles.chatFabTextContainer,
+              {
+                width: textWidth,
+                opacity: textOpacity,
+              },
+            ]}
+          >
+            <Text style={styles.chatFabTitle} numberOfLines={1}>
+              Pregúntale a Ruti
+            </Text>
+            <Text style={styles.chatFabSub} numberOfLines={1}>
+              Guía IA del Atlántico
+            </Text>
+          </Animated.View>
+
+          <Animated.View style={{ opacity: sparkleOpacity }}>
+            <Ionicons name="sparkles" size={16} color="#FFD200" />
+          </Animated.View>
+        </Pressable>
+      </Animated.View>
 
       <BottomNav />
     </View>
@@ -477,29 +581,58 @@ const styles = StyleSheet.create({
   chatFab: {
     position: 'absolute',
     right: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#E60124',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 26,
     shadowColor: '#E60124',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.22,
     shadowRadius: 10,
-    elevation: 6,
+    elevation: 8,
     zIndex: 90,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chatFabPressable: {
+    width: '100%',
+    height: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    gap: 8,
+  },
+  chatFabIconWrap: {
+    position: 'relative',
+    width: 38,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   chatFabIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+  },
+  miniSparkleBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#E60124',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+    borderRadius: 8,
+    width: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   chatFabTextContainer: {
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   chatFabTitle: {
     color: '#E60124',

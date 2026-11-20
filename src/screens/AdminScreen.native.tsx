@@ -454,15 +454,21 @@ export function AdminScreen() {
   );
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
       <ScrollView
         contentContainerStyle={[
           styles.content,
           {
             paddingTop: Math.max(insets.top, 20) + 10,
             paddingBottom: Math.max(insets.bottom, 16) + 30,
+            flexGrow: 1,
           },
         ]}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
