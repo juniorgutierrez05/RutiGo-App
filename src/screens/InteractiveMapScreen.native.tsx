@@ -53,16 +53,16 @@ export function InteractiveMapScreen() {
       return routeCache.get(cacheKey)!;
     }
 
-    // Endpoints ultrarrápidos sin alternativas redundantes para carga inmediata
+    // Endpoints de enrutamiento de alta precisión con cálculo de alternativas para elegir siempre la ruta más corta
     const endpoints = [
-      `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`,
-      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`,
+      `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&alternatives=true&continue_straight=false`,
+      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&alternatives=true&continue_straight=false`,
     ];
 
     for (const url of endpoints) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
         const res = await fetch(url, {
           signal: controller.signal,
           headers: { 'Accept': 'application/json' },
@@ -72,15 +72,21 @@ export function InteractiveMapScreen() {
         if (!res.ok) continue;
         const data = await res.json();
         if (data.code === 'Ok' && Array.isArray(data.routes) && data.routes.length > 0) {
-          const mainRoute = data.routes[0];
-          if (Array.isArray(mainRoute.geometry?.coordinates) && mainRoute.geometry.coordinates.length > 1) {
+          // Evaluar todas las rutas alternativas calculadas y seleccionar estrictamente la de menor distancia (la más corta)
+          const shortestRoute = data.routes.reduce((best: any, candidate: any) => {
+            if (!candidate?.geometry?.coordinates?.length) return best;
+            if (!best) return candidate;
+            return candidate.distance < best.distance ? candidate : best;
+          }, data.routes[0]);
+
+          if (Array.isArray(shortestRoute?.geometry?.coordinates) && shortestRoute.geometry.coordinates.length > 1) {
             const result: RouteResult = {
-              coords: mainRoute.geometry.coordinates.map((c: [number, number]) => ({
+              coords: shortestRoute.geometry.coordinates.map((c: [number, number]) => ({
                 latitude: c[1],
                 longitude: c[0],
               })),
-              distanceKm: mainRoute.distance / 1000,
-              durationMin: Math.max(1, Math.round(mainRoute.duration / 60)),
+              distanceKm: shortestRoute.distance / 1000,
+              durationMin: Math.max(1, Math.round(shortestRoute.duration / 60)),
             };
             routeCache.set(cacheKey, result);
             return result;

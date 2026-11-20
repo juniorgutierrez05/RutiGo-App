@@ -244,6 +244,16 @@ app.post('/api/chat', async (request, response) => {
   }
 });
 
+app.get('/api/chat/status', async (_request, response) => {
+  try {
+    const { getChatDiagnostic } = await import('./chat.js');
+    const diagnostic = await getChatDiagnostic();
+    return response.json(diagnostic);
+  } catch (err: any) {
+    return response.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 app.get('/api/reviews', async (request, response) => {
   const { pool } = await import('./db.js');
   const target = request.query.placeId ? ['place_id', Number(request.query.placeId)] : request.query.routeId ? ['route_id', Number(request.query.routeId)] : null;
