@@ -29,6 +29,38 @@ export function LeafletMapView({
 }: LeafletMapViewProps) {
   const webViewRef = useRef<WebView | null>(null);
   const isMapLoadedRef = useRef(false);
+  const latestRouteCoordsRef = useRef<{ latitude: number; longitude: number }[]>(routeCoords);
+  const latestShowRouteRef = useRef<boolean>(showRoute);
+  const latestActivePlaceRef = useRef<Place | null>(activePlace);
+
+  // Mantener referencias actualizadas siempre
+  latestRouteCoordsRef.current = routeCoords;
+  latestShowRouteRef.current = showRoute;
+  latestActivePlaceRef.current = activePlace;
+
+  // Funciones de inyección seguras y resilientes
+  const sendRouteToMap = (coords: { latitude: number; longitude: number }[], show: boolean) => {
+    if (!webViewRef.current) return;
+    const coordsJson = JSON.stringify(
+      show && coords.length > 0 ? coords.map((c) => [c.latitude, c.longitude]) : []
+    );
+    webViewRef.current.injectJavaScript(`
+      if (typeof window.updateRoute === 'function') {
+        window.updateRoute(${coordsJson});
+      }
+      true;
+    `);
+  };
+
+  const sendActivePlaceToMap = (place: Place | null) => {
+    if (!webViewRef.current || !place) return;
+    webViewRef.current.injectJavaScript(`
+      if (typeof window.updateActivePlace === 'function') {
+        window.updateActivePlace('${place.id}', ${place.location.lat}, ${place.location.lng});
+      }
+      true;
+    `);
+  };
 
   // Exponer método para centrar externamente (ej: botón "Mi ubicación")
   useEffect(() => {
@@ -37,7 +69,8 @@ export function LeafletMapView({
         centerOn: (lat: number, lng: number, zoom = 14) => {
           webViewRef.current?.injectJavaScript(`
             if (window.map) {
-              window.map.flyTo([${lat}, ${lng}], ${zoom}, { duration: 0.6 });
+              window.map.stop();
+              window.map.flyTo([${lat}, ${lng}], ${zoom}, { duration: 0.5 });
             }
             true;
           `);
@@ -46,32 +79,24 @@ export function LeafletMapView({
     }
   }, [mapRef]);
 
-  // Actualizar instantáneamente el marcador activo vía JS (SIN recargar el HTML)
+  // Actualizar marcador activo vía JS
   useEffect(() => {
-    if (activePlace && isMapLoadedRef.current && webViewRef.current) {
-      webViewRef.current.injectJavaScript(`
-        if (window.updateActivePlace) {
-          window.updateActivePlace('${activePlace.id}', ${activePlace.location.lat}, ${activePlace.location.lng});
-        }
-        true;
-      `);
-    }
+    sendActivePlaceToMap(activePlace);
   }, [activePlace]);
 
-  // Actualizar la ruta trazada instantáneamente vía JS
+  // Actualizar la ruta trazada vía JS
   useEffect(() => {
-    if (isMapLoadedRef.current && webViewRef.current) {
-      const coordsJson = JSON.stringify(
-        showRoute ? routeCoords.map((c) => [c.latitude, c.longitude]) : []
-      );
-      webViewRef.current.injectJavaScript(`
-        if (window.updateRoute) {
-          window.updateRoute(${coordsJson});
-        }
-        true;
-      `);
-    }
+    sendRouteToMap(routeCoords, showRoute);
   }, [showRoute, routeCoords]);
+
+  const handleMapReady = () => {
+    isMapLoadedRef.current = true;
+    logEvent('info', 'LEAFLET', 'Motor de mapa Leaflet inicializado y listo');
+    // Sincronizar inmediatamente estado actual por si se definió antes del renderizado de la WebView
+    sendActivePlaceToMap(latestActivePlaceRef.current);
+    sendRouteToMap(latestRouteCoordsRef.current, latestShowRouteRef.current);
+    onReady?.();
+  };
 
   // Al abrir el mapa, siempre priorizar la ubicación real del usuario
   const initialCenterLat = userLocation?.lat || activePlace?.location.lat || 10.9685;
@@ -182,33 +207,70 @@ export function LeafletMapView({
     });
 
     window.updateActivePlace = function(id, lat, lng) {
-      if (activeId && document.getElementById('pin-' + activeId)) {
-        document.getElementById('pin-' + activeId).classList.remove('active');
-      }
-      activeId = id;
-      if (document.getElementById('pin-' + id)) {
-        document.getElementById('pin-' + id).classList.add('active');
-      }
-      map.flyTo([lat, lng], 13, { duration: 0.5 });
+      try {
+        if (activeId && document.getElementById('pin-' + activeId)) {
+          document.getElementById('pin-' + activeId).classList.remove('active');
+        }
+        activeId = id;
+        if (document.getElementById('pin-' + id)) {
+          document.getElementById('pin-' + id).classList.add('active');
+        }
+        map.stop();
+        map.flyTo([lat, lng], 14, { duration: 0.5 });
+      } catch (e) {}
     };
 
+    let routePolylineBg = null;
     window.updateRoute = function(coords) {
-      if (routePolyline) {
-        map.removeLayer(routePolyline);
-        routePolyline = null;
-      }
-      if (coords && coords.length > 0) {
-        routePolyline = L.polyline(coords, {
-          color: '#E60124',
-          weight: 5,
-          opacity: 0.9,
-          lineJoin: 'round'
-        }).addTo(map);
-        map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+      try {
+        if (routePolylineBg) {
+          map.removeLayer(routePolylineBg);
+          routePolylineBg = null;
+        }
+        if (routePolyline) {
+          map.removeLayer(routePolyline);
+          routePolyline = null;
+        }
+        if (coords && Array.isArray(coords) && coords.length > 1) {
+          map.stop();
+
+          // Capa de fondo blanca gruesa (8px) para máximo contraste y nitidez sobre cualquier calle
+          routePolylineBg = L.polyline(coords, {
+            color: '#FFFFFF',
+            weight: 8,
+            opacity: 0.95,
+            lineJoin: 'round',
+            lineCap: 'round'
+          }).addTo(map);
+
+          // Línea principal rojo RutiGo vibrante (5px)
+          routePolyline = L.polyline(coords, {
+            color: '#E60124',
+            weight: 5,
+            opacity: 0.98,
+            lineJoin: 'round',
+            lineCap: 'round'
+          }).addTo(map);
+
+          const bounds = routePolyline.getBounds();
+          if (bounds && bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+          }
+        }
+      } catch (err) {
+        console.warn('Error al actualizar ruta Leaflet:', err);
       }
     };
 
-    window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'MAP_READY' }));
+    // Notificación resiliente con reintento si window.ReactNativeWebView aún se está inyectando
+    function notifyReady() {
+      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'MAP_READY' }));
+      } else {
+        setTimeout(notifyReady, 60);
+      }
+    }
+    notifyReady();
   </script>
 </body>
 </html>
@@ -228,6 +290,7 @@ export function LeafletMapView({
         scrollEnabled={false}
         cacheEnabled
         androidHardwareAccelerationDisabled={false}
+        onLoadEnd={handleMapReady}
         onMessage={(event: WebViewMessageEvent) => {
           try {
             const data = JSON.parse(event.nativeEvent.data);
@@ -235,9 +298,7 @@ export function LeafletMapView({
               const found = places.find((p) => p.id === data.placeId);
               if (found) onSelectPlace(found);
             } else if (data.type === 'MAP_READY') {
-              isMapLoadedRef.current = true;
-              logEvent('info', 'LEAFLET', 'Motor de mapa Leaflet inicializado y teselas listas');
-              onReady?.();
+              handleMapReady();
             }
           } catch (err) {
             logEvent('warn', 'LEAFLET', 'Error procesando mensaje de WebView Leaflet', err instanceof Error ? err.message : String(err));

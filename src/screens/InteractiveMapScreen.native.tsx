@@ -44,9 +44,6 @@ export function InteractiveMapScreen() {
     setShowRoute(false);
     setRouteCoords([]);
     setRouteInfo(null);
-    if (active && mapRef.current) {
-      mapRef.current.centerOn(active.location.lat, active.location.lng, 14);
-    }
   }, [active]);
 
   const fetchStreetRoute = async (
@@ -58,26 +55,31 @@ export function InteractiveMapScreen() {
       return routeCache.get(cacheKey)!;
     }
 
-    // Endpoints de enrutamiento de alta precisión con cálculo de alternativas para elegir siempre la ruta más corta
+    // Endpoints de enrutamiento OSRM oficiales para navegación por calles reales
+    // Se consultan alternativas para escoger estrictamente la ruta con menor kilometraje
     const endpoints = [
-      `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&alternatives=true&continue_straight=false`,
-      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&alternatives=true&continue_straight=false`,
+      `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&alternatives=true`,
+      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson&alternatives=true`,
+      `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`,
     ];
 
     for (const url of endpoints) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
         const res = await fetch(url, {
           signal: controller.signal,
-          headers: { 'Accept': 'application/json' },
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'RutiGoApp/1.0 (Android; Mobile)',
+          },
         });
         clearTimeout(timeoutId);
 
         if (!res.ok) continue;
         const data = await res.json();
         if (data.code === 'Ok' && Array.isArray(data.routes) && data.routes.length > 0) {
-          // Evaluar todas las rutas alternativas calculadas y seleccionar estrictamente la de menor distancia (la más corta)
+          // Seleccionar la ruta con menor kilometraje entre las rutas válidas
           const shortestRoute = data.routes.reduce((best: any, candidate: any) => {
             if (!candidate?.geometry?.coordinates?.length) return best;
             if (!best) return candidate;
@@ -93,35 +95,32 @@ export function InteractiveMapScreen() {
               distanceKm: shortestRoute.distance / 1000,
               durationMin: Math.max(1, Math.round(shortestRoute.duration / 60)),
             };
+            // Guardar en caché solo rutas reales de alta precisión
             routeCache.set(cacheKey, result);
             return result;
           }
         }
       } catch {
-        // Continuar al siguiente endpoint o fallback inmediato
+        // Continuar al siguiente endpoint
       }
     }
 
-    // Fallback inteligente garantizado: cálculo geodésico directo sin bloquear la experiencia del usuario
+    // Fallback de contingencia garantizado (sin guardar en caché para permitir reintento)
     const directKm = calculateDistanceKm(start, dest);
     const approxDrivingMin = Math.max(2, Math.round((directKm / 42) * 60));
-    const fallbackResult: RouteResult = {
+    return {
       coords: [
         { latitude: start.lat, longitude: start.lng },
-        { latitude: (start.lat + dest.lat) / 2 + 0.002, longitude: (start.lng + dest.lng) / 2 },
         { latitude: dest.lat, longitude: dest.lng },
       ],
       distanceKm: directKm,
       durationMin: approxDrivingMin,
     };
-    routeCache.set(cacheKey, fallbackResult);
-    return fallbackResult;
   };
 
   const directions = async () => {
     if (!active) return;
     setLoadingRoute(true);
-    setShowRoute(true);
 
     const origin = userLocation;
     logEvent('info', 'ROUTE', `Calculando ruta hacia ${active.name}`, {
@@ -134,6 +133,7 @@ export function InteractiveMapScreen() {
       if (result && result.coords.length > 0) {
         setRouteCoords(result.coords);
         setRouteInfo({ distanceKm: result.distanceKm, durationMin: result.durationMin });
+        setShowRoute(true);
         logEvent('info', 'ROUTE', `Ruta calculada con éxito: ${result.distanceKm.toFixed(1)} km · ${result.durationMin} min`);
       }
     } catch (err) {
