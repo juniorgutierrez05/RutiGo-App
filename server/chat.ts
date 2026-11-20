@@ -167,7 +167,8 @@ ${catalogContext}
             };
           }
         } else {
-          console.warn(`[RutiBot] Modelo ${currentModel} devolvió ${geminiRes.status}, intentando siguiente...`);
+          const errText = await geminiRes.text();
+          console.warn(`[RutiBot] Modelo ${currentModel} devolvió ${geminiRes.status}: ${errText.slice(0, 150)}`);
         }
       } catch (err) {
         console.warn(`[RutiBot] Error con modelo ${currentModel}:`, err);
@@ -183,48 +184,102 @@ function generateFallbackResponse(
   message: string,
   places: Array<{ id: number; name: string; municipality: string; category: string; description: string }>
 ): ChatResponse {
-  const query = message.toLowerCase();
+  // Normalizar removiendo tildes y pasando a minúsculas
+  const query = message
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
   // Buscar por gastronomía
-  if (query.includes('comer') || query.includes('comida') || query.includes('chicharron') || query.includes('arepa') || query.includes('hambre') || query.includes('gastronom')) {
-    const foodPlaces = places.filter((p) => p.category === 'gastronomia' || p.name.includes('Chicharrón') || p.name.includes('Luruaco') || p.id === 1);
+  if (
+    query.includes('comer') ||
+    query.includes('comida') ||
+    query.includes('chicharron') ||
+    query.includes('arepa') ||
+    query.includes('hambre') ||
+    query.includes('gastronom') ||
+    query.includes('restaurante') ||
+    query.includes('plato')
+  ) {
+    const foodPlaces = places.filter(
+      (p) =>
+        p.category === 'gastronomia' ||
+        p.name.toLowerCase().includes('chicharron') ||
+        p.name.toLowerCase().includes('luruaco') ||
+        p.id === 1
+    );
     return {
-      reply: '¡Ajá, mi hermano! En el Atlántico el buen comer no se negocia. Si quieres probar el auténtico chicharrón crocante con bollo limpio, Baranoa es parada obligatoria. Y para la arepa de huevo con sabor tradicional campesino, ¡la parada en Luruaco junto a la laguna es una delicia total! También en Barranquilla el Caimán del Río en el Gran Malecón te ofrece de todo frente a la brisa.',
+      reply:
+        '¡Ajá, mi hermano! En el Atlántico el buen comer no se negocia. Si quieres probar el auténtico chicharrón crocante con bollo limpio, Baranoa es parada obligatoria. Y para la arepa de huevo con sabor tradicional campesino, ¡la parada en Luruaco junto a la laguna es una delicia total! También en Barranquilla el Caimán del Río en el Gran Malecón te ofrece de todo frente a la brisa.',
       suggestedPlaceIds: foodPlaces.slice(0, 3).map((p) => p.id),
     };
   }
 
-  // Buscar por playas / mar / atardecer
-  if (query.includes('playa') || query.includes('mar') || query.includes('atardecer') || query.includes('brisa') || query.includes('salgar') || query.includes('puerto')) {
-    const seaPlaces = places.filter((p) => p.municipality === 'Puerto Colombia' || p.id === 8 || p.id === 7 || p.id === 4);
+  // Buscar por playas / mar / atardecer / Puerto Colombia / Salgar
+  if (
+    query.includes('playa') ||
+    query.includes('mar') ||
+    query.includes('atardecer') ||
+    query.includes('brisa') ||
+    query.includes('salgar') ||
+    query.includes('puerto colombia') ||
+    query.includes('puerto') ||
+    query.includes('muelle')
+  ) {
+    const seaPlaces = places.filter(
+      (p) => p.municipality === 'Puerto Colombia' || p.id === 8 || p.id === 7 || p.id === 4
+    );
     return {
-      reply: '¡Uy, qué sabrosura! Para tardear frente al mar Caribe nada le gana al Castillo de Salgar al caer el sol: la vista panorámica es de película. También te recomiendo darte una vuelta por el Muelle 1888 y el Malecón del Mar en Puerto Colombia, o maravillarte con la unión del río y el mar en Bocas de Ceniza.',
+      reply:
+        '¡Uy, qué sabrosura! Para tardear frente al mar Caribe nada le gana al Castillo de Salgar al caer el sol: la vista panorámica es de película. También te recomiendo darte una vuelta por el Muelle 1888 y el Malecón del Mar en Puerto Colombia, o maravillarte con la unión del río y el mar en Bocas de Ceniza.',
       suggestedPlaceIds: seaPlaces.slice(0, 3).map((p) => p.id),
     };
   }
 
-  // Buscar por cultura / artesanías / Usiacurí
-  if (query.includes('artesania') || query.includes('usiacuri') || query.includes('cultura') || query.includes('carnaval') || query.includes('mural') || query.includes('museo')) {
-    const cultPlaces = places.filter((p) => p.municipality === 'Usiacurí' || p.id === 3 || p.id === 12);
+  // Buscar por cultura / artesanías / Usiacurí / Carnaval / Galapa
+  if (
+    query.includes('artesania') ||
+    query.includes('usiacuri') ||
+    query.includes('cultura') ||
+    query.includes('carnaval') ||
+    query.includes('mural') ||
+    query.includes('museo') ||
+    query.includes('galapa') ||
+    query.includes('mascara') ||
+    query.includes('iraca')
+  ) {
+    const cultPlaces = places.filter(
+      (p) => p.municipality === 'Usiacurí' || p.id === 3 || p.id === 12
+    );
     return {
-      reply: '¡El Atlántico tiene un legado cultural bellísimo! Tienes que visitar Usiacurí, el "Pesebre del Atlántico": sus techos pintados de aves, la Casa Museo del poeta Julio Flórez y los tejidos en palma de iraca son un tesoro nacional. En Barranquilla tampoco te puedes perder el Museo del Carnaval para vivir la fiesta todo el año.',
+      reply:
+        '¡El Atlántico tiene un legado cultural bellísimo! Tienes que visitar Usiacurí, el "Pesebre del Atlántico": sus techos pintados de aves, la Casa Museo del poeta Julio Flórez y los tejidos en palma de iraca son un tesoro nacional. En Barranquilla tampoco te puedes perder el Museo del Carnaval para vivir la fiesta todo el año.',
       suggestedPlaceIds: cultPlaces.slice(0, 3).map((p) => p.id),
     };
   }
 
-  // Buscar por planes familiares o niños
-  if (query.includes('familia') || query.includes('niño') || query.includes('parque') || query.includes('fin de semana')) {
+  // Buscar por planes familiares o niños o parques
+  if (
+    query.includes('familia') ||
+    query.includes('nino') ||
+    query.includes('parque') ||
+    query.includes('fin de semana') ||
+    query.includes('malecon') ||
+    query.includes('ventana al mundo')
+  ) {
     const famPlaces = places.filter((p) => p.id === 1 || p.id === 2 || p.id === 7);
     return {
-      reply: '¡Un plan en familia sale perfecto en el Gran Malecón del Río! Tienes zonas de juegos para niños, caminatas seguras y mucha brisa. Después pueden pasar a tomarse la foto familiar obligatoria en el monumento de la Ventana al Mundo con todos sus colores.',
+      reply:
+        '¡Un plan en familia sale perfecto en el Gran Malecón del Río! Tienes zonas de juegos para niños, caminatas seguras y mucha brisa. Después pueden pasar a tomarse la foto familiar obligatoria en el monumento de la Ventana al Mundo con todos sus colores.',
       suggestedPlaceIds: famPlaces.slice(0, 3).map((p) => p.id),
     };
   }
 
-  // Respuesta general de bienvenida y orientación
+  // Respuesta general de bienvenida y orientación turística
   const generalPlaces = places.slice(0, 2);
   return {
-    reply: '¡Hola! Soy Ruti, tu guía del Atlántico. Conozco cada rincón desde Bocas de Ceniza hasta la Laguna de Luruaco. Cuéntame: ¿qué te provoca hacer hoy? ¿Buscas dónde comer rico, escaparte a la playa o descubrir rutas de artesanías?',
+    reply:
+      '¡Hola! Soy Ruti, tu guía del Atlántico. Conozco cada rincón desde Bocas de Ceniza hasta la Laguna de Luruaco. Cuéntame: ¿qué te provoca hacer hoy? ¿Buscas dónde comer rico, escaparte a la playa o descubrir rutas de artesanías?',
     suggestedPlaceIds: generalPlaces.map((p) => p.id),
   };
 }
