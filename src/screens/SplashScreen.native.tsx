@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '../store';
+import * as api from '../services/api';
 import { IMAGES } from '../assets/images';
 
 export function SplashScreen() {
-  const { navigateTo } = useApp();
+  const { navigateTo, currentUser } = useApp();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const [progress, setProgress] = useState(25);
@@ -14,16 +16,39 @@ export function SplashScreen() {
   const artSize = Math.min(width * 0.70, height * 0.32, 270);
   const mascotSize = artSize * 0.88;
 
+  const proceedFromSplash = useCallback(async () => {
+    try {
+      // 1. Si ya hay una sesión guardada, pasamos directo a home (o admin)
+      const user = currentUser || (await api.getCurrentUser());
+      if (user) {
+        navigateTo(user.role === 'admin' ? 'admin' : 'home');
+        return;
+      }
+
+      // 2. Si no hay sesión, comprobamos si ya pasó el onboarding anteriormente
+      const onboardingDone = await AsyncStorage.getItem('rutigo_onboarding_completed');
+      if (onboardingDone) {
+        navigateTo('home');
+      } else {
+        navigateTo('onboarding');
+      }
+    } catch {
+      navigateTo('home');
+    }
+  }, [currentUser, navigateTo]);
+
   useEffect(() => {
     const first = setTimeout(() => setProgress(65), 500);
     const second = setTimeout(() => setProgress(100), 1400);
-    const finish = setTimeout(() => navigateTo('onboarding'), 2200);
+    const finish = setTimeout(() => {
+      proceedFromSplash();
+    }, 2200);
     return () => {
       clearTimeout(first);
       clearTimeout(second);
       clearTimeout(finish);
     };
-  }, [navigateTo]);
+  }, [proceedFromSplash]);
 
   return (
     <Pressable
@@ -34,7 +59,7 @@ export function SplashScreen() {
           paddingBottom: Math.max(insets.bottom, 16) + 16,
         },
       ]}
-      onPress={() => navigateTo('onboarding')}
+      onPress={proceedFromSplash}
     >
       <View style={styles.header}>
         <Text style={styles.pill}>Caribe Colombiano</Text>

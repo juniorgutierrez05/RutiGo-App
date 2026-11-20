@@ -37,10 +37,12 @@ async function storedUser(): Promise<User | null> {
 
 async function saveSession(data: AuthApiResponse): Promise<User> {
   await AsyncStorage.setItem(USER_KEY, JSON.stringify(data.user));
+  await AsyncStorage.setItem('rutigo_onboarding_completed', 'true');
+  await AsyncStorage.setItem(TOKEN_KEY, data.token);
   try {
     await SecureStore.setItemAsync(TOKEN_KEY, data.token);
   } catch {
-    await AsyncStorage.setItem(TOKEN_KEY, data.token);
+    // SecureStore fallback
   }
   return data.user;
 }
@@ -71,10 +73,12 @@ async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 3
   }
 
   if (!response.ok) {
-    const body = await response.json().catch(() => null) as { message?: string } | null;
-    throw new Error(body?.message || `API error ${response.status}`);
+    const body = (await response.json().catch(() => null)) as { message?: string } | null;
+    const err = new Error(body?.message || `API error ${response.status}`) as any;
+    err.status = response.status;
+    throw err;
   }
-  return response.status === 204 ? undefined as T : response.json() as Promise<T>;
+  return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
 }
 
 function jsonValue<T>(value: T | string | null | undefined, fallback: T): T {
@@ -97,12 +101,12 @@ export async function registerWithEmail(name: string, email: string, password: s
 export async function loginWithGoogle(idToken: string): Promise<User> { return saveSession(await request<AuthApiResponse>('/api/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) })); }
 export async function logoutUser(): Promise<void> {
   await AsyncStorage.removeItem(USER_KEY);
+  await AsyncStorage.removeItem(TOKEN_KEY);
   try {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
   } catch {
     // ignore
   }
-  await AsyncStorage.removeItem(TOKEN_KEY);
 }
 export async function getCurrentUser(): Promise<User | null> { return storedUser(); }
 export async function validateSession(): Promise<void> { await request('/api/me'); }

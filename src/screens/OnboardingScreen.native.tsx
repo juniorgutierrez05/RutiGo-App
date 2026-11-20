@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useApp } from '../store';
 import { IMAGES } from '../assets/images';
 import { Button } from '../components/Button.native';
@@ -40,7 +41,15 @@ export function OnboardingScreen() {
   const imageSize = artSize * 0.88;
 
   const step = steps[currentStep];
-  const next = () => (currentStep < steps.length - 1 ? setCurrentStep(currentStep + 1) : navigateTo('login'));
+
+  const finishOnboarding = async (target: 'home' | 'login') => {
+    try {
+      await AsyncStorage.setItem('rutigo_onboarding_completed', 'true');
+    } catch {}
+    navigateTo(target);
+  };
+
+  const next = () => (currentStep < steps.length - 1 ? setCurrentStep(currentStep + 1) : finishOnboarding('login'));
 
   return (
     <View
@@ -56,7 +65,7 @@ export function OnboardingScreen() {
         <View style={styles.topPill}>
           <Text style={styles.topPillText}>Atlántico Mágico</Text>
         </View>
-        <Pressable onPress={() => navigateTo('login')} hitSlop={8}>
+        <Pressable onPress={() => finishOnboarding('home')} hitSlop={8}>
           <Text style={styles.skip}>Saltar</Text>
         </Pressable>
       </View>
@@ -101,7 +110,7 @@ export function OnboardingScreen() {
         {currentStep === steps.length - 1 && (
           <Text style={styles.loginHint}>
             ¿Ya tienes cuenta?{' '}
-            <Text onPress={() => navigateTo('login')} style={styles.loginLink}>
+            <Text onPress={() => finishOnboarding('login')} style={styles.loginLink}>
               Inicia sesión
             </Text>
           </Text>

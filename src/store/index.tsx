@@ -72,19 +72,34 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     let cancelled = false;
     api.getCurrentUser().then((user) => {
-      if (!cancelled) setCurrentUser(user);
+      if (!cancelled && user) {
+        setCurrentUser(user);
+      }
     });
     return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
-    if (currentUser) {
-      api.validateSession().catch(async () => {
-        await api.logoutUser();
-        setCurrentUser(null);
-      });
+    if (currentUser?.id) {
+      api.validateSession()
+        .then((freshUser: any) => {
+          if (freshUser?.id) {
+            setCurrentUser((prev) => (prev ? { ...prev, ...freshUser } : freshUser));
+          }
+        })
+        .catch(async (err: any) => {
+          // SOLO cerramos sesión si el servidor explícitamente responde 401 (token expirado o revocado)
+          const is401 = err?.status === 401 || err?.message?.includes('401') || err?.message === 'Autenticación requerida' || err?.message === 'Sesión inválida';
+          if (is401) {
+            console.warn('[RutiGo Auth] Token revocado o expirado por el servidor. Cerrando sesión.');
+            await api.logoutUser();
+            setCurrentUser(null);
+          } else {
+            console.log('[RutiGo Auth] No se pudo verificar sesión con el servidor (sin conexión o servidor en espera). Manteniendo sesión guardada localmente.');
+          }
+        });
     }
-  }, [currentUser]);
+  }, [currentUser?.id]);
 
   // Core Data
   const [routes, setRoutes] = useState<Route[]>([]);

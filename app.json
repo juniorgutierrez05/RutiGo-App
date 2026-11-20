@@ -41,6 +41,10 @@
         "projectId": "a8191abc-b55a-4fcf-b404-f6e651e16161"
       }
     },
-    "owner": "matthewsg"
+    "owner": "matthewsg",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/a8191abc-b55a-4fcf-b404-f6e651e16161"
+    }
   }
 }
