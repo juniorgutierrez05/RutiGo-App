@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { logEvent } from '../services/logger';
 import { Place, PlaceLocation } from '../types';
+
+const MapWebView = WebView as any;
 
 type LeafletMapViewProps = {
   places: Place[];
@@ -206,7 +208,7 @@ export function LeafletMapView({
 
   return (
     <View style={StyleSheet.absoluteFill}>
-      <WebView
+      <MapWebView
         ref={webViewRef}
         originWhitelist={['*']}
         source={{ html: htmlContent }}
@@ -214,7 +216,7 @@ export function LeafletMapView({
         javaScriptEnabled
         domStorageEnabled
         scrollEnabled={false}
-        onMessage={(event) => {
+        onMessage={(event: WebViewMessageEvent) => {
           try {
             const data = JSON.parse(event.nativeEvent.data);
             if (data.type === 'SELECT_PLACE') {
@@ -228,8 +230,8 @@ export function LeafletMapView({
             logEvent('warn', 'LEAFLET', 'Error procesando mensaje de WebView Leaflet', err instanceof Error ? err.message : String(err));
           }
         }}
-        onError={(err) => {
-          logEvent('error', 'LEAFLET', 'Error cargando WebView de mapa Leaflet', err.nativeEvent.description);
+        onError={(err: any) => {
+          logEvent('error', 'LEAFLET', 'Error cargando WebView de mapa Leaflet', err?.nativeEvent?.description || 'Error');
         }}
       />
     </View>
