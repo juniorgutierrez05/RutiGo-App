@@ -89,18 +89,38 @@ export function LeafletMapView({
     sendRouteToMap(routeCoords, showRoute);
   }, [showRoute, routeCoords]);
 
+  // Actualizar la posición del usuario cuando el GPS del dispositivo responda
+  useEffect(() => {
+    if (userLocation?.lat && userLocation?.lng && webViewRef.current) {
+      webViewRef.current.injectJavaScript(`
+        if (typeof window.updateUserLocation === 'function') {
+          window.updateUserLocation(${userLocation.lat}, ${userLocation.lng});
+        }
+        true;
+      `);
+    }
+  }, [userLocation]);
+
   const handleMapReady = () => {
     isMapLoadedRef.current = true;
     logEvent('info', 'LEAFLET', 'Motor de mapa Leaflet inicializado y listo');
-    // Sincronizar inmediatamente estado actual por si se definió antes del renderizado de la WebView
+    // Sincronizar ubicación de usuario, marcador activo y ruta
+    if (userLocation?.lat && userLocation?.lng) {
+      webViewRef.current?.injectJavaScript(`
+        if (typeof window.updateUserLocation === 'function') {
+          window.updateUserLocation(${userLocation.lat}, ${userLocation.lng});
+        }
+        true;
+      `);
+    }
     sendActivePlaceToMap(latestActivePlaceRef.current);
     sendRouteToMap(latestRouteCoordsRef.current, latestShowRouteRef.current);
     onReady?.();
   };
 
-  // Al abrir el mapa, siempre priorizar la ubicación real del usuario
-  const initialCenterLat = userLocation?.lat || activePlace?.location.lat || 10.9685;
-  const initialCenterLng = userLocation?.lng || activePlace?.location.lng || -74.7813;
+  // Al abrir el mapa, siempre priorizar estrictamente la ubicación del dispositivo del usuario
+  const initialCenterLat = userLocation?.lat || 10.9685;
+  const initialCenterLng = userLocation?.lng || -74.7813;
   const initialActiveId = activePlace?.id || '';
 
   const htmlSource = useMemo(() => {
@@ -176,6 +196,7 @@ export function LeafletMapView({
     }).addTo(map);
 
     // Marcador de ubicación del usuario
+    let userMarker = null;
     if (userLoc && userLoc.lat) {
       const userIcon = L.divIcon({
         className: 'user-pin-wrap',
@@ -183,8 +204,24 @@ export function LeafletMapView({
         iconSize: [18, 18],
         iconAnchor: [9, 9]
       });
-      L.marker([userLoc.lat, userLoc.lng], { icon: userIcon }).addTo(map);
+      userMarker = L.marker([userLoc.lat, userLoc.lng], { icon: userIcon }).addTo(map);
     }
+
+    window.updateUserLocation = function(lat, lng) {
+      try {
+        if (userMarker) {
+          userMarker.setLatLng([lat, lng]);
+        } else {
+          const userIcon = L.divIcon({
+            className: 'user-pin-wrap',
+            html: '<div class="user-pin"></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+          });
+          userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
+        }
+      } catch (e) {}
+    };
 
     // Marcadores de atractivos turísticos
     places.forEach(p => {

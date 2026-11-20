@@ -93,8 +93,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   // Selections
-  const [selectedRouteId, setSelectedRouteId] = useState<string | null>('route_usiacuri');
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>('place_usiacuri_murales');
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<CategoryType>('gastronomia');
 
   // Search
@@ -167,6 +167,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   ) => {
     if (params?.routeId) setSelectedRouteId(params.routeId);
     if (params?.placeId) setSelectedPlaceId(params.placeId);
+    else if (screen === 'interactive_map') setSelectedPlaceId(null);
     if (params?.category) setActiveCategory(params.category);
 
     setScreenHistory((prev) => {
@@ -306,8 +307,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const unreadNotifsCount = notifications.filter((n) => !n.read).length;
 
-  const selectedRoute = routes.find((r) => r.id === selectedRouteId) || routes[0] || null;
-  const selectedPlace = places.find((p) => p.id === selectedPlaceId) || places[0] || null;
+  const selectedRoute = selectedRouteId ? routes.find((r) => r.id === selectedRouteId) || routes[0] || null : routes[0] || null;
+  const selectedPlace = selectedPlaceId ? places.find((p) => p.id === selectedPlaceId) || null : null;
 
   return (
     <AppContext.Provider

@@ -41,6 +41,13 @@ export function InteractiveMapScreen() {
   }, []);
 
   useEffect(() => {
+    // Cuando el GPS del dispositivo actualice la ubicación real, centrar inmediatamente en el usuario
+    if (!active && userLocation?.lat && mapRef.current) {
+      mapRef.current.centerOn(userLocation.lat, userLocation.lng, 14);
+    }
+  }, [userLocation]);
+
+  useEffect(() => {
     setShowRoute(false);
     setRouteCoords([]);
     setRouteInfo(null);
