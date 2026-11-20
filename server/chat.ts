@@ -84,14 +84,13 @@ export async function getChatDiagnostic() {
     listModelsError = e.message;
   }
 
-  // 2. Probar generateContent con los modelos candidatos
+  // 2. Probar generateContent con los modelos candidatos modernos
   const candidates = [
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-latest',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-exp',
-    'gemini-pro',
-    'gemini-1.5-pro',
+    'gemini-2.5-flash',
+    'gemini-flash-latest',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-pro',
+    'gemini-3.8-flash',
   ];
 
   const results: any[] = [];
