@@ -57,7 +57,6 @@ export function NotificationsScreen() {
     markNotificationRead,
     markAllNotificationsRead,
     clearNotifications,
-    sendTestNotification,
     unreadNotifsCount,
   } = useApp();
   const insets = useSafeAreaInsets();
@@ -172,11 +171,6 @@ export function NotificationsScreen() {
               </Pressable>
             );
           })}
-
-          <Pressable style={styles.testBtn} onPress={sendTestNotification}>
-            <Ionicons name="notifications-outline" size={16} color="#6B7280" />
-            <Text style={styles.testBtnText}>Enviar notificación de prueba al teléfono</Text>
-          </Pressable>
         </View>
       ) : (
         /* Estado Vacío */
@@ -188,11 +182,6 @@ export function NotificationsScreen() {
           <Text style={styles.emptySub}>
             Aquí recibirás avisos sobre tus lugares favoritos, nuevas rutas por el Atlántico y sugerencias de fin de semana.
           </Text>
-
-          <Pressable style={styles.emptyActionBtn} onPress={sendTestNotification}>
-            <Ionicons name="paper-plane-outline" size={18} color="#FFFFFF" />
-            <Text style={styles.emptyActionBtnText}>Probar notificación del sistema</Text>
-          </Pressable>
         </View>
       )}
     </ScrollView>
@@ -329,23 +318,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E60124',
     marginTop: 6,
   },
-  testBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 14,
-    marginTop: 10,
-    borderRadius: 12,
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  testBtnText: {
-    color: '#6B7280',
-    fontSize: 12.5,
-    fontWeight: '700',
-  },
   emptyWrap: {
     paddingVertical: 60,
     alignItems: 'center',
@@ -372,25 +344,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
-    marginBottom: 24,
-  },
-  emptyActionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#E60124',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 14,
-    shadowColor: '#E60124',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  emptyActionBtnText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800',
   },
 });
