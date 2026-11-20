@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const configuredApiUrl =
   (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) ||
-  'https://app-d50c9e72-22b8-450f-ac61-2dd77700dfeb.cleverapps.io';
+  'https://rutigo-api.onrender.com';
 const API_URL = configuredApiUrl.replace(/\/$/, '');
 
 const USER_KEY = 'rutigo_user';
@@ -45,7 +45,7 @@ async function saveSession(data: AuthApiResponse): Promise<User> {
   return data.user;
 }
 
-async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 12000): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, timeoutMs = 35000): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
   const authToken = await getToken();
@@ -191,3 +191,18 @@ export async function deletePlace(id: number): Promise<void> { await request(`/a
 export async function createRoute(input: RouteInput): Promise<number> { return (await request<{ id: number }>('/api/admin/routes', { method: 'POST', body: JSON.stringify(input) })).id; }
 export async function updateRoute(id: number, input: RouteInput): Promise<void> { await request(`/api/admin/routes/${id}`, { method: 'PATCH', body: JSON.stringify(input) }); }
 export async function deleteRoute(id: number): Promise<void> { await request(`/api/admin/routes/${id}`, { method: 'DELETE' }); }
+
+export async function pingServerHealth(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(`${API_URL}/api/health`, {
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' },
+    });
+    clearTimeout(timer);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

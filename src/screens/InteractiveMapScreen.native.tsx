@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, Text, View } 
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LeafletMapView } from '../components/LeafletMapView.native';
-import { getCurrentCoordinates } from '../services/locationService';
+import { getCurrentCoordinates, openExternalNavigation } from '../services/locationService';
 import { logEvent } from '../services/logger';
 import { useApp } from '../store';
 import { Place } from '../types';
@@ -117,10 +117,10 @@ export function InteractiveMapScreen() {
         logEvent('warn', 'ROUTE', `No se pudo obtener ruta OSRM hacia ${active.name}`);
         Alert.alert(
           'Aviso de ruta',
-          'No se pudo conectar al servidor de navegación para trazar las calles. Puedes iniciar la navegación directa en Google Maps.',
+          'No se pudo conectar al servidor de navegación para trazar las calles. Puedes iniciar la navegación directa en tu app de GPS.',
           [
             { text: 'Cancelar', style: 'cancel' },
-            { text: 'Abrir Google Maps', onPress: openExternalGoogleMaps },
+            { text: 'Abrir GPS', onPress: openExternalGps },
           ]
         );
       }
@@ -128,10 +128,10 @@ export function InteractiveMapScreen() {
       logEvent('error', 'ROUTE', `Error al calcular ruta hacia ${active.name}`, err instanceof Error ? err.message : String(err));
       Alert.alert(
         'Error',
-        'Ocurrió un problema obteniendo la ruta. Puedes usar Google Maps directamente.',
+        'Ocurrió un problema obteniendo la ruta. Puedes usar tu app de GPS directamente.',
         [
           { text: 'Cancelar', style: 'cancel' },
-          { text: 'Abrir Google Maps', onPress: openExternalGoogleMaps },
+          { text: 'Abrir GPS', onPress: openExternalGps },
         ]
       );
     } finally {
@@ -139,16 +139,10 @@ export function InteractiveMapScreen() {
     }
   };
 
-  const openExternalGoogleMaps = () => {
+  const openExternalGps = () => {
     if (!active) return;
-    const { lat, lng } = active.location;
-    const label = encodeURIComponent(active.name);
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}&travelmode=driving`;
-    logEvent('info', 'MAP', `Abriendo navegación externa en Google Maps para ${active.name}`);
-    Linking.openURL(url).catch(() => {
-      logEvent('error', 'MAP', 'Fallo al abrir Google Maps externo');
-      Alert.alert('Error', 'No se pudo abrir Google Maps en el dispositivo.');
-    });
+    logEvent('info', 'MAP', `Abriendo navegación externa GPS para ${active.name}`);
+    openExternalNavigation(active.location.lat, active.location.lng, active.name);
   };
 
   const centerOnUser = () => {
@@ -224,11 +218,11 @@ export function InteractiveMapScreen() {
 
             <Pressable
               style={[styles.button, styles.mapsButton]}
-              onPress={openExternalGoogleMaps}
+              onPress={openExternalGps}
             >
               <View style={styles.mapsBtnRow}>
-                <Text style={styles.mapsButtonText}>Google Maps</Text>
-                <Ionicons name="open-outline" size={14} color="#00AEB7" />
+                <Text style={styles.mapsButtonText}>GPS Externo</Text>
+                <Ionicons name="navigate-outline" size={14} color="#00AEB7" />
               </View>
             </Pressable>
           </View>

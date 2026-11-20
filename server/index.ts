@@ -343,4 +343,22 @@ app.delete('/api/admin/routes/:id', requireAuth, requireAdmin, async (request: A
 
 app.listen(port, () => {
   console.log(`RutiGo API escuchando en http://localhost:${port}`);
+
+  // Servicio Keep-Alive para Render (Previene la suspensión por inactividad de 15 min en el plan Free)
+  const publicApiUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_API_URL || 'https://rutigo-api.onrender.com';
+  if (process.env.NODE_ENV === 'production' || process.env.RENDER_EXTERNAL_URL) {
+    const PING_INTERVAL_MS = 12 * 60 * 1000; // Cada 12 minutos
+    setInterval(async () => {
+      try {
+        const pingUrl = `${publicApiUrl.replace(/\/$/, '')}/api/health`;
+        const res = await fetch(pingUrl, { headers: { 'User-Agent': 'RutiGo-Internal-KeepAlive/1.0' } });
+        if (res.ok) {
+          console.log(`[Keep-Alive] Heartbeat exitoso a ${pingUrl} - ${new Date().toISOString()}`);
+        }
+      } catch (err: any) {
+        console.warn(`[Keep-Alive] Aviso: fallo en ping automático: ${err?.message}`);
+      }
+    }, PING_INTERVAL_MS);
+    console.log(`[Keep-Alive] Monitor de actividad activo cada 12 min apuntando a: ${publicApiUrl}`);
+  }
 });

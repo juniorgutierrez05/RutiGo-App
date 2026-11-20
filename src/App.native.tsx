@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProvider } from './store';
 import { NativeRouter } from './NativeRouter';
 import { StatusBarScrim } from './components/StatusBarScrim.native';
+import { ServerStatusBanner } from './components/ServerStatusBanner.native';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
       <NavigationBar style="light" />
       <AppProvider>
         <NativeRouter />
+        <ServerStatusBanner />
         <StatusBarScrim />
       </AppProvider>
     </SafeAreaProvider>

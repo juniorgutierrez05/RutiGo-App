@@ -55,6 +55,7 @@ interface AppContextType {
   markNotificationRead: (id: string) => Promise<void>;
   unreadNotifsCount: number;
   isLoading: boolean;
+  isServerWaking: boolean;
   refreshData: () => Promise<void>;
 }
 
@@ -110,9 +111,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [userLocation, setUserLocation] = useState<PlaceLocation>(ATLANTICO_MUNICIPALITIES['Puerto Colombia']);
   const [locationName, setLocationName] = useState<string>('Puerto Colombia');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isServerWaking, setIsServerWaking] = useState<boolean>(false);
 
   const refreshData = useCallback(async () => {
     setIsLoading(true);
+    // Si la carga tarda más de 2.2 segundos (Cold start de Render), avisamos en UI de forma no intrusiva
+    const wakeTimer = setTimeout(() => {
+      setIsServerWaking(true);
+    }, 2200);
+
     try {
       const [allRoutes, allPlaces, allReviews, allNotifs] = await Promise.all([
         api.getRoutes(),
@@ -127,9 +134,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {
       console.warn('Error refreshing data:', e);
     } finally {
+      clearTimeout(wakeTimer);
+      setIsServerWaking(false);
       setIsLoading(false);
     }
   }, [currentUser]);
+
+  // Client Keep-Alive Heartbeat: cada 10 min mientras la app esté abierta para evitar cold start de Render
+  useEffect(() => {
+    const keepAliveTimer = setInterval(() => {
+      api.pingServerHealth();
+    }, 10 * 60 * 1000);
+    return () => clearInterval(keepAliveTimer);
+  }, []);
 
   // Initial fetch
   useEffect(() => {
@@ -330,6 +347,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         markNotificationRead,
         unreadNotifsCount,
         isLoading,
+        isServerWaking,
         refreshData,
       }}
     >

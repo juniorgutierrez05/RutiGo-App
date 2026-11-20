@@ -6,10 +6,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { Button } from '../components/Button.native';
 import { Card } from '../components/Card.native';
+import { openExternalNavigation } from '../services/locationService';
 
 export function RouteDetailScreen() {
-  const { selectedRoute, navigateTo, goBack, isFavorite, toggleFavorite } = useApp();
+  const { selectedRoute, places, navigateTo, goBack, isFavorite, toggleFavorite } = useApp();
   const insets = useSafeAreaInsets();
+
+  const firstPlace = selectedRoute?.placeIds?.[0]
+    ? places.find((p) => p.id === String(selectedRoute.placeIds[0]))
+    : null;
 
   if (!selectedRoute) {
     return (
@@ -64,12 +69,35 @@ export function RouteDetailScreen() {
       </Card>
 
       <View style={styles.actions}>
-        <Button fullWidth onPress={() => navigateTo('explore_category', { category: selectedRoute.category })}>
+        {firstPlace && (
+          <Button
+            fullWidth
+            onPress={() =>
+              openExternalNavigation(
+                firstPlace.location.lat,
+                firstPlace.location.lng,
+                `Inicio de ${selectedRoute.name} (${firstPlace.name})`
+              )
+            }
+          >
+            Cómo llegar al inicio (GPS)
+          </Button>
+        )}
+        {firstPlace && (
+          <Button
+            fullWidth
+            variant="outline"
+            onPress={() => navigateTo('interactive_map', { placeId: firstPlace.id })}
+          >
+            Ver ruta en mapa de RutiGo
+          </Button>
+        )}
+        <Button fullWidth variant="outline" onPress={() => navigateTo('explore_category', { category: selectedRoute.category })}>
           Ver lugares de la ruta
         </Button>
         <Button
           fullWidth
-          variant="outline"
+          variant="ghost"
           onPress={() => toggleFavorite('route', selectedRoute.id)}
         >
           {isFavorite('route', selectedRoute.id) ? 'Quitar de guardados' : 'Guardar ruta'}

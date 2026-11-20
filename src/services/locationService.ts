@@ -4,6 +4,7 @@
  */
 import { PlaceLocation } from '../types';
 import * as Location from 'expo-location';
+import { Alert, Linking, Platform } from 'react-native';
 
 export const ATLANTICO_MUNICIPALITIES: Record<string, PlaceLocation> = {
   'Puerto Colombia': { lat: 10.9882, lng: -74.9554 },
@@ -86,4 +87,55 @@ export function getCurrentCoordinates(): Promise<PlaceLocation> {
         .catch(() => ATLANTICO_MUNICIPALITIES['Puerto Colombia']);
     })
     .catch(() => ATLANTICO_MUNICIPALITIES['Puerto Colombia']);
+}
+
+/**
+ * Opens turn-by-turn navigation in external map apps (Google Maps, Waze, Apple Maps)
+ */
+export function openExternalNavigation(lat: number, lng: number, placeName: string) {
+  const encodedName = encodeURIComponent(placeName);
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${encodedName}`;
+  const wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+  const appleMapsUrl = `http://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+
+  const buttons: Array<{ text: string; onPress?: () => void; style?: 'default' | 'cancel' | 'destructive' }> = [
+    {
+      text: 'Google Maps',
+      onPress: () => {
+        Linking.openURL(googleMapsUrl).catch(() => {
+          Alert.alert('Error', 'No se pudo abrir Google Maps en este dispositivo.');
+        });
+      },
+    },
+    {
+      text: 'Waze',
+      onPress: () => {
+        Linking.openURL(wazeUrl).catch(() => {
+          Linking.openURL(googleMapsUrl);
+        });
+      },
+    },
+  ];
+
+  if (Platform.OS === 'ios') {
+    buttons.push({
+      text: 'Apple Maps',
+      onPress: () => {
+        Linking.openURL(appleMapsUrl).catch(() => {
+          Linking.openURL(googleMapsUrl);
+        });
+      },
+    });
+  }
+
+  buttons.push({
+    text: 'Cancelar',
+    style: 'cancel',
+  });
+
+  Alert.alert(
+    'Iniciar Navegación GPS',
+    `¿Con qué aplicación deseas conducir hacia "${placeName}"?`,
+    buttons
+  );
 }

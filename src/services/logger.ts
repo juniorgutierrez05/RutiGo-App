@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 
 const configuredApiUrl =
   (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_API_URL) ||
-  'http://localhost:3001';
+  'https://rutigo-api.onrender.com';
 const API_URL = configuredApiUrl.replace(/\/$/, '');
 
 type LogLevel = 'info' | 'warn' | 'error';
