@@ -86,11 +86,11 @@ export async function getChatDiagnostic() {
 
   // 2. Probar generateContent con los modelos candidatos modernos
   const candidates = [
-    'gemini-2.5-flash',
     'gemini-flash-latest',
-    'gemini-2.5-flash-lite',
-    'gemini-2.5-pro',
     'gemini-3.8-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
   ];
 
   const results: any[] = [];
@@ -150,16 +150,16 @@ export async function handleChatMessage(
   }
 
   const apiKey = getCleanApiKey();
-  const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const preferredModel = process.env.GEMINI_MODEL || 'gemini-flash-latest';
   const modelsToTry = Array.from(
     new Set([
       preferredModel,
-      'gemini-2.5-flash',
       'gemini-flash-latest',
+      'gemini-3.8-flash',
       'gemini-2.5-flash-lite',
+      'gemini-2.5-flash',
       'gemini-2.5-pro',
       'gemini-pro-latest',
-      'gemini-1.5-flash',
     ])
   );
 
