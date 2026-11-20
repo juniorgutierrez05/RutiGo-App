@@ -3,44 +3,39 @@ import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   registerBackgroundUpdateTask,
-  UPDATE_NOTIFICATION_CHANNEL_ID,
 } from './backgroundUpdateService';
+import {
+  initializeNotificationChannels,
+  scheduleWeekendNotification,
+  triggerWelcomeNotification,
+} from './notificationService';
 
 const NOTIFICATIONS_ASKED_KEY = 'rutigo_notifications_permission_asked';
 
 /**
  * Solicita permisos de notificaciones al usuario en la primera apertura de la app.
- * Configura canales nativos en Android y activa la tarea en segundo plano.
+ * Configura canales nativos en Android y activa las tareas periódicas.
  */
 export async function checkAndRequestNotificationPermission(force = false): Promise<boolean> {
   if (Platform.OS === 'web') return true;
 
   try {
+    // 1. Siempre asegurar que los canales de Android estén creados en el SO
+    await initializeNotificationChannels();
+
     if (!force) {
       const alreadyAsked = await AsyncStorage.getItem(NOTIFICATIONS_ASKED_KEY);
       if (alreadyAsked === 'true') {
         const current = await Notifications.getPermissionsAsync();
         if (current.granted) {
-          // Asegurar que la tarea periódica de fondo esté activa
           await registerBackgroundUpdateTask();
+          await scheduleWeekendNotification();
           return true;
         }
       }
     }
 
     await AsyncStorage.setItem(NOTIFICATIONS_ASKED_KEY, 'true');
-
-    // 1. Configurar canal de notificaciones en Android
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync(UPDATE_NOTIFICATION_CHANNEL_ID, {
-        name: 'Actualizaciones de RutiGo',
-        description: 'Avisos sobre nuevas versiones de la app y contenido nuevo',
-        importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#E60124',
-        sound: 'default',
-      });
-    }
 
     // 2. Solicitar permiso al usuario con el diálogo oficial del sistema
     const permissionResponse = await Notifications.requestPermissionsAsync({
@@ -55,8 +50,10 @@ export async function checkAndRequestNotificationPermission(force = false): Prom
 
     if (isGranted) {
       console.log('[RutiGo Permissions] Permiso de notificaciones concedido por el usuario.');
-      // 3. Registrar la tarea de actualización en segundo plano
+      // 3. Activar tareas periódicas y avisos de bienvenida
       await registerBackgroundUpdateTask();
+      await scheduleWeekendNotification();
+      await triggerWelcomeNotification();
     } else {
       console.log('[RutiGo Permissions] Permiso de notificaciones no concedido o pospuesto.');
     }

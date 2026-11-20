@@ -4,9 +4,19 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, Route, Place, Review, NotificationItem, CategoryType, ScreenName, PlaceLocation } from '../types';
 import * as api from '../services/api';
 import { getCurrentCoordinates, ATLANTICO_MUNICIPALITIES } from '../services/locationService';
+import {
+  getLocalNotifications,
+  notifyFavoriteAdded,
+  notifyReviewAdded,
+  triggerWelcomeNotification,
+  markAllLocalNotificationsRead,
+  clearAllLocalNotifications,
+  sendTestSystemNotification,
+} from '../services/notificationService';
 
 interface AppContextType {
   // Navigation
@@ -28,6 +38,11 @@ interface AppContextType {
   reviews: Review[];
   notifications: NotificationItem[];
   addNotification?: (title: string, body: string) => void;
+  markNotificationRead: (id: string) => Promise<void>;
+  markAllNotificationsRead: () => Promise<void>;
+  clearNotifications: () => Promise<void>;
+  sendTestNotification: () => Promise<void>;
+  unreadNotifsCount: number;
   selectedRoute: Route | null;
   selectedPlace: Place | null;
   activeCategory: CategoryType;
@@ -53,8 +68,6 @@ interface AppContextType {
   addReview: (placeId: string, rating: number, comment: string, photoUrl?: string) => Promise<void>;
   editReview: (reviewId: string, rating: number, comment: string) => Promise<void>;
   deleteReview: (reviewId: string) => Promise<void>;
-  markNotificationRead: (id: string) => Promise<void>;
-  unreadNotifsCount: number;
   isLoading: boolean;
   isServerWaking: boolean;
   refreshData: () => Promise<void>;
@@ -137,16 +150,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, 2200);
 
     try {
-      const [allRoutes, allPlaces, allReviews, allNotifs] = await Promise.all([
+      const [allRoutes, allPlaces, allReviews, allNotifs, localNotifs] = await Promise.all([
         api.getRoutes(),
         api.getPlaces(),
         api.getReviews(),
         currentUser ? api.getNotifications() : Promise.resolve([]),
+        getLocalNotifications(),
       ]);
       setRoutes(allRoutes);
       setPlaces(allPlaces);
       setReviews(allReviews);
-      setNotifications(allNotifs);
+
+      const map = new Map<string, NotificationItem>();
+      [...allNotifs, ...localNotifs].forEach((n) => map.set(n.id, n));
+      const merged = Array.from(map.values()).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setNotifications(merged);
     } catch (e) {
       console.warn('Error refreshing data:', e);
     } finally {
@@ -225,18 +245,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const login = async (email: string, pass: string) => {
     const user = await api.loginWithEmail(email, pass);
     setCurrentUser(user);
+    await triggerWelcomeNotification();
     navigateTo(user.role === 'admin' ? 'admin' : 'home');
   };
 
   const loginGoogle = async (idToken: string) => {
     const user = await api.loginWithGoogle(idToken);
     setCurrentUser(user);
+    await triggerWelcomeNotification();
     navigateTo(user.role === 'admin' ? 'admin' : 'home');
   };
 
   const register = async (name: string, email: string, pass: string, homeCity: string) => {
     const user = await api.registerWithEmail(name, email, pass, homeCity);
     setCurrentUser(user);
+    await triggerWelcomeNotification();
     navigateTo('home');
   };
 
@@ -252,8 +275,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       navigateTo('login');
       return;
     }
+    const willBeFavorite = type === 'route'
+      ? !currentUser.savedRoutes.includes(id)
+      : !currentUser.savedPlaces.includes(id);
+
     const updated = await api.toggleFavorite(type, id, currentUser);
     setCurrentUser(updated);
+
+    if (willBeFavorite) {
+      const name = type === 'place'
+        ? places.find((p) => p.id === id)?.name || 'Lugar turístico'
+        : routes.find((r) => r.id === id)?.name || 'Ruta turística';
+
+      const notif = await notifyFavoriteAdded(name, type, id);
+      setNotifications((prev) => [notif, ...prev.filter((n) => n.id !== notif.id)]);
+    }
   };
 
   const isFavorite = (type: 'route' | 'place', id: string): boolean => {
@@ -276,6 +312,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       photoUrl,
     });
     setReviews((prev) => [newRev, ...prev]);
+
+    const placeName = places.find((p) => p.id === placeId)?.name || 'Lugar turístico';
+    const notif = await notifyReviewAdded(placeName, rating, placeId);
+    setNotifications((prev) => [notif, ...prev.filter((n) => n.id !== notif.id)]);
 
     // Refresh places to get updated avgRating
     try {
@@ -317,8 +357,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Notifications
   const markNotificationRead = async (id: string) => {
-    await api.markNotificationAsRead(id);
+    if (!id.includes('-')) {
+      try {
+        await api.markNotificationAsRead(id);
+      } catch (e) {}
+    }
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    const local = await getLocalNotifications();
+    const updatedLocal = local.map((n) => (n.id === id ? { ...n, read: true } : n));
+    await AsyncStorage.setItem('rutigo_local_notifications_store_v2', JSON.stringify(updatedLocal));
+  };
+
+  const markAllNotificationsRead = async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    await markAllLocalNotificationsRead();
+  };
+
+  const clearNotifications = async () => {
+    setNotifications([]);
+    await clearAllLocalNotifications();
+  };
+
+  const sendTestNotification = async () => {
+    const item = await sendTestSystemNotification();
+    setNotifications((prev) => [item, ...prev.filter((n) => n.id !== item.id)]);
   };
 
   const addNotification = (title: string, body: string) => {
@@ -376,6 +438,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         editReview,
         deleteReview,
         markNotificationRead,
+        markAllNotificationsRead,
+        clearNotifications,
+        sendTestNotification,
         unreadNotifsCount,
         isLoading,
         isServerWaking,

@@ -75,10 +75,11 @@ export interface Review {
 export interface NotificationItem {
   id: string;
   userId: string;
-  type: 'new_route' | 'review_reply' | 'recommendation' | 'system';
+  type: 'new_route' | 'review_reply' | 'recommendation' | 'system' | 'favorite' | 'review' | 'weekend' | 'welcome';
   title: string;
   body: string;
   read: boolean;
+  relatedType?: 'place' | 'route' | 'review';
   relatedId?: string;
   createdAt: string;
 }

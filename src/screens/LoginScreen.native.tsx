@@ -102,12 +102,28 @@ export function LoginScreen() {
           </View>
         </Card>
 
-        <Pressable onPress={() => navigateTo('register')} hitSlop={6}>
-          <Text style={styles.link}>Crear una cuenta</Text>
-        </Pressable>
-        <Pressable onPress={() => navigateTo('home')} hitSlop={6}>
-          <Text style={styles.guest}>Explorar sin registrarme</Text>
-        </Pressable>
+        <View style={styles.footerWrap}>
+          <Pressable onPress={() => navigateTo('register')} hitSlop={8} style={styles.registerBtn}>
+            <Text style={styles.registerBtnText}>
+              ¿No tienes una cuenta? <Text style={styles.registerBtnHighlight}>Regístrate</Text>
+            </Text>
+          </Pressable>
+
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>o también</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <Pressable
+            onPress={() => navigateTo('home')}
+            hitSlop={8}
+            style={styles.guestButton}
+          >
+            <Ionicons name="compass-outline" size={18} color="#E60124" />
+            <Text style={styles.guestButtonText}>Explorar como invitado</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -125,6 +141,56 @@ const styles = StyleSheet.create({
   title: { color: '#1E1927', fontSize: 28, fontWeight: '900' },
   subtitle: { color: '#6B7280', fontSize: 14, lineHeight: 21, marginBottom: 8 },
   buttons: { gap: 12, marginTop: 6 },
-  link: { color: '#E60124', fontSize: 15, fontWeight: '800', textAlign: 'center', marginTop: 14 },
-  guest: { color: '#6B7280', fontSize: 13, textAlign: 'center', marginTop: 6 },
+  footerWrap: {
+    marginTop: 10,
+    alignItems: 'center',
+    gap: 12,
+  },
+  registerBtn: {
+    paddingVertical: 6,
+  },
+  registerBtnText: {
+    color: '#6B7280',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  registerBtnHighlight: {
+    color: '#E60124',
+    fontWeight: '800',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  dividerText: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  guestButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#FFF5F6',
+    borderWidth: 1.5,
+    borderColor: '#FED7DC',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    width: '100%',
+  },
+  guestButtonText: {
+    color: '#E60124',
+    fontSize: 14,
+    fontWeight: '800',
+  },
 });

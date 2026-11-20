@@ -25,15 +25,16 @@ export function SplashScreen() {
         return;
       }
 
-      // 2. Si no hay sesión, comprobamos si ya pasó el onboarding anteriormente
+      // 2. Si no hay sesión activa guardada:
       const onboardingDone = await AsyncStorage.getItem('rutigo_onboarding_completed');
       if (onboardingDone) {
-        navigateTo('home');
+        // Enviar a login (donde el usuario puede iniciar sesión, registrarse o explorar como invitado)
+        navigateTo('login');
       } else {
         navigateTo('onboarding');
       }
     } catch {
-      navigateTo('home');
+      navigateTo('login');
     }
   }, [currentUser, navigateTo]);
 

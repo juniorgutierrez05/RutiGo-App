@@ -132,7 +132,19 @@ export async function registerLocal(input: z.infer<typeof localRegisterSchema>) 
      VALUES (?, ?, ?, 'local', NULLIF(?, ''))`,
     [input.name.trim(), email, passwordHash, input.homeCity?.trim() || '']
   );
-  return toAuthResponse(await getUserById(Number((result as { insertId: number }).insertId)));
+  const newUserId = Number((result as { insertId: number }).insertId);
+
+  try {
+    await pool.execute(
+      `INSERT INTO notifications (user_id, type, title, body)
+       VALUES (?, 'recommendation', '🎉 ¡Bienvenido a RutiGo!', 'Tu cuenta ha sido creada exitosamente. Comienza a explorar centros comerciales, rutas y playas del Atlántico.')`,
+      [newUserId]
+    );
+  } catch (notifErr) {
+    console.warn('[RutiGo Auth] Error creando notificación de bienvenida:', notifErr);
+  }
+
+  return toAuthResponse(await getUserById(newUserId));
 }
 
 export async function loginLocal(input: z.infer<typeof localLoginSchema>) {

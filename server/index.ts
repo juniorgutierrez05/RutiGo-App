@@ -285,6 +285,20 @@ app.post('/api/reviews', requireAuth, async (request: AuthenticatedRequest, resp
       [parsed.data.routeId]
     );
   }
+
+  // Guardar notificación de agradecimiento por la reseña
+  try {
+    const relatedType = parsed.data.placeId ? 'place' : 'route';
+    const relatedId = parsed.data.placeId || parsed.data.routeId;
+    await pool.execute(
+      `INSERT INTO notifications (user_id, type, title, body, related_type, related_id)
+       VALUES (?, 'recommendation', '⭐ ¡Gracias por tu reseña!', 'Tu calificación y opinión se han publicado exitosamente en la comunidad.', ?, ?)`,
+      [request.user!.id, relatedType, relatedId]
+    );
+  } catch (notifErr) {
+    console.warn('[RutiGo Reviews] Error registrando notificación de reseña:', notifErr);
+  }
+
   return response.status(201).json({
     id: reviewId,
     user_id: request.user!.id,

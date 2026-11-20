@@ -1,20 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
+import {
+  checkNotificationPermissions,
+  requestNotificationPermissions,
+} from '../services/notificationService';
 
 export function SettingsScreen() {
-  const { goBack, locationName, setLocationName } = useApp();
+  const { goBack, locationName, setLocationName, sendTestNotification } = useApp();
   const insets = useSafeAreaInsets();
+  const [hasNotifPermission, setHasNotifPermission] = useState<boolean | null>(null);
 
-  const setting = (label: string, value: string, action: () => void) => (
+  useEffect(() => {
+    checkNotificationPermissions().then((granted) => setHasNotifPermission(granted));
+  }, []);
+
+  const handleToggleNotifications = async () => {
+    const granted = await requestNotificationPermissions();
+    setHasNotifPermission(granted);
+    if (granted) {
+      Alert.alert(
+        '¡Notificaciones activadas!',
+        'RutiGo te avisará sobre nuevas rutas, lugares turísticos y planes de fin de semana.',
+        [
+          { text: 'Entendido' },
+          { text: 'Enviar prueba ahora', onPress: () => sendTestNotification() },
+        ]
+      );
+    } else {
+      Alert.alert(
+        'Permiso denegado',
+        'Para activar las notificaciones, abre los Ajustes de tu teléfono > Aplicaciones > RutiGo > Notificaciones y activa el interruptor.'
+      );
+    }
+  };
+
+  const handleSendTest = async () => {
+    try {
+      await sendTestNotification();
+      Alert.alert('¡Alerta enviada!', 'Revisa la barra superior de tu teléfono para ver la notificación del sistema.');
+    } catch {
+      Alert.alert('Error', 'No se pudo enviar la notificación de prueba.');
+    }
+  };
+
+  const setting = (label: string, value: string, action: () => void, icon?: keyof typeof Ionicons.glyphMap) => (
     <Pressable style={styles.item} onPress={action}>
       <View style={styles.itemInfo}>
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.value}>{value}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color="#C4B7B0" />
+      <Ionicons name={icon || 'chevron-forward'} size={18} color="#C4B7B0" />
     </Pressable>
   );
 
@@ -35,15 +73,32 @@ export function SettingsScreen() {
         <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Text style={styles.title}>Configuración</Text>
+
       {setting('Municipio base', locationName, () =>
         Alert.alert('Municipio base', 'Usa la ubicación actual para personalizar tus recomendaciones.')
       )}
-      {setting('Notificaciones', 'Activadas', () =>
-        Alert.alert('Notificaciones', 'Las notificaciones están activadas.')
+
+      {setting(
+        'Notificaciones del sistema',
+        hasNotifPermission === null
+          ? 'Comprobando...'
+          : hasNotifPermission
+          ? 'Permitidas (Activas)'
+          : 'Desactivadas (Toca para activar)',
+        handleToggleNotifications
       )}
-      {setting('Ubicación', 'Permitir GPS', () => setLocationName('Puerto Colombia'))}
+
+      {setting(
+        'Probar notificación del sistema',
+        'Enviar una notificación de prueba a la barra de estado',
+        handleSendTest,
+        'paper-plane-outline'
+      )}
+
+      {setting('Ubicación GPS', 'Permitir GPS', () => setLocationName('Puerto Colombia'))}
+
       {setting('Privacidad', 'Tus datos están protegidos', () =>
-        Alert.alert('Privacidad', 'RutiGo solo utiliza tu ubicación para calcular distancias.')
+        Alert.alert('Privacidad', 'RutiGo solo utiliza tu ubicación para calcular distancias y mostrar lugares turísticos cercanos.')
       )}
     </ScrollView>
   );
@@ -74,5 +129,4 @@ const styles = StyleSheet.create({
   itemInfo: { flex: 1 },
   label: { color: '#1E1927', fontSize: 15, fontWeight: '800' },
   value: { color: '#806F69', fontSize: 12, marginTop: 4 },
-  arrow: { color: '#E60124', fontSize: 22, marginTop: -2 },
 });
