@@ -13,27 +13,31 @@ export const theme = {
   isIOS: Platform.OS === 'ios',
 
   colors: {
-    // Colores principales
-    primary: '#FF7A59',
+    // Colores oficiales RutiGo
+    primary: '#E60124',
     onPrimary: '#FFFFFF',
-    primaryContainer: isAndroid ? '#FFDBD2' : '#FFEBE3',
-    onPrimaryContainer: isAndroid ? '#3B0901' : '#1E1927',
+    primaryContainer: isAndroid ? '#FDE8EA' : '#FFF0F2',
+    onPrimaryContainer: '#B8001D',
 
-    secondary: '#00AEB7',
+    secondary: '#5DB872',
     onSecondary: '#FFFFFF',
-    secondaryContainer: isAndroid ? '#D2F7F9' : '#E5FAF8',
-    onSecondaryContainer: isAndroid ? '#00363D' : '#006E73',
+    secondaryContainer: isAndroid ? '#EEF8F1' : '#F4FAF6',
+    onSecondaryContainer: '#2D753E',
 
-    // Superficies y fondos
-    background: '#FFFCF8',
+    tertiary: '#FFD200',
+    onTertiary: '#1E1927',
+    tertiaryContainer: '#FFFBE6',
+
+    // Superficies y fondos: 100% fondo blanco oficial
+    background: '#FFFFFF',
     surface: '#FFFFFF',
-    surfaceVariant: isAndroid ? '#F7EEE9' : '#FFF9F5',
+    surfaceVariant: isAndroid ? '#FAFAFA' : '#FFFFFF',
     onSurface: '#1E1927',
-    onSurfaceVariant: '#806F69',
+    onSurfaceVariant: '#6B7280',
 
     // Bordes
-    outline: isAndroid ? '#EADBD3' : '#F0E4DC',
-    outlineVariant: '#F7ECE6',
+    outline: isAndroid ? '#E5E7EB' : '#F3F4F6',
+    outlineVariant: '#F3F4F6',
   },
 
   shapes: {

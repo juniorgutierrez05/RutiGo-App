@@ -27,13 +27,18 @@ export function ExploreCategoryScreen() {
     <View style={styles.headerWrap}>
       <View style={styles.header}>
         <Pressable onPress={goBack} hitSlop={8}>
-          <Ionicons name="chevron-back" size={28} color="#FF7A59" />
+          <Ionicons name="chevron-back" size={28} color="#E60124" />
         </Pressable>
         <Text style={styles.title}>Explorar</Text>
       </View>
       <Text style={styles.subtitle}>Encuentra tu próxima experiencia en el Atlántico.</Text>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.chipsScroll}
+        contentContainerStyle={styles.chips}
+      >
         {categories.map((category) => (
           <Chip
             key={category}
@@ -102,8 +107,8 @@ export function ExploreCategoryScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#FF7A59']}
-            tintColor="#FF7A59"
+            colors={['#E60124']}
+            tintColor="#E60124"
           />
         }
       />
@@ -113,35 +118,44 @@ export function ExploreCategoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
   headerWrap: { marginBottom: 6 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900' },
-  subtitle: { color: '#806F69', fontSize: 14, lineHeight: 21, marginTop: 4 },
-  chips: { gap: 8, paddingVertical: 14 },
-  count: { color: '#806F69', fontSize: 13, marginBottom: 12, fontWeight: '700' },
+  subtitle: { color: '#6B7280', fontSize: 14, lineHeight: 21, marginTop: 4 },
+  chipsScroll: {
+    marginHorizontal: -16,
+    paddingHorizontal: 0,
+    width: '100%',
+  },
+  chips: {
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  count: { color: '#6B7280', fontSize: 13, marginBottom: 12, fontWeight: '700' },
   card: {
     flexDirection: 'row',
     padding: 10,
     borderRadius: 18,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#F0F0F0',
     marginBottom: 12,
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 2,
   },
   image: { width: 95, height: 110, borderRadius: 14 },
   info: { flex: 1, paddingLeft: 12, justifyContent: 'center' },
-  municipality: { color: '#FF7A59', fontSize: 10, fontWeight: '900', textTransform: 'uppercase' },
+  municipality: { color: '#E60124', fontSize: 10, fontWeight: '900', textTransform: 'uppercase' },
   name: { color: '#1E1927', fontSize: 16, fontWeight: '900', marginTop: 3 },
-  description: { color: '#806F69', fontSize: 12, lineHeight: 17, marginTop: 3 },
+  description: { color: '#6B7280', fontSize: 12, lineHeight: 17, marginTop: 3 },
   meta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
-  distance: { color: '#00AEB7', fontSize: 11, fontWeight: '800' },
+  distance: { color: '#5DB872', fontSize: 11, fontWeight: '800' },
   emptyWrap: {
     paddingVertical: 48,
     alignItems: 'center',

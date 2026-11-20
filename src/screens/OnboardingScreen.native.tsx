@@ -11,7 +11,7 @@ const steps = [
     title: 'Explora los tesoros del\n',
     highlight: 'Atlántico Mágico',
     description: 'Descubre rutas artesanales en Usiacurí, atardeceres coloniales en Salgar y sabores autóctonos en Baranoa.',
-    image: IMAGES.mascot.iguanaSuitcase,
+    image: IMAGES.brand.officialMascot,
     badge: '◈ Cultura & Artesanías',
   },
   {
@@ -114,7 +114,7 @@ export function OnboardingScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#FFFCF8',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
@@ -124,19 +124,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   topPill: {
-    backgroundColor: '#FFF0EB',
+    backgroundColor: '#FDE8EA',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   topPillText: {
-    color: '#FF7A59',
+    color: '#E60124',
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 0.8,
   },
   skip: {
-    color: '#806F69',
+    color: '#6B7280',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -151,8 +151,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 24,
     borderWidth: 1.5,
-    borderColor: '#F0E4DC',
-    shadowColor: '#1E1927',
+    borderColor: '#ECECEC',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -161,15 +161,15 @@ const styles = StyleSheet.create({
   badge: {
     position: 'absolute',
     bottom: -12,
-    backgroundColor: '#FFF0EB',
-    color: '#006E73',
+    backgroundColor: '#EEF8F1',
+    color: '#5DB872',
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 7,
     fontWeight: '800',
     fontSize: 11,
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
   },
   title: {
     color: '#1E1927',
@@ -179,10 +179,10 @@ const styles = StyleSheet.create({
     lineHeight: 31,
   },
   highlight: {
-    color: '#FF7A59',
+    color: '#E60124',
   },
   description: {
-    color: '#806F69',
+    color: '#6B7280',
     fontSize: 14,
     lineHeight: 21,
     textAlign: 'center',
@@ -202,20 +202,20 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#E0D5CF',
+    backgroundColor: '#E5E7EB',
   },
   activeDot: {
     width: 26,
-    backgroundColor: '#FF7A59',
+    backgroundColor: '#E60124',
   },
   loginHint: {
-    color: '#806F69',
+    color: '#6B7280',
     textAlign: 'center',
     fontSize: 13,
     marginTop: 12,
   },
   loginLink: {
-    color: '#FF7A59',
+    color: '#E60124',
     fontWeight: '800',
   },
 });

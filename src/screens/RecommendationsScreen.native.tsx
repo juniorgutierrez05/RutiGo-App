@@ -22,7 +22,7 @@ export function RecommendationsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Ionicons name="chevron-back" size={20} color="#E60124" />
         <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Text style={styles.eyebrow}>INSPIRACIÓN LOCAL</Text>
@@ -54,19 +54,19 @@ export function RecommendationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
-  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
-  eyebrow: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1.4 },
+  back: { color: '#E60124', fontSize: 16, fontWeight: '800' },
+  eyebrow: { color: '#E60124', fontSize: 11, fontWeight: '900', letterSpacing: 1.4 },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900', marginTop: 4 },
-  subtitle: { color: '#806F69', fontSize: 14, marginTop: 4, marginBottom: 18 },
+  subtitle: { color: '#6B7280', fontSize: 14, marginTop: 4, marginBottom: 18 },
   card: {
     height: 180,
     borderRadius: 22,
     overflow: 'hidden',
     marginBottom: 14,
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: '100%' },
   shade: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.36)' },
   overlay: { position: 'absolute', bottom: 14, left: 16, right: 16 },
-  tag: { color: '#FFD6A5', fontSize: 10, fontWeight: '900' },
+  tag: { color: '#FFD200', fontSize: 10, fontWeight: '900' },
   name: { color: '#FFFFFF', fontSize: 18, fontWeight: '900', marginTop: 3 },
   meta: { color: '#FFFFFF', fontSize: 12, marginTop: 3, opacity: 0.9 },
 });

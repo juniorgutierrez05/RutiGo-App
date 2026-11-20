@@ -34,13 +34,13 @@ export function FavoritesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#FF7A59']}
-            tintColor="#FF7A59"
+            colors={['#E60124']}
+            tintColor="#E60124"
           />
         }
       >
         <Text style={styles.eyebrow}>MI COLECCIÓN</Text>
-        <Text style={styles.title}>Guardados</Text>
+        <Text style={styles.title}>Mis favoritos</Text>
 
         {!currentUser ? (
           <View style={styles.emptyWrap}>
@@ -102,9 +102,9 @@ export function FavoritesScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
-  eyebrow: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1.4 },
+  eyebrow: { color: '#E60124', fontSize: 11, fontWeight: '900', letterSpacing: 1.4 },
   title: { color: '#1E1927', fontSize: 28, fontWeight: '900', marginTop: 4 },
   section: { color: '#1E1927', fontSize: 17, fontWeight: '900', marginTop: 22, marginBottom: 10 },
   item: {
@@ -115,28 +115,28 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     marginBottom: 10,
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 2,
   },
   image: { width: 62, height: 62, borderRadius: 12 },
   info: { flex: 1 },
   name: { color: '#1E1927', fontSize: 15, fontWeight: '900' },
-  muted: { color: '#806F69', fontSize: 13, marginTop: 4 },
+  muted: { color: '#6B7280', fontSize: 13, marginTop: 4 },
   route: {
     backgroundColor: '#FFFFFF',
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     marginBottom: 10,
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -147,10 +147,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   emptyText: { color: '#1E1927', fontSize: 16, fontWeight: '800', marginTop: 10 },
-  emptySubText: { color: '#806F69', fontSize: 13, textAlign: 'center', paddingHorizontal: 20 },
+  emptySubText: { color: '#6B7280', fontSize: 13, textAlign: 'center', paddingHorizontal: 20 },
   loginBtn: {
     marginTop: 14,
-    backgroundColor: '#FF7A59',
+    backgroundColor: '#E60124',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,

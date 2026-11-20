@@ -43,9 +43,8 @@ export function SplashScreen() {
 
       <View style={styles.center}>
         <View style={[styles.art, { width: artSize, height: artSize }]}>
-          <Text style={styles.sun}>☀</Text>
           <Image
-            source={IMAGES.mascot.iguanaMain}
+            source={IMAGES.brand.officialMascot}
             style={{ width: mascotSize, height: mascotSize }}
             contentFit="contain"
             transition={200}
@@ -53,9 +52,9 @@ export function SplashScreen() {
           />
         </View>
         <Text style={styles.logo}>
-          Ruti<Text style={styles.accent}>Go</Text>
+          RUTI<Text style={styles.accent}> GO</Text>
         </Text>
-        <Text style={styles.badge}>✓ Atlántico Mágico</Text>
+        <Text style={styles.badge}>★ Atlántico Mágico</Text>
       </View>
 
       <View style={styles.footer}>
@@ -72,7 +71,7 @@ export function SplashScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#F9F1FF',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
@@ -81,8 +80,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   pill: {
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    color: '#00696E',
+    backgroundColor: '#EEF8F1',
+    color: '#5DB872',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 20,
@@ -93,39 +92,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   art: {
-    borderRadius: 32,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderRadius: 36,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#1E1927',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.10,
+    shadowRadius: 14,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
   },
   sun: {
     position: 'absolute',
     zIndex: 2,
     right: 12,
     top: 10,
-    fontSize: 42,
+    fontSize: 36,
+    color: '#FFD200',
   },
   logo: {
-    color: '#1E1927',
-    fontSize: 42,
+    color: '#E60124',
+    fontSize: 40,
     fontWeight: '900',
     marginTop: 18,
+    letterSpacing: -0.5,
   },
   accent: {
-    color: '#FF7A59',
+    color: '#FFD200',
   },
   badge: {
     color: '#1E1927',
-    backgroundColor: '#EEE4F9',
+    backgroundColor: '#FFFBE6',
+    borderWidth: 1,
+    borderColor: '#FFD200',
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 18,
-    fontWeight: '800',
+    fontWeight: '900',
     marginTop: 8,
     fontSize: 12,
   },
@@ -136,23 +141,25 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F3F4F6',
     padding: 2,
+    overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    borderRadius: 5,
-    backgroundColor: '#FF7A59',
+    borderRadius: 4,
+    backgroundColor: '#E60124',
   },
   loading: {
-    color: '#806F69',
-    marginTop: 12,
-    fontWeight: '700',
+    color: '#E60124',
     fontSize: 13,
+    fontWeight: '800',
+    marginTop: 10,
   },
   cities: {
-    color: '#8B716B',
+    color: '#6B7280',
     fontSize: 11,
-    marginTop: 10,
+    fontWeight: '700',
+    marginTop: 4,
   },
 });

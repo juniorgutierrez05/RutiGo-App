@@ -43,7 +43,7 @@ export function ReviewsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Ionicons name="chevron-back" size={20} color="#E60124" />
         <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Text style={styles.title}>Reseñas</Text>
@@ -86,20 +86,20 @@ export function ReviewsScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
-  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
+  back: { color: '#E60124', fontSize: 16, fontWeight: '800' },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900' },
-  subtitle: { color: '#806F69', fontSize: 14, marginTop: 4, marginBottom: 18 },
+  subtitle: { color: '#6B7280', fontSize: 14, marginTop: 4, marginBottom: 18 },
   review: {
     padding: 15,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     backgroundColor: '#FFFFFF',
     marginBottom: 10,
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 4,
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   author: { color: '#1E1927', fontSize: 15, fontWeight: '900', marginBottom: 6 },
   comment: { color: '#58423C', fontSize: 14, lineHeight: 20, marginTop: 8 },
-  form: { padding: 16, borderRadius: 18, backgroundColor: '#FFF0EB', marginTop: 12 },
+  form: { padding: 16, borderRadius: 18, backgroundColor: '#FDE8EA', marginTop: 12 },
   formTitle: { color: '#1E1927', fontSize: 16, fontWeight: '900', marginBottom: 12 },
   input: {
     minHeight: 100,
@@ -118,15 +118,15 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     marginTop: 14,
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
   },
   button: {
-    backgroundColor: '#FF7A59',
+    backgroundColor: '#E60124',
     borderRadius: 14,
     alignItems: 'center',
     paddingVertical: 13,
     marginTop: 12,
-    shadowColor: '#FF7A59',
+    shadowColor: '#E60124',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 6,

@@ -115,15 +115,15 @@ export function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: {
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
     gap: 12,
   },
-  eyebrow: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1.5 },
+  eyebrow: { color: '#E60124', fontSize: 11, fontWeight: '900', letterSpacing: 1.5 },
   title: { color: '#1E1927', fontSize: 28, fontWeight: '900' },
-  subtitle: { color: '#806F69', fontSize: 14, lineHeight: 21, marginBottom: 8 },
-  link: { color: '#FF7A59', fontSize: 15, fontWeight: '800', textAlign: 'center', marginTop: 14 },
+  subtitle: { color: '#6B7280', fontSize: 14, lineHeight: 21, marginBottom: 8 },
+  link: { color: '#E60124', fontSize: 15, fontWeight: '800', textAlign: 'center', marginTop: 14 },
 });

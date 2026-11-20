@@ -15,10 +15,10 @@ type ChipProps = {
 };
 
 const categoryColors: Record<CategoryType, string> = {
-  gastronomia: '#FF7A59',
-  naturaleza: '#00AEB7',
-  cultura: '#7B61FF',
-  historia: '#CA9A00',
+  gastronomia: '#E60124',
+  naturaleza: '#5DB872',
+  cultura: '#E60124',
+  historia: '#FFD200',
 };
 
 export function Chip({
@@ -68,7 +68,12 @@ export function Chip({
           { transform: [{ scale: scaleAnim }] },
         ]}
       >
-        <Text style={[styles.text, selected && styles.selectedText]}>
+        <Text
+          style={[
+            styles.text,
+            selected && (category === 'historia' ? styles.selectedYellowText : styles.selectedText),
+          ]}
+        >
           {icon ? `${icon} ` : ''}
           {label}
           {count !== undefined ? ` (${count})` : ''}
@@ -86,7 +91,7 @@ export function Chip({
 const styles = StyleSheet.create({
   base: {
     borderRadius: theme.shapes.chip,
-    borderWidth: 1,
+    borderWidth: 1.5,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -94,17 +99,21 @@ const styles = StyleSheet.create({
   small: { minHeight: 36, paddingHorizontal: 14 },
   medium: { minHeight: 44, paddingHorizontal: 18 },
   unselected: {
-    backgroundColor: theme.isAndroid ? '#F7EEE9' : '#FFFFFF',
-    borderColor: theme.isAndroid ? '#EADBD3' : theme.colors.outline,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#ECECEC',
     ...theme.elevation.card,
   },
   text: {
-    color: theme.colors.onSurface,
+    color: '#1E1927',
     fontSize: 13,
     fontWeight: '800',
   },
   selectedText: {
     color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  selectedYellowText: {
+    color: '#1E1927',
     fontWeight: '900',
   },
   close: {

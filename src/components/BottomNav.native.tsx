@@ -12,19 +12,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../store';
 import { theme } from '../theme/expressiveTheme';
 
-type NavKey = 'home' | 'explore' | 'map' | 'saved' | 'profile';
+type NavKey = 'home' | 'explore' | 'map' | 'profile';
 
 const NAV_ITEMS: {
   key: NavKey;
   activeIcon: keyof typeof Ionicons.glyphMap;
   inactiveIcon: keyof typeof Ionicons.glyphMap;
   label: string;
-  target: 'home' | 'explore_category' | 'interactive_map' | 'favorites' | 'profile';
+  target: 'home' | 'explore_category' | 'interactive_map' | 'profile';
 }[] = [
   { key: 'home', activeIcon: 'home', inactiveIcon: 'home-outline', label: 'Inicio', target: 'home' },
   { key: 'explore', activeIcon: 'compass', inactiveIcon: 'compass-outline', label: 'Explorar', target: 'explore_category' },
   { key: 'map', activeIcon: 'map', inactiveIcon: 'map-outline', label: 'Mapa', target: 'interactive_map' },
-  { key: 'saved', activeIcon: 'heart', inactiveIcon: 'heart-outline', label: 'Guardados', target: 'favorites' },
   { key: 'profile', activeIcon: 'person', inactiveIcon: 'person-outline', label: 'Perfil', target: 'profile' },
 ];
 
@@ -39,9 +38,7 @@ export function BottomNav() {
   const active: NavKey =
     currentScreen === 'interactive_map' || currentScreen === 'nearby_routes'
       ? 'map'
-      : currentScreen === 'favorites'
-      ? 'saved'
-      : currentScreen === 'profile' || currentScreen === 'settings'
+      : currentScreen === 'profile' || currentScreen === 'settings' || currentScreen === 'favorites'
       ? 'profile'
       : currentScreen === 'explore_category' || currentScreen === 'search' || currentScreen === 'recommendations'
       ? 'explore'
@@ -133,7 +130,7 @@ export function BottomNav() {
                 <Ionicons
                   name={isCurrent ? activeIcon : inactiveIcon}
                   size={22}
-                  color={isCurrent ? (theme.isAndroid ? '#7C2106' : '#FF7A59') : '#806F69'}
+                  color={isCurrent ? '#E60124' : '#8A8A8A'}
                 />
               </Animated.View>
               <Text style={[styles.label, isCurrent && styles.activeLabel]}>{label}</Text>
@@ -156,19 +153,19 @@ const styles = StyleSheet.create({
   nav: {
     width: '100%',
     height: 68,
-    backgroundColor: theme.isAndroid ? '#FFFDFB' : '#FFFFFFF2',
+    backgroundColor: '#FFFFFF',
     borderRadius: 34,
     borderWidth: 1,
-    borderColor: theme.isAndroid ? '#F2E4DC' : '#F0E4DC',
+    borderColor: '#ECECEC',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 6,
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.14,
+    shadowOpacity: 0.10,
     shadowRadius: 16,
-    elevation: 10,
+    elevation: 8,
   },
   slidingPillContainer: {
     position: 'absolute',
@@ -180,10 +177,10 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   slidingPill: {
-    width: 58,
+    width: 62,
     height: 32,
     borderRadius: 16,
-    backgroundColor: theme.isAndroid ? '#FFDBD2' : '#FFEBE3',
+    backgroundColor: '#FDE8EA',
   },
   item: {
     flex: 1,
@@ -193,19 +190,19 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   pillSlot: {
-    width: 58,
+    width: 62,
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
-    color: '#806F69',
-    fontSize: 10.5,
+    color: '#8A8A8A',
+    fontSize: 11,
     fontWeight: '700',
     marginTop: 2,
   },
   activeLabel: {
-    color: theme.isAndroid ? '#7C2106' : '#FF7A59',
+    color: '#E60124',
     fontWeight: '900',
   },
 });

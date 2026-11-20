@@ -5,12 +5,12 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 interface StatusBarScrimProps {
   /**
-   * Color base del degradado. Por defecto el tono crema cálido de RutiGo '#FFFCF8'.
+   * Color base del degradado. Por defecto fondo blanco puro '#FFFFFF'.
    */
   baseColor?: string;
 }
 
-export function StatusBarScrim({ baseColor = '#FFFCF8' }: StatusBarScrimProps) {
+export function StatusBarScrim({ baseColor = '#FFFFFF' }: StatusBarScrimProps) {
   const insets = useSafeAreaInsets();
   const topInset = Math.max(insets.top, 24);
   const scrimHeight = topInset + 20;

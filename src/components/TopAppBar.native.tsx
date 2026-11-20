@@ -38,7 +38,7 @@ export function TopAppBar({
         ) : (
           <Pressable style={styles.avatar} onPress={() => navigateTo('profile')} hitSlop={6}>
             <Image
-              source={IMAGES.mascot.pelicanAvatar}
+              source={IMAGES.brand.officialIcon}
               style={styles.image}
               contentFit="cover"
               transition={200}
@@ -55,7 +55,7 @@ export function TopAppBar({
         {trailing}
         {showNotifications && (
           <Pressable style={styles.circle} onPress={() => navigateTo('notifications')} hitSlop={6}>
-            <Ionicons name="notifications-outline" size={20} color="#FF7A59" />
+            <Ionicons name="notifications-outline" size={20} color="#E60124" />
             {unreadNotifsCount > 0 && <View style={styles.dot} />}
           </Pressable>
         )}
@@ -68,17 +68,17 @@ const styles = StyleSheet.create({
   bar: {
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: theme.isAndroid ? '#FFFDFBFA' : '#FFFFFFFA',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: theme.isAndroid ? '#F4EAE3' : '#F0E4DC',
+    borderBottomColor: '#ECECEC',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.04,
     shadowRadius: 6,
-    elevation: 4,
+    elevation: 3,
   },
   left: {
     flex: 1,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#FFF0EB',
+    backgroundColor: '#FDE8EA',
     padding: 2,
   },
   image: {
@@ -111,11 +111,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: theme.isAndroid ? '#F7EEE9' : '#FFFFFF',
+    backgroundColor: '#F5F5F5',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: theme.isAndroid ? 0 : 1,
-    borderColor: '#F0E4DC',
+    borderWidth: 1,
+    borderColor: '#ECECEC',
   },
   back: {
     color: '#1E1927',
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   bell: {
-    color: '#FF7A59',
+    color: '#E60124',
     fontSize: 22,
   },
   dot: {
@@ -133,15 +133,15 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#FF7A59',
+    backgroundColor: '#E60124',
   },
   title: {
-    color: '#FF7A59',
+    color: '#E60124',
     fontSize: 15.5,
     fontWeight: '900',
   },
   subtitle: {
-    color: '#806F69',
+    color: '#6B7280',
     fontSize: 11,
     marginTop: 2,
   },

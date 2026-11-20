@@ -4,11 +4,17 @@
  */
 
 export const IMAGES = {
-  // Brand Mascots
+  // Brand Mascots & Identity
+  brand: {
+    officialIcon: require('../../assets/icon.png'),
+    officialMascot: require('../../assets/mascot_official.png'),
+    officialLogo: require('../../assets/logo_official.png'),
+  },
   mascot: {
-    // 3D Iguana with sombrero vueltiao & traveler backpack
-    iguanaMain:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBYUzmuNoSGf3RxfCQ6UjVXp9wGY6ONCUeB-9e5eiAKw5kRjG1194W3bGdxuvG7Uspkwl2bbVKNnarKWeThc7EpvRaIkij4EDfgTYe988aEXYPWYLDzGYahJHH7Byv5XZbILIDYSpZ6erol9GDQGRagAO-0F3QQypBzT1dpaiPdpvB4v5XXaNnnCSJMMp83vDq_dmWeVXvXdqoNcKXzhwUp2bkwGDRN7SIoYeK8JGNPnWa7GkOkcrn4',
+    // 3D Official Iguana with sombrero vueltiao & traveler backpack
+    iguanaMain: require('../../assets/mascot_official.png'),
+    officialIcon: require('../../assets/icon.png'),
+    officialLogo: require('../../assets/logo_official.png'),
     iguanaSuitcase:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuAMIu91XbxsoUWcAo2PsGGREJfT2Y-fSGHqcrBVrxPWjPF0hGFqp_9kMlyGyyqLNtymJeJ3D2yC8pi55Su52hTeICcNSqUrwCBaw1Dvl-d-xJhpKJ4no3mhBi8tvY9153yWh2dZKXbQWaENf4U5QLdPqu7t-YDpHqhXRWvnIwKRZ9dKRN0Q3UjXOoq8GJp0AP9X9x6aeR0sTFdLj25X9SfWmo1JwRmUCOIuq6NXcTlisibVJJ9TX7o6',
     iguanaTip:

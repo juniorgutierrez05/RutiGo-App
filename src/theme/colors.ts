@@ -1,49 +1,68 @@
 /**
- * RutiGo Design Tokens - Color Palette
- * Extraído del prototipo de Google Stitch y Guía de Estilo Caribe Atlántico
+ * RutiGo Design Tokens - Official Brand Palette
+ * Paleta Oficial: Rojo (#E60124), Amarillo (#FFD200), Verde (#5DB872), Fondo Blanco (#FFFFFF)
  */
 
 export const colors = {
-  // Brand gradients & accents
+  // Brand official colors
+  brandRed: {
+    primary: '#E60124',
+    light: '#FF6B81',
+    dark: '#B8001D',
+    container: '#FDE8EA',
+  },
+  brandYellow: {
+    primary: '#FFD200',
+    light: '#FFE466',
+    dark: '#CCA800',
+    container: '#FFFBE6',
+  },
+  brandGreen: {
+    primary: '#5DB872',
+    light: '#8ED29E',
+    dark: '#3D9452',
+    container: '#EEF8F1',
+  },
+  // Legacy aliases mapped to official brand
   coral: {
-    primary: '#FF7A59',
-    light: '#FFB199',
-    dark: '#B83414',
-    gradient: 'linear-gradient(135deg, #FFB199 0%, #FF7A59 100%)',
-    pill: 'linear-gradient(135deg, #FF957D 0%, #FF7A59 100%)',
+    primary: '#E60124',
+    light: '#FF6B81',
+    dark: '#B8001D',
+    gradient: 'linear-gradient(135deg, #FF6B81 0%, #E60124 100%)',
+    pill: 'linear-gradient(135deg, #FF455F 0%, #E60124 100%)',
   },
   turquesa: {
-    primary: '#00C2CB',
-    light: '#7FF0E0',
-    dark: '#006E73',
-    gradient: 'linear-gradient(135deg, #7FF0E0 0%, #00C2CB 100%)',
-    pill: 'linear-gradient(135deg, #00D5DF 0%, #009DA6 100%)',
+    primary: '#5DB872',
+    light: '#8ED29E',
+    dark: '#3D9452',
+    gradient: 'linear-gradient(135deg, #8ED29E 0%, #5DB872 100%)',
+    pill: 'linear-gradient(135deg, #72C786 0%, #4EA362 100%)',
   },
   amarillo: {
-    primary: '#FFC93C',
-    light: '#FFE49C',
-    dark: '#CA9A00',
-    gradient: 'linear-gradient(135deg, #FFE180 0%, #FFC93C 100%)',
+    primary: '#FFD200',
+    light: '#FFE466',
+    dark: '#CCA800',
+    gradient: 'linear-gradient(135deg, #FFE466 0%, #FFD200 100%)',
   },
   violeta: {
-    primary: '#7B61FF',
-    light: '#C9B8FF',
-    dark: '#583BD9',
-    gradient: 'linear-gradient(135deg, #A895FF 0%, #7B61FF 100%)',
+    primary: '#E60124',
+    light: '#FF8596',
+    dark: '#B8001D',
+    gradient: 'linear-gradient(135deg, #FF6B81 0%, #E60124 100%)',
   },
   verde: {
-    primary: '#2ECC71',
-    light: '#B9F6CA',
-    dark: '#18B85C',
-    gradient: 'linear-gradient(135deg, #7BE9A8 0%, #2ECC71 100%)',
+    primary: '#5DB872',
+    light: '#8ED29E',
+    dark: '#3D9452',
+    gradient: 'linear-gradient(135deg, #8ED29E 0%, #5DB872 100%)',
   },
-  // Surfaces and background
-  background: '#FFFCF8',
+  // Surfaces and background: 100% fondo blanco oficial en todas las vistas
+  background: '#FFFFFF',
   surface: '#FFFFFF',
-  surfaceSoft: '#FFF7F2',
-  surfaceContainerLow: '#F9F1FF',
-  surfaceContainerHigh: '#EEE4F9',
-  surfaceDim: '#E0D6EB',
+  surfaceSoft: '#FFFFFF',
+  surfaceContainerLow: '#FFFFFF',
+  surfaceContainerHigh: '#F8F9FA',
+  surfaceDim: '#EDEDED',
   // Typography neutrals
   text: {
     primary: '#1E1927',
@@ -56,30 +75,30 @@ export const colors = {
   // Categories mapping
   categories: {
     cultura: {
-      color: '#7B61FF',
-      light: '#F3EFFF',
-      badge: 'linear-gradient(135deg, #9681FF 0%, #7B61FF 100%)',
+      color: '#E60124',
+      light: '#FDE8EA',
+      badge: 'linear-gradient(135deg, #FF6B81 0%, #E60124 100%)',
       label: 'Cultura & Tradición',
       icon: 'palette',
     },
     gastronomia: {
-      color: '#FF7A59',
-      light: '#FFF0EB',
-      badge: 'linear-gradient(135deg, #FFB199 0%, #FF7A59 100%)',
+      color: '#E60124',
+      light: '#FDE8EA',
+      badge: 'linear-gradient(135deg, #FF6B81 0%, #E60124 100%)',
       label: 'Gastronomía Caribeña',
       icon: 'restaurant',
     },
     naturaleza: {
-      color: '#2ECC71',
-      light: '#E8F9EE',
-      badge: 'linear-gradient(135deg, #7BE9A8 0%, #2ECC71 100%)',
+      color: '#5DB872',
+      light: '#EEF8F1',
+      badge: 'linear-gradient(135deg, #8ED29E 0%, #5DB872 100%)',
       label: 'Naturaleza & Playas',
       icon: 'forest',
     },
     historia: {
-      color: '#CA9A00',
-      light: '#FFF8E7',
-      badge: 'linear-gradient(135deg, #FFE180 0%, #FFC93C 100%)',
+      color: '#FFD200',
+      light: '#FFFBE6',
+      badge: 'linear-gradient(135deg, #FFE466 0%, #FFD200 100%)',
       label: 'Historia & Patrimonio',
       icon: 'castle',
     },

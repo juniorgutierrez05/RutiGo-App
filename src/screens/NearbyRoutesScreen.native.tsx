@@ -22,7 +22,7 @@ export function NearbyRoutesScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Ionicons name="chevron-back" size={20} color="#E60124" />
         <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Text style={styles.title}>Rutas más cercanas</Text>
@@ -43,26 +43,26 @@ export function NearbyRoutesScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
-  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
+  back: { color: '#E60124', fontSize: 16, fontWeight: '800' },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900' },
-  subtitle: { color: '#806F69', fontSize: 14, marginTop: 4, marginBottom: 18 },
+  subtitle: { color: '#6B7280', fontSize: 14, marginTop: 4, marginBottom: 18 },
   card: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     borderRadius: 18,
     padding: 16,
     marginBottom: 10,
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 2,
   },
   name: { color: '#1E1927', fontSize: 16, fontWeight: '900' },
-  meta: { color: '#00AEB7', fontSize: 12, fontWeight: '800', marginTop: 4 },
-  description: { color: '#806F69', fontSize: 13, lineHeight: 18, marginTop: 6 },
+  meta: { color: '#5DB872', fontSize: 12, fontWeight: '800', marginTop: 4 },
+  description: { color: '#6B7280', fontSize: 13, lineHeight: 18, marginTop: 6 },
 });

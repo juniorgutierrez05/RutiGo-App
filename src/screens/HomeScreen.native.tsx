@@ -54,14 +54,14 @@ export function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#FF7A59']}
-            tintColor="#FF7A59"
+            colors={['#E60124']}
+            tintColor="#E60124"
           />
         }
       >
         <Pressable style={styles.search} onPress={() => navigateTo('search')}>
           <View style={styles.searchLeading}>
-            <Ionicons name="search" size={20} color="#FF7A59" />
+            <Ionicons name="search" size={20} color="#E60124" />
             <Text style={styles.searchText}>Buscar rutas, gastronomía, lugares...</Text>
           </View>
           <View style={styles.searchTrailing}>
@@ -138,7 +138,7 @@ export function HomeScreen() {
         ) : isLoading ? (
           <View style={[styles.featuredCardWrap, { marginTop: 16 }]}>
             <View style={[styles.routeImageWrap, styles.skeletonBox]}>
-              <ActivityIndicator color="#FF7A59" size="large" />
+              <ActivityIndicator color="#E60124" size="large" />
             </View>
           </View>
         ) : null}
@@ -152,7 +152,7 @@ export function HomeScreen() {
 
         {places.length === 0 && isLoading ? (
           <View style={styles.loadingWrap}>
-            <ActivityIndicator color="#FF7A59" size="small" />
+            <ActivityIndicator color="#E60124" size="small" />
             <Text style={styles.loadingText}>Cargando experiencias...</Text>
           </View>
         ) : (
@@ -203,7 +203,7 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#FFFCF8',
+    backgroundColor: '#FFFFFF',
   },
   content: {
     paddingTop: 10,
@@ -214,17 +214,17 @@ const styles = StyleSheet.create({
     height: 56,
     paddingHorizontal: 16,
     borderRadius: 28,
-    backgroundColor: theme.isAndroid ? '#F7ECE6' : '#FFFFFF',
-    borderWidth: theme.isAndroid ? 0 : 1,
-    borderColor: '#F0E4DC',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#ECECEC',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#2B1712',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: theme.isAndroid ? 0.08 : 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: theme.isAndroid ? 4 : 2,
+    elevation: 3,
   },
   searchLeading: {
     flexDirection: 'row',
@@ -236,12 +236,12 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: theme.isAndroid ? '#EDE0D8' : '#F5ECE6',
+    backgroundColor: '#F5F5F5',
     alignItems: 'center',
     justifyContent: 'center',
   },
   searchText: {
-    color: '#806F69',
+    color: '#6B7280',
     fontSize: 14,
     fontWeight: '600',
     flex: 1,
@@ -260,12 +260,12 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   link: {
-    color: '#FF7A59',
+    color: '#E60124',
     fontSize: 13,
     fontWeight: '800',
   },
   chips: {
-    gap: 8,
+    gap: 10,
     paddingHorizontal: 16,
     paddingBottom: 4,
   },
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     bottom: 16,
   },
   badgeContainer: {
-    backgroundColor: '#FFDBD2',
+    backgroundColor: '#FDE8EA',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   routeTag: {
-    color: '#7C2106',
+    color: '#E60124',
     fontSize: 10.5,
     fontWeight: '900',
     letterSpacing: 0.8,
@@ -355,9 +355,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     padding: 12,
     borderRadius: theme.shapes.card,
-    backgroundColor: theme.isAndroid ? '#FFFDFB' : '#FFFFFF',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: theme.isAndroid ? '#F4EAE3' : '#F0E4DC',
+    borderColor: '#ECECEC',
     flexDirection: 'row',
     alignItems: 'center',
     ...theme.elevation.card,
@@ -379,13 +379,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   muniBadge: {
-    backgroundColor: theme.isAndroid ? '#FFDBD2' : '#FFF0EB',
+    backgroundColor: '#FDE8EA',
     paddingHorizontal: 8,
     paddingVertical: 2.5,
     borderRadius: 8,
   },
   municipality: {
-    color: theme.isAndroid ? '#7C2106' : '#FF7A59',
+    color: '#E60124',
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 0.6,

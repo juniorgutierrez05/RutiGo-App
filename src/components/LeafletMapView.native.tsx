@@ -101,28 +101,29 @@ export function LeafletMapView({
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #00AEB7;
+      background: #E60124;
       border: 3px solid #FFFFFF;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.22);
+      box-shadow: 0 3px 8px rgba(230,1,36,0.35);
       color: #FFFFFF;
       font-weight: 900;
       font-size: 14px;
       transition: transform 0.25s ease, background 0.25s ease;
     }
     .custom-pin.active {
-      background: #FF7A59;
+      background: #FFD200;
+      color: #1E1927;
       transform: scale(1.3);
-      border-color: #FFFFFF;
-      box-shadow: 0 5px 15px rgba(255,122,89,0.5);
+      border-color: #E60124;
+      box-shadow: 0 5px 15px rgba(230,1,36,0.45);
       z-index: 9999 !important;
     }
     .user-pin {
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background: #2563EB;
+      background: #5DB872;
       border: 3px solid #FFFFFF;
-      box-shadow: 0 0 0 6px rgba(37,99,235,0.25);
+      box-shadow: 0 0 0 6px rgba(93,184,114,0.35);
     }
   </style>
 </head>
@@ -198,7 +199,7 @@ export function LeafletMapView({
       }
       if (coords && coords.length > 0) {
         routePolyline = L.polyline(coords, {
-          color: '#FF7A59',
+          color: '#E60124',
           weight: 5,
           opacity: 0.9,
           lineJoin: 'round'

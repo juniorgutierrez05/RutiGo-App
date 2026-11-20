@@ -31,7 +31,7 @@ export function SettingsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Ionicons name="chevron-back" size={20} color="#E60124" />
         <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Text style={styles.title}>Configuración</Text>
@@ -50,29 +50,29 @@ export function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
-  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
+  back: { color: '#E60124', fontSize: 16, fontWeight: '800' },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900', marginBottom: 18 },
   item: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     borderRadius: 16,
     padding: 16,
     marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 2,
   },
   itemInfo: { flex: 1 },
   label: { color: '#1E1927', fontSize: 15, fontWeight: '800' },
   value: { color: '#806F69', fontSize: 12, marginTop: 4 },
-  arrow: { color: '#FF7A59', fontSize: 22, marginTop: -2 },
+  arrow: { color: '#E60124', fontSize: 22, marginTop: -2 },
 });

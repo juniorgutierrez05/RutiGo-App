@@ -62,7 +62,7 @@ export function PlaceDetailScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Ionicons name="chevron-back" size={20} color="#E60124" />
         <Text style={styles.back}>Volver</Text>
       </Pressable>
 
@@ -136,15 +136,15 @@ export function PlaceDetailScreen() {
       <View style={styles.info}>
         <Text style={styles.infoTitle}>Información práctica</Text>
         <View style={styles.infoRow}>
-          <Ionicons name="location-outline" size={16} color="#FF7A59" />
+          <Ionicons name="location-outline" size={16} color="#E60124" />
           <Text style={styles.infoText}>{selectedPlace.address || 'Dirección disponible en el mapa'}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Ionicons name="time-outline" size={16} color="#FF7A59" />
+          <Ionicons name="time-outline" size={16} color="#E60124" />
           <Text style={styles.infoText}>{selectedPlace.schedule || 'Consulta el horario antes de visitar'}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Ionicons name="hourglass-outline" size={16} color="#FF7A59" />
+          <Ionicons name="hourglass-outline" size={16} color="#E60124" />
           <Text style={styles.infoText}>{selectedPlace.estimatedTime || 'Tiempo estimado por confirmar'}</Text>
         </View>
       </View>
@@ -185,17 +185,17 @@ export function PlaceDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
-  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
+  back: { color: '#E60124', fontSize: 16, fontWeight: '800' },
   carouselContainer: {
     height: 230,
     borderRadius: 22,
     overflow: 'hidden',
     marginBottom: 16,
     position: 'relative',
-    backgroundColor: '#F3EAE3',
+    backgroundColor: '#F5F5F5',
   },
   cover: { height: 230, borderRadius: 22 },
   dotsContainer: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     width: 20,
-    backgroundColor: '#FF7A59',
+    backgroundColor: '#E60124',
   },
   counterBadge: {
     position: 'absolute',
@@ -232,11 +232,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
   },
-  category: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1 },
+  category: { color: '#E60124', fontSize: 11, fontWeight: '900', letterSpacing: 1 },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900', marginTop: 4 },
-  subtitle: { color: '#806F69', fontSize: 14, lineHeight: 21, marginTop: 10 },
+  subtitle: { color: '#6B7280', fontSize: 14, lineHeight: 21, marginTop: 10 },
   rating: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
-  distance: { color: '#00AEB7', fontSize: 13, fontWeight: '800' },
+  distance: { color: '#5DB872', fontSize: 13, fontWeight: '800' },
   weatherCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -263,10 +263,10 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0.5,
   },
-  info: { marginTop: 16, padding: 16, borderRadius: 18, backgroundColor: '#FFF0EB' },
+  info: { marginTop: 16, padding: 16, borderRadius: 18, backgroundColor: '#FDE8EA' },
   infoTitle: { color: '#1E1927', fontSize: 16, fontWeight: '900', marginBottom: 8 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
   infoText: { color: '#58423C', fontSize: 13, flex: 1, lineHeight: 18 },
   actions: { gap: 10, marginTop: 20 },
-  empty: { flex: 1, padding: 25, backgroundColor: '#FFFCF8' },
+  empty: { flex: 1, padding: 25, backgroundColor: '#FFFFFF' },
 });

@@ -37,7 +37,7 @@ export function RouteDetailScreen() {
       showsVerticalScrollIndicator={false}
     >
       <Pressable onPress={goBack} hitSlop={8} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={20} color="#FF7A59" />
+        <Ionicons name="chevron-back" size={20} color="#E60124" />
         <Text style={styles.back}>Volver</Text>
       </Pressable>
       <Image
@@ -117,21 +117,21 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
   backButton: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
-  back: { color: '#FF7A59', fontSize: 16, fontWeight: '800' },
+  back: { color: '#E60124', fontSize: 16, fontWeight: '800' },
   cover: { width: '100%', height: 210, borderRadius: 22, marginBottom: 16 },
-  category: { color: '#FF7A59', fontSize: 11, fontWeight: '900', letterSpacing: 1 },
+  category: { color: '#E60124', fontSize: 11, fontWeight: '900', letterSpacing: 1 },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900', marginTop: 4 },
-  subtitle: { color: '#806F69', fontSize: 14, lineHeight: 21, marginTop: 6 },
+  subtitle: { color: '#6B7280', fontSize: 14, lineHeight: 21, marginTop: 6 },
   stats: { flexDirection: 'row', gap: 8, marginVertical: 18 },
-  stat: { flex: 1, padding: 12, borderRadius: 14, backgroundColor: '#E5FAF8', alignItems: 'center' },
-  statValue: { color: '#006E73', fontSize: 13, fontWeight: '900' },
-  statLabel: { color: '#806F69', fontSize: 10, marginTop: 3 },
+  stat: { flex: 1, padding: 12, borderRadius: 14, backgroundColor: '#EEF8F1', alignItems: 'center' },
+  statValue: { color: '#5DB872', fontSize: 13, fontWeight: '900' },
+  statLabel: { color: '#6B7280', fontSize: 10, marginTop: 3 },
   section: { color: '#1E1927', fontSize: 16, fontWeight: '900', marginBottom: 8, marginTop: 4 },
   item: { color: '#58423C', fontSize: 13, marginBottom: 6 },
-  tipsText: { color: '#806F69', fontSize: 13, lineHeight: 18 },
+  tipsText: { color: '#6B7280', fontSize: 13, lineHeight: 18 },
   actions: { gap: 10, marginTop: 16 },
-  empty: { flex: 1, padding: 25, backgroundColor: '#FFFCF8' },
+  empty: { flex: 1, padding: 25, backgroundColor: '#FFFFFF' },
 });

@@ -49,13 +49,13 @@ export function SearchScreen() {
       >
         <View style={styles.header}>
           <Pressable onPress={goBack} hitSlop={8}>
-            <Ionicons name="chevron-back" size={28} color="#FF7A59" />
+            <Ionicons name="chevron-back" size={28} color="#E60124" />
           </Pressable>
           <Text style={styles.title}>Buscar</Text>
         </View>
 
         <View style={styles.inputWrap}>
-          <Ionicons name="search-outline" size={20} color="#FF7A59" style={styles.inputIcon} />
+          <Ionicons name="search-outline" size={20} color="#E60124" style={styles.inputIcon} />
           <TextInput
             autoFocus
             value={query}
@@ -132,21 +132,21 @@ export function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
-  back: { color: '#FF7A59', fontSize: 32, marginTop: -2 },
+  back: { color: '#E60124', fontSize: 32, marginTop: -2 },
   title: { color: '#1E1927', fontSize: 26, fontWeight: '900' },
   inputWrap: {
     height: 52,
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 6,
@@ -155,20 +155,20 @@ const styles = StyleSheet.create({
   inputIcon: { marginRight: 8 },
   input: { flex: 1, color: '#1E1927', fontSize: 15 },
   label: { color: '#1E1927', fontSize: 16, fontWeight: '900', marginTop: 22, marginBottom: 10 },
-  recent: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F0E4DC' },
+  recent: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
   recentRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  recentText: { color: '#806F69', fontSize: 14 },
+  recentText: { color: '#6B7280', fontSize: 14 },
   result: {
     padding: 12,
     borderRadius: 16,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     marginBottom: 10,
     flexDirection: 'row',
     gap: 12,
     alignItems: 'center',
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 4,
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   thumb: { width: 56, height: 56, borderRadius: 12 },
   resultInfo: { flex: 1 },
-  type: { color: '#FF7A59', fontSize: 10, fontWeight: '900', letterSpacing: 0.8 },
+  type: { color: '#E60124', fontSize: 10, fontWeight: '900', letterSpacing: 0.8 },
   name: { color: '#1E1927', fontSize: 15, fontWeight: '900', marginTop: 2 },
-  description: { color: '#806F69', fontSize: 12, marginTop: 2, lineHeight: 16 },
+  description: { color: '#6B7280', fontSize: 12, marginTop: 2, lineHeight: 16 },
 });

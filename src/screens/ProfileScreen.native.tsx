@@ -69,7 +69,7 @@ function Menu({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; 
   return (
     <Pressable style={styles.menu} onPress={onPress}>
       <View style={styles.menuLeft}>
-        <Ionicons name={icon} size={20} color="#FF7A59" />
+        <Ionicons name={icon} size={20} color="#E60124" />
         <Text style={styles.menuText}>{label}</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color="#C4B7B0" />
@@ -78,25 +78,25 @@ function Menu({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; 
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#FFFCF8' },
+  root: { flex: 1, backgroundColor: '#FFFFFF' },
   content: { paddingHorizontal: 16, alignItems: 'center' },
   avatar: {
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: '#FFF0EB',
+    backgroundColor: '#FDE8EA',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    shadowColor: '#FF7A59',
+    shadowColor: '#E60124',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 3,
   },
-  avatarText: { color: '#FF7A59', fontSize: 36, fontWeight: '900' },
+  avatarText: { color: '#E60124', fontSize: 36, fontWeight: '900' },
   title: { color: '#1E1927', fontSize: 24, fontWeight: '900', marginTop: 12 },
-  email: { color: '#806F69', fontSize: 13, marginTop: 4 },
+  email: { color: '#6B7280', fontSize: 13, marginTop: 4 },
   stats: { flexDirection: 'row', width: '100%', gap: 10, marginVertical: 20 },
   stat: {
     flex: 1,
@@ -104,16 +104,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     alignItems: 'center',
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 2,
   },
-  statValue: { color: '#FF7A59', fontSize: 24, fontWeight: '900' },
-  statLabel: { color: '#806F69', fontSize: 11, marginTop: 4, fontWeight: '700' },
+  statValue: { color: '#E60124', fontSize: 24, fontWeight: '900' },
+  statLabel: { color: '#6B7280', fontSize: 11, marginTop: 4, fontWeight: '700' },
   menuGroup: { width: '100%', marginBottom: 8 },
   menu: {
     width: '100%',
@@ -122,13 +122,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F0E4DC',
+    borderColor: '#ECECEC',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#1E1927',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -139,20 +139,20 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 14,
     borderWidth: 1.5,
-    borderColor: '#FF7A59',
+    borderColor: '#E60124',
     alignItems: 'center',
     marginTop: 8,
     backgroundColor: '#FFFFFF',
   },
-  logoutText: { color: '#FF7A59', fontWeight: '900', fontSize: 14 },
+  logoutText: { color: '#E60124', fontWeight: '900', fontSize: 14 },
   loginBtn: {
     width: '100%',
     borderRadius: 14,
     paddingVertical: 14,
-    backgroundColor: '#FF7A59',
+    backgroundColor: '#E60124',
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: '#FF7A59',
+    shadowColor: '#E60124',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
