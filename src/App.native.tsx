@@ -7,6 +7,7 @@ import { NativeRouter } from './NativeRouter';
 import { StatusBarScrim } from './components/StatusBarScrim.native';
 import { ServerStatusBanner } from './components/ServerStatusBanner.native';
 import { UpdateNotificationBanner } from './components/UpdateNotificationBanner.native';
+import { InAppNotificationToast } from './components/InAppNotificationToast.native';
 import { initializeNotificationChannels } from './services/notificationService';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
       <NavigationBar style="light" />
       <AppProvider>
         <NativeRouter />
+        <InAppNotificationToast />
         <UpdateNotificationBanner />
         <ServerStatusBanner />
         <StatusBarScrim />

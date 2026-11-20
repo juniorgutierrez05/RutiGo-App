@@ -43,6 +43,17 @@ interface AppContextType {
   clearNotifications: () => Promise<void>;
   sendTestNotification: () => Promise<void>;
   unreadNotifsCount: number;
+
+  // In-App Toast
+  activeToast: {
+    id: string;
+    title: string;
+    body: string;
+    relatedType?: 'place' | 'route';
+    relatedId?: string;
+  } | null;
+  dismissToast: () => void;
+  showNotificationToast: (notif: { title: string; body: string; relatedType?: 'place' | 'route'; relatedId?: string }) => void;
   selectedRoute: Route | null;
   selectedPlace: Place | null;
   activeCategory: CategoryType;
@@ -120,6 +131,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [places, setPlaces] = useState<Place[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+
+  // In-App Toast State (Funciona en el 100% de versiones incluyendo APKs antiguos)
+  const [activeToast, setActiveToast] = useState<{
+    id: string;
+    title: string;
+    body: string;
+    relatedType?: 'place' | 'route';
+    relatedId?: string;
+  } | null>(null);
+
+  const dismissToast = useCallback(() => setActiveToast(null), []);
+
+  const showNotificationToast = useCallback(
+    (notif: { title: string; body: string; relatedType?: 'place' | 'route'; relatedId?: string }) => {
+      setActiveToast({
+        id: `toast-${Date.now()}`,
+        ...notif,
+      });
+    },
+    []
+  );
 
   // Selections
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
@@ -289,6 +321,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       const notif = await notifyFavoriteAdded(name, type, id);
       setNotifications((prev) => [notif, ...prev.filter((n) => n.id !== notif.id)]);
+      showNotificationToast({
+        title: notif.title,
+        body: notif.body,
+        relatedType: type,
+        relatedId: id,
+      });
     }
   };
 
@@ -316,6 +354,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const placeName = places.find((p) => p.id === placeId)?.name || 'Lugar turístico';
     const notif = await notifyReviewAdded(placeName, rating, placeId);
     setNotifications((prev) => [notif, ...prev.filter((n) => n.id !== notif.id)]);
+    showNotificationToast({
+      title: notif.title,
+      body: notif.body,
+      relatedType: 'place',
+      relatedId: placeId,
+    });
 
     // Refresh places to get updated avgRating
     try {
@@ -381,6 +425,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const sendTestNotification = async () => {
     const item = await sendTestSystemNotification();
     setNotifications((prev) => [item, ...prev.filter((n) => n.id !== item.id)]);
+    showNotificationToast({
+      title: item.title,
+      body: item.body,
+    });
   };
 
   const addNotification = (title: string, body: string) => {
@@ -394,6 +442,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       createdAt: new Date().toISOString(),
     };
     setNotifications((prev) => [item, ...prev]);
+    showNotificationToast({ title, body });
   };
 
   const unreadNotifsCount = notifications.filter((n) => !n.read).length;
@@ -442,6 +491,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         clearNotifications,
         sendTestNotification,
         unreadNotifsCount,
+        activeToast,
+        dismissToast,
+        showNotificationToast,
         isLoading,
         isServerWaking,
         refreshData,
