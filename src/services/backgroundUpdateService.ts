@@ -8,14 +8,20 @@ export const BACKGROUND_UPDATE_TASK = 'RUTIGO_BACKGROUND_OTA_UPDATE_TASK';
 export const UPDATE_NOTIFICATION_CHANNEL_ID = 'rutigo_app_updates';
 
 // Configuración global de visualización de notificaciones en primer plano
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+try {
+  if (Notifications && typeof Notifications.setNotificationHandler === 'function') {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+  }
+} catch (err) {
+  console.warn('[RutiGo Notifications] setNotificationHandler no disponible en este binario:', err);
+}
 
 /**
  * Envia una notificación del sistema informando que la actualización ya está descargada y lista.
