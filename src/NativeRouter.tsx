@@ -20,6 +20,7 @@ import { SettingsScreen } from './screens/SettingsScreen.native';
 import { NotificationsScreen } from './screens/NotificationsScreen.native';
 import { RecommendationsScreen } from './screens/RecommendationsScreen.native';
 import { AdminScreen } from './screens/AdminScreen.native';
+import { ChatScreen } from './screens/ChatScreen.native';
 
 export function NativeRouter() {
   const { currentScreen, goBack } = useApp();
@@ -57,6 +58,7 @@ export function NativeRouter() {
     case 'settings': return <SettingsScreen />;
     case 'notifications': return <NotificationsScreen />;
     case 'recommendations': return <RecommendationsScreen />;
+    case 'chat': return <ChatScreen />;
     case 'admin': return <AdminScreen />;
     default: return <View />;
   }

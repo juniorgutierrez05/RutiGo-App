@@ -177,6 +177,19 @@ export async function toggleFavorite(type: 'route' | 'place', id: string, user: 
 export async function getNotifications(): Promise<NotificationItem[]> { return (await request<any[]>('/api/notifications')).map((value) => ({ id: String(value.id), userId: String(value.user_id), type: value.type, title: value.title, body: value.body, read: Boolean(value.is_read), relatedId: value.related_id ? String(value.related_id) : undefined, createdAt: value.created_at })); }
 export async function markNotificationAsRead(id: string): Promise<void> { await request(`/api/notifications/${id}/read`, { method: 'PATCH' }); }
 
+export type ChatApiMessage = { sender: 'user' | 'bot'; text: string };
+export type ChatApiResponse = { reply: string; suggestedPlaceIds: number[] };
+
+export async function sendChatMessage(
+  message: string,
+  history: ChatApiMessage[] = []
+): Promise<ChatApiResponse> {
+  return request<ChatApiResponse>('/api/chat', {
+    method: 'POST',
+    body: JSON.stringify({ message, history }),
+  });
+}
+
 export type AdminUser = { id: number; name: string; email: string; role: 'tourist' | 'admin'; status: 'active' | 'blocked'; home_city: string | null; auth_provider: string; created_at: string; last_login_at: string | null };
 export type Municipality = { id: number; name: string; department: string; latitude: string; longitude: string };
 export type PlaceInput = { name: string; description: string; category: string; municipalityId: number; latitude: number | ''; longitude: number | ''; address?: string; schedule?: string; estimatedTime?: string; tag?: string; priceNote?: string; images: { url: string; altText?: string }[] };

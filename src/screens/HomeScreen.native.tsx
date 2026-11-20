@@ -8,6 +8,7 @@ import { BottomNav } from '../components/BottomNav.native';
 import { Card } from '../components/Card.native';
 import { Chip } from '../components/Chip.native';
 import { TopAppBar } from '../components/TopAppBar.native';
+import { IMAGES } from '../assets/images';
 import { calculateDistanceKm, formatDistance } from '../services/locationService';
 import { CategoryType } from '../types';
 import { theme } from '../theme/expressiveTheme';
@@ -194,6 +195,27 @@ export function HomeScreen() {
           ))
         )}
       </ScrollView>
+
+      {/* Botón flotante del Asistente Turístico Ruti */}
+      <Pressable
+        style={[
+          styles.chatFab,
+          { bottom: Math.max(insets.bottom, 12) + 80 },
+        ]}
+        onPress={() => navigateTo('chat')}
+        hitSlop={6}
+      >
+        <Image
+          source={IMAGES.brand.officialIcon}
+          style={styles.chatFabIcon}
+          contentFit="cover"
+        />
+        <View style={styles.chatFabTextContainer}>
+          <Text style={styles.chatFabTitle}>Pregúntale a Ruti</Text>
+          <Text style={styles.chatFabSub}>Guía IA del Atlántico</Text>
+        </View>
+        <Ionicons name="sparkles" size={16} color="#FFD200" />
+      </Pressable>
 
       <BottomNav />
     </View>
@@ -450,6 +472,43 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#806F69',
     fontSize: 13,
+    fontWeight: '700',
+  },
+  chatFab: {
+    position: 'absolute',
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E60124',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 26,
+    shadowColor: '#E60124',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 6,
+    zIndex: 90,
+  },
+  chatFabIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  chatFabTextContainer: {
+    justifyContent: 'center',
+  },
+  chatFabTitle: {
+    color: '#E60124',
+    fontSize: 12.5,
+    fontWeight: '900',
+  },
+  chatFabSub: {
+    color: '#6B7280',
+    fontSize: 10,
     fontWeight: '700',
   },
 });

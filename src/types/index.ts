@@ -102,4 +102,5 @@ export type ScreenName =
   | 'settings'
   | 'notifications'
   | 'recommendations'
+  | 'chat'
   | 'admin';

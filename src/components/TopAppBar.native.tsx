@@ -53,6 +53,18 @@ export function TopAppBar({
       </View>
       <View style={styles.right}>
         {trailing}
+        <Pressable
+          style={[styles.circle, styles.rutiChatButton]}
+          onPress={() => navigateTo('chat')}
+          hitSlop={6}
+          accessibilityLabel="Hablar con Ruti"
+        >
+          <Image
+            source={IMAGES.brand.officialIcon}
+            style={styles.rutiIcon}
+            contentFit="cover"
+          />
+        </Pressable>
         {showNotifications && (
           <Pressable style={styles.circle} onPress={() => navigateTo('notifications')} hitSlop={6}>
             <Ionicons name="notifications-outline" size={20} color="#E60124" />
@@ -134,6 +146,16 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#E60124',
+  },
+  rutiChatButton: {
+    backgroundColor: '#FDE8EA',
+    borderColor: '#E60124',
+    borderWidth: 1.5,
+  },
+  rutiIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
   },
   title: {
     color: '#E60124',

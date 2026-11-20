@@ -214,6 +214,22 @@ app.delete('/api/favorites/:type/:id', requireAuth, async (request: Authenticate
   return response.status(204).send();
 });
 
+// Endpoint del Asistente Turístico Inteligente Ruti (Google Gemini Flash)
+app.post('/api/chat', async (request, response) => {
+  const { message, history } = request.body || {};
+  if (!message || typeof message !== 'string') {
+    return response.status(400).json({ message: 'El mensaje es requerido.' });
+  }
+  try {
+    const { handleChatMessage } = await import('./chat.js');
+    const result = await handleChatMessage(message, Array.isArray(history) ? history : []);
+    return response.json(result);
+  } catch (err: any) {
+    console.error('Error procesando chat de Ruti:', err);
+    return response.status(500).json({ message: 'Error interno en el chat de Ruti' });
+  }
+});
+
 app.get('/api/reviews', async (request, response) => {
   const { pool } = await import('./db.js');
   const target = request.query.placeId ? ['place_id', Number(request.query.placeId)] : request.query.routeId ? ['route_id', Number(request.query.routeId)] : null;
