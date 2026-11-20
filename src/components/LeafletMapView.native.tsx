@@ -14,7 +14,10 @@ type LeafletMapViewProps = {
   showRoute?: boolean;
   onSelectPlace: (place: Place) => void;
   onReady?: () => void;
-  mapRef?: React.MutableRefObject<{ centerOn: (lat: number, lng: number, zoom?: number) => void } | null>;
+  mapRef?: React.MutableRefObject<{
+    centerOn: (lat: number, lng: number, zoom?: number) => void;
+    fitPlaces: (placesList: Place[]) => void;
+  } | null>;
 };
 
 export function LeafletMapView({
@@ -62,7 +65,7 @@ export function LeafletMapView({
     `);
   };
 
-  // Exponer método para centrar externamente (ej: botón "Mi ubicación")
+  // Exponer método para centrar y encuadrar externamente (ej: botón "Mi ubicación", filtros)
   useEffect(() => {
     if (mapRef) {
       mapRef.current = {
@@ -75,9 +78,34 @@ export function LeafletMapView({
             true;
           `);
         },
+        fitPlaces: (placesList: Place[]) => {
+          if (!placesList || placesList.length === 0) return;
+          const coords = JSON.stringify(
+            placesList.map((p) => ({ lat: p.location.lat, lng: p.location.lng }))
+          );
+          webViewRef.current?.injectJavaScript(`
+            if (typeof window.fitPlaces === 'function') {
+              window.fitPlaces(${coords});
+            }
+            true;
+          `);
+        },
       };
     }
   }, [mapRef]);
+
+  // Actualizar marcadores en vivo sin recargar el mapa (0ms latencia)
+  useEffect(() => {
+    if (webViewRef.current && isMapLoadedRef.current) {
+      const placesJson = JSON.stringify(places);
+      webViewRef.current.injectJavaScript(`
+        if (typeof window.setPlaces === 'function') {
+          window.setPlaces(${placesJson});
+        }
+        true;
+      `);
+    }
+  }, [places]);
 
   // Actualizar marcador activo vía JS
   useEffect(() => {
@@ -223,34 +251,106 @@ export function LeafletMapView({
       } catch (e) {}
     };
 
-    // Marcadores de atractivos turísticos
-    places.forEach(p => {
-      const isAct = p.id === activeId;
-      const icon = L.divIcon({
-        className: 'custom-pin-wrap',
-        html: '<div class="custom-pin ' + (isAct ? 'active' : '') + '" id="pin-' + p.id + '">📍</div>',
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
-      });
+    // Marcadores dinámicos agrupados
+    let currentPlacesList = places;
+    const markersGroup = L.layerGroup().addTo(map);
 
-      const m = L.marker([p.location.lat, p.location.lng], { icon }).addTo(map);
-      m.on('click', () => {
-        window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
-          type: 'SELECT_PLACE',
-          placeId: p.id
-        }));
+    function getPinMeta(p) {
+      const tagLower = (p.tag || '').toLowerCase();
+      const nameLower = (p.name || '').toLowerCase();
+      if (
+        tagLower.includes('centro comercial') ||
+        tagLower.includes('mall') ||
+        nameLower.includes('centro comercial') ||
+        nameLower.includes('mallplaza') ||
+        nameLower.includes('viva barranquilla') ||
+        nameLower.includes('buenavista') ||
+        nameLower.includes('carnaval') ||
+        nameLower.includes('gran plaza')
+      ) {
+        return { emoji: '🛍️', bg: '#2563EB' }; // Centros comerciales (Azul)
+      }
+      if (
+        p.category === 'gastronomia' ||
+        nameLower.includes('restaurante') ||
+        tagLower.includes('cocina') ||
+        tagLower.includes('culinario') ||
+        tagLower.includes('gastronomía') ||
+        tagLower.includes('gastronomia')
+      ) {
+        return { emoji: '🍽️', bg: '#EA580C' }; // Restaurantes (Naranja)
+      }
+      return { emoji: '🏛️', bg: '#E60124' }; // Zonas turísticas & culturales (Rojo)
+    }
+
+    function renderMarkers(placesList) {
+      currentPlacesList = placesList || [];
+      markersGroup.clearLayers();
+      markersMap = {};
+
+      currentPlacesList.forEach(p => {
+        const isAct = p.id === activeId;
+        const meta = getPinMeta(p);
+        const icon = L.divIcon({
+          className: 'custom-pin-wrap',
+          html: '<div class="custom-pin ' + (isAct ? 'active' : '') + '" id="pin-' + p.id + '" style="background:' + (isAct ? '#FFD200' : meta.bg) + '">' + meta.emoji + '</div>',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
+
+        const m = L.marker([p.location.lat, p.location.lng], { icon });
+        m.on('click', () => {
+          window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'SELECT_PLACE',
+            placeId: p.id
+          }));
+        });
+        markersGroup.addLayer(m);
+        markersMap[p.id] = m;
       });
-      markersMap[p.id] = m;
-    });
+    }
+
+    renderMarkers(places);
+
+    window.setPlaces = function(newPlacesList) {
+      try {
+        renderMarkers(newPlacesList);
+      } catch (e) {}
+    };
+
+    window.fitPlaces = function(coordsList) {
+      try {
+        if (coordsList && coordsList.length > 0) {
+          if (coordsList.length === 1) {
+            map.stop();
+            map.flyTo([coordsList[0].lat, coordsList[0].lng], 15, { duration: 0.6 });
+          } else {
+            const bounds = L.latLngBounds(coordsList.map(c => [c.lat, c.lng]));
+            if (bounds.isValid()) {
+              map.stop();
+              map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15, duration: 0.6 });
+            }
+          }
+        }
+      } catch (e) {}
+    };
 
     window.updateActivePlace = function(id, lat, lng) {
       try {
         if (activeId && document.getElementById('pin-' + activeId)) {
-          document.getElementById('pin-' + activeId).classList.remove('active');
+          const oldEl = document.getElementById('pin-' + activeId);
+          oldEl.classList.remove('active');
+          const oldPlace = currentPlacesList.find(p => p.id === activeId);
+          if (oldPlace) {
+            const meta = getPinMeta(oldPlace);
+            oldEl.style.background = meta.bg;
+          }
         }
         activeId = id;
         if (document.getElementById('pin-' + id)) {
-          document.getElementById('pin-' + id).classList.add('active');
+          const newEl = document.getElementById('pin-' + id);
+          newEl.classList.add('active');
+          newEl.style.background = '#FFD200';
         }
         map.stop();
         map.flyTo([lat, lng], 14, { duration: 0.5 });
