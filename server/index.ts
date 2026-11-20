@@ -145,6 +145,20 @@ for (const provider of ['google', 'apple'] as const) {
   });
 }
 
+app.get('/', (_request, response) => {
+  response.json({
+    ok: true,
+    name: 'RutiGo API',
+    description: 'API turística y cultural del Atlántico, Colombia',
+    version: '1.0.0',
+    status: 'healthy',
+  });
+});
+
+app.head('/', (_request, response) => {
+  response.status(200).end();
+});
+
 app.get('/api/health', (_request, response) => {
   response.json({ ok: true, service: 'rutigo-api' });
 });
