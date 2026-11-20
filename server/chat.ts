@@ -84,13 +84,15 @@ export async function getChatDiagnostic() {
     listModelsError = e.message;
   }
 
-  // 2. Probar generateContent con los modelos candidatos modernos
+  // 2. Probar generateContent con los modelos candidatos activos y vigentes
   const candidates = [
-    'gemini-flash-latest',
+    'gemini-3.5-flash-lite',
+    'gemini-flash-lite-latest',
+    'gemini-3.5-flash',
+    'gemini-3.1-flash-lite',
     'gemini-3.8-flash',
-    'gemini-2.5-flash-lite',
-    'gemini-2.5-flash',
-    'gemini-2.5-pro',
+    'gemini-flash-latest',
+    'gemini-3.1-pro-preview',
   ];
 
   const results: any[] = [];
@@ -150,15 +152,17 @@ export async function handleChatMessage(
   }
 
   const apiKey = getCleanApiKey();
-  const preferredModel = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+  const preferredModel = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
   const modelsToTry = Array.from(
     new Set([
       preferredModel,
-      'gemini-flash-latest',
+      'gemini-3.5-flash-lite',
+      'gemini-flash-lite-latest',
+      'gemini-3.5-flash',
+      'gemini-3.1-flash-lite',
       'gemini-3.8-flash',
-      'gemini-2.5-flash-lite',
-      'gemini-2.5-flash',
-      'gemini-2.5-pro',
+      'gemini-flash-latest',
+      'gemini-3.1-pro-preview',
       'gemini-pro-latest',
     ])
   );
