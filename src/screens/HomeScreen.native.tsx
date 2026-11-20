@@ -74,12 +74,12 @@ export function HomeScreen() {
       Animated.timing(fabPressScale, {
         toValue: 0.88,
         duration: 90,
-        useNativeDriver: true,
+        useNativeDriver: false, // Debe ser false para no entrar en conflicto con el width animado
       }),
       Animated.timing(fabPressScale, {
         toValue: 1,
         duration: 100,
-        useNativeDriver: true,
+        useNativeDriver: false, // Debe ser false para no entrar en conflicto con el width animado
       }),
     ]).start(() => {
       navigateTo('chat');
@@ -91,18 +91,13 @@ export function HomeScreen() {
     outputRange: [56, 212],
   });
 
-  const textWidth = fabAnim.interpolate({
-    inputRange: [0, 0.35, 1],
-    outputRange: [0, 0, 116],
+  const collapsibleWidth = fabAnim.interpolate({
+    inputRange: [0, 0.3, 1],
+    outputRange: [0, 0, 148],
   });
 
   const textOpacity = fabAnim.interpolate({
     inputRange: [0, 0.45, 1],
-    outputRange: [0, 0, 1],
-  });
-
-  const sparkleOpacity = fabAnim.interpolate({
-    inputRange: [0, 0.5, 1],
     outputRange: [0, 0, 1],
   });
 
@@ -283,6 +278,7 @@ export function HomeScreen() {
           hitSlop={6}
           accessibilityLabel="Pregúntale a Ruti"
         >
+          {/* Icono de la mascota (siempre centrado al quedar como bolita 56x56) */}
           <View style={styles.chatFabIconWrap}>
             <Image
               source={IMAGES.brand.officialIcon}
@@ -298,25 +294,25 @@ export function HomeScreen() {
             </Animated.View>
           </View>
 
+          {/* Contenido colapsable: texto + destello (se contrae a ancho 0 para centrar el icono) */}
           <Animated.View
             style={[
-              styles.chatFabTextContainer,
+              styles.chatFabCollapsible,
               {
-                width: textWidth,
+                width: collapsibleWidth,
                 opacity: textOpacity,
               },
             ]}
           >
-            <Text style={styles.chatFabTitle} numberOfLines={1}>
-              Pregúntale a Ruti
-            </Text>
-            <Text style={styles.chatFabSub} numberOfLines={1}>
-              Guía IA del Atlántico
-            </Text>
-          </Animated.View>
-
-          <Animated.View style={{ opacity: sparkleOpacity }}>
-            <Ionicons name="sparkles" size={16} color="#FFD200" />
+            <View style={styles.chatFabTextContainer}>
+              <Text style={styles.chatFabTitle} numberOfLines={1}>
+                Pregúntale a Ruti
+              </Text>
+              <Text style={styles.chatFabSub} numberOfLines={1}>
+                Guía IA del Atlántico
+              </Text>
+            </View>
+            <Ionicons name="sparkles" size={16} color="#FFD200" style={styles.chatFabSparkle} />
           </Animated.View>
         </Pressable>
       </Animated.View>
@@ -593,8 +589,6 @@ const styles = StyleSheet.create({
     elevation: 8,
     zIndex: 90,
     overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   chatFabPressable: {
     width: '100%',
@@ -602,8 +596,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
-    gap: 8,
   },
   chatFabIconWrap: {
     position: 'relative',
@@ -630,9 +622,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  chatFabCollapsible: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
   chatFabTextContainer: {
     justifyContent: 'center',
-    overflow: 'hidden',
+    paddingLeft: 8,
+    width: 120,
+  },
+  chatFabSparkle: {
+    marginLeft: 4,
+    marginRight: 4,
   },
   chatFabTitle: {
     color: '#E60124',
