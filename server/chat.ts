@@ -67,33 +67,77 @@ export async function getChatDiagnostic() {
     };
   }
 
-  const model = 'gemini-1.5-flash';
-  const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`;
-
+  // 1. Probar ListModels para descubrir exactamente qué modelos admite esta clave
+  let availableModelsList: string[] = [];
+  let listModelsError: any = null;
   try {
-    const res = await fetch(testUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: 'Di únicamente: Ruti conectado' }] }],
-      }),
-    });
-
-    const data = await res.json();
-    return {
-      ok: res.ok,
-      status: res.status,
-      keyPrefix: cleanKey.slice(0, 6) + '...' + cleanKey.slice(-4),
-      keyLength: cleanKey.length,
-      modelUsed: model,
-      geminiResponse: data?.candidates?.[0]?.content?.parts?.[0]?.text || data,
-    };
-  } catch (err: any) {
-    return {
-      ok: false,
-      error: err.message,
-    };
+    const listRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${cleanKey}`
+    );
+    const listData = await listRes.json();
+    if (listRes.ok && Array.isArray(listData.models)) {
+      availableModelsList = listData.models.map((m: any) => m.name);
+    } else {
+      listModelsError = listData;
+    }
+  } catch (e: any) {
+    listModelsError = e.message;
   }
+
+  // 2. Probar generateContent con los modelos candidatos
+  const candidates = [
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-exp',
+    'gemini-pro',
+    'gemini-1.5-pro',
+  ];
+
+  const results: any[] = [];
+  for (const model of candidates) {
+    for (const apiVer of ['v1beta', 'v1']) {
+      try {
+        const testUrl = `https://generativelanguage.googleapis.com/${apiVer}/models/${model}:generateContent?key=${cleanKey}`;
+        const res = await fetch(testUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'Hola, responde OK' }] }],
+          }),
+        });
+        const data = await res.json();
+        results.push({
+          model,
+          apiVer,
+          status: res.status,
+          success: res.ok,
+          reply: data?.candidates?.[0]?.content?.parts?.[0]?.text || data?.error?.message || null,
+        });
+        if (res.ok) {
+          return {
+            ok: true,
+            workingModel: model,
+            workingApiVersion: apiVer,
+            keyPrefix: cleanKey.slice(0, 6) + '...' + cleanKey.slice(-4),
+            allResults: results,
+            availableModels: availableModelsList,
+          };
+        }
+      } catch (err: any) {
+        results.push({ model, apiVer, error: err.message });
+      }
+    }
+  }
+
+  return {
+    ok: false,
+    keyPrefix: cleanKey.slice(0, 6) + '...' + cleanKey.slice(-4),
+    keyLength: cleanKey.length,
+    listModelsError,
+    availableModels: availableModelsList,
+    results,
+  };
 }
 
 export async function handleChatMessage(
