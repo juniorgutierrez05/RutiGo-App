@@ -16,7 +16,8 @@ export async function handleChatMessage(
   history: ChatMessage[] = []
 ): Promise<ChatResponse> {
   const apiKey = process.env.GEMINI_API_KEY;
-  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const preferredModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+  const modelsToTry = Array.from(new Set([preferredModel, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro']));
 
   // 1. Obtener catálogo turístico real de la base de datos MySQL (Clever Cloud)
   let catalogContext = '';
@@ -41,12 +42,9 @@ export async function handleChatMessage(
     console.warn('[RutiBot] No se pudo leer el catálogo para el prompt:', err);
   }
 
-  // 2. Si hay clave GEMINI_API_KEY configurada, llamamos a Google Gemini 2.5 Flash
+  // 2. Si hay clave GEMINI_API_KEY configurada, llamamos a Google Gemini Flash
   if (apiKey && apiKey.trim().length > 10) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const systemInstruction = `
+    const systemInstruction = `
 Eres "Ruti", la iguana oficial con sombrero vueltiao y mochila viajera de RutiGo, la guía turística del Atlántico, Colombia.
 Hablas con tono caribeño, cálido, acogedor, alegre y respetuoso (costeño amable: "¡Hola, mi gente!", "¡Qué vaina tan buena!", "Ajá, cuéntame", "pégate el viaje", etc., sin exagerar ni usar groserías).
 Tu misión es recomendar experiencias, comida tradicional, planes de playa, ecoturismo y cultura en el departamento del Atlántico.
@@ -57,65 +55,69 @@ ${catalogContext}
 Instrucciones de formato:
 - Si mencionas uno de los lugares del catálogo anterior, incluye al final de tu recomendación la etiqueta [PLACE:id] con el ID numérico correspondiente (ejemplo: [PLACE:1], [PLACE:13]). Esto le permitirá a la aplicación mostrar la tarjeta interactiva con fotos y mapa al turista.
 - Mantén tus respuestas concisas, dinámicas (máximo 2 a 3 párrafos cortos) y muy orientadas a la acción (precios aproximados, horarios, o qué plato probar).
-      `.trim();
+    `.trim();
 
-      // Convertir historial a formato Gemini
-      const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
+    // Convertir historial a formato Gemini
+    const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
 
-      for (const h of history.slice(-6)) {
-        contents.push({
-          role: h.sender === 'user' ? 'user' : 'model',
-          parts: [{ text: h.text }],
-        });
-      }
+    for (const h of history.slice(-6)) {
       contents.push({
-        role: 'user',
-        parts: [{ text: message }],
+        role: h.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: h.text }],
       });
+    }
+    contents.push({
+      role: 'user',
+      parts: [{ text: message }],
+    });
 
-      const geminiRes = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: systemInstruction }],
-          },
-          contents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 600,
-          },
-        }),
-      });
+    for (const currentModel of modelsToTry) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
 
-      if (geminiRes.ok) {
-        const data = await geminiRes.json();
-        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (rawText) {
-          // Extraer los IDs de lugares mencionados [PLACE:X]
-          const placeIdMatches = rawText.match(/\[PLACE:(\d+)\]/g) || [];
-          const suggestedPlaceIds = Array.from(
-            new Set(
-              placeIdMatches
-                .map((m: string) => Number(m.replace(/\D/g, '')))
-                .filter((id: number) => availablePlaces.some((p) => p.id === id))
-            )
-          );
+        const geminiRes = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: systemInstruction }],
+            },
+            contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 600,
+            },
+          }),
+        });
 
-          // Limpiar las etiquetas [PLACE:X] del texto visible para que quede natural
-          const cleanText = rawText.replace(/\[PLACE:\d+\]/g, '').trim();
+        if (geminiRes.ok) {
+          const data = await geminiRes.json();
+          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (rawText) {
+            // Extraer los IDs de lugares mencionados [PLACE:X]
+            const placeIdMatches = rawText.match(/\[PLACE:(\d+)\]/g) || [];
+            const suggestedPlaceIds = Array.from(
+              new Set(
+                placeIdMatches
+                  .map((m: string) => Number(m.replace(/\D/g, '')))
+                  .filter((id: number) => availablePlaces.some((p) => p.id === id))
+              )
+            );
 
-          return {
-            reply: cleanText,
-            suggestedPlaceIds,
-          };
+            // Limpiar las etiquetas [PLACE:X] del texto visible para que quede natural
+            const cleanText = rawText.replace(/\[PLACE:\d+\]/g, '').trim();
+
+            return {
+              reply: cleanText,
+              suggestedPlaceIds,
+            };
+          }
+        } else {
+          console.warn(`[RutiBot] Modelo ${currentModel} devolvió ${geminiRes.status}, intentando siguiente...`);
         }
-      } else {
-        const errText = await geminiRes.text();
-        console.warn('[RutiBot] Gemini API devolvió error:', geminiRes.status, errText);
+      } catch (err) {
+        console.warn(`[RutiBot] Error con modelo ${currentModel}:`, err);
       }
-    } catch (err) {
-      console.error('[RutiBot] Fallo al llamar a Gemini:', err);
     }
   }
 
