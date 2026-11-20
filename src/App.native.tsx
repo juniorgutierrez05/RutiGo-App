@@ -6,6 +6,7 @@ import { AppProvider } from './store';
 import { NativeRouter } from './NativeRouter';
 import { StatusBarScrim } from './components/StatusBarScrim.native';
 import { ServerStatusBanner } from './components/ServerStatusBanner.native';
+import { UpdateNotificationBanner } from './components/UpdateNotificationBanner.native';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <NavigationBar style="light" />
       <AppProvider>
         <NativeRouter />
+        <UpdateNotificationBanner />
         <ServerStatusBanner />
         <StatusBarScrim />
       </AppProvider>

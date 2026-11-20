@@ -75,7 +75,7 @@ export interface Review {
 export interface NotificationItem {
   id: string;
   userId: string;
-  type: 'new_route' | 'review_reply' | 'recommendation';
+  type: 'new_route' | 'review_reply' | 'recommendation' | 'system';
   title: string;
   body: string;
   read: boolean;

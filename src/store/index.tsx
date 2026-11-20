@@ -27,6 +27,7 @@ interface AppContextType {
   places: Place[];
   reviews: Review[];
   notifications: NotificationItem[];
+  addNotification?: (title: string, body: string) => void;
   selectedRoute: Route | null;
   selectedPlace: Place | null;
   activeCategory: CategoryType;
@@ -320,6 +321,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
+  const addNotification = (title: string, body: string) => {
+    const item: NotificationItem = {
+      id: `local-${Date.now()}`,
+      userId: currentUser?.id || 'guest',
+      type: 'system',
+      title,
+      body,
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+    setNotifications((prev) => [item, ...prev]);
+  };
+
   const unreadNotifsCount = notifications.filter((n) => !n.read).length;
 
   const selectedRoute = selectedRouteId ? routes.find((r) => r.id === selectedRouteId) || routes[0] || null : routes[0] || null;
@@ -341,6 +355,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         places,
         reviews,
         notifications,
+        addNotification,
         selectedRoute,
         selectedPlace,
         activeCategory,

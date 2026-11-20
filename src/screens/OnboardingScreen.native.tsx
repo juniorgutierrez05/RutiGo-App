@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-na
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { checkAndRequestNotificationPermission } from '../services/notificationPermissionService';
 import { useApp } from '../store';
 import { IMAGES } from '../assets/images';
 import { Button } from '../components/Button.native';
@@ -45,6 +46,7 @@ export function OnboardingScreen() {
   const finishOnboarding = async (target: 'home' | 'login') => {
     try {
       await AsyncStorage.setItem('rutigo_onboarding_completed', 'true');
+      checkAndRequestNotificationPermission();
     } catch {}
     navigateTo(target);
   };
