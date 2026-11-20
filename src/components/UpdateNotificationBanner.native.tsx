@@ -14,6 +14,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Updates from 'expo-updates';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { checkAndRequestNotificationPermission } from '../services/notificationPermissionService';
+import {
+  sendUpdateReadyNotification,
+  setupUpdateNotificationResponseListener,
+} from '../services/backgroundUpdateService';
 import { useApp } from '../store';
 
 const LAST_SEEN_UPDATE_ID_KEY = 'rutigo_last_seen_update_id';
@@ -37,6 +41,14 @@ export function UpdateNotificationBanner() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Escuchar cuando el usuario presiona la notificación de actualización para reiniciar
+  useEffect(() => {
+    const unsubscribe = setupUpdateNotificationResponseListener(() => {
+      handleReload();
+    });
+    return () => unsubscribe();
+  }, []);
+
   // 2. Verificar y descargar actualizaciones en segundo plano al iniciar
   useEffect(() => {
     async function checkForOtaUpdates() {
@@ -45,8 +57,11 @@ export function UpdateNotificationBanner() {
         const check = await Updates.checkForUpdateAsync();
         if (check.isAvailable) {
           console.log('[RutiGo Updates] Nueva actualización encontrada, descargando en segundo plano...');
-          await Updates.fetchUpdateAsync();
-          console.log('[RutiGo Updates] Actualización descargada exitosamente.');
+          const result = await Updates.fetchUpdateAsync();
+          if (result.isNew) {
+            console.log('[RutiGo Updates] Actualización descargada exitosamente. Enviando notificación...');
+            await sendUpdateReadyNotification();
+          }
         }
       } catch (err) {
         // Silencioso si no hay red o está offline

@@ -19,7 +19,9 @@
       },
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
       ]
     },
     "plugins": [
@@ -34,7 +36,14 @@
       ],
       "expo-image",
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#E60124"
+        }
+      ]
     ],
     "extra": {
       "eas": {
@@ -44,7 +53,9 @@
     "owner": "matthewsg",
     "runtimeVersion": "1.0.0",
     "updates": {
-      "url": "https://u.expo.dev/a8191abc-b55a-4fcf-b404-f6e651e16161"
+      "url": "https://u.expo.dev/a8191abc-b55a-4fcf-b404-f6e651e16161",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 5000
     }
   }
 }
