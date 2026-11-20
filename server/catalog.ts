@@ -44,7 +44,10 @@ export async function listPlaces(query: { category?: string; municipalityId?: nu
   const offset = (query.page - 1) * query.limit;
   params.push(query.limit, offset);
   const [rows] = await pool.execute(
-    `SELECT p.*, m.name AS municipality,
+    `SELECT p.*,
+      COALESCE((SELECT COUNT(*) FROM reviews r WHERE r.place_id = p.id AND r.deleted_at IS NULL), 0) AS review_count,
+      COALESCE((SELECT ROUND(AVG(r.rating), 1) FROM reviews r WHERE r.place_id = p.id AND r.deleted_at IS NULL), 0.0) AS average_rating,
+      m.name AS municipality,
       COALESCE((SELECT JSON_ARRAYAGG(JSON_OBJECT('url', pi.image_url, 'altText', pi.alt_text))
            FROM place_images pi WHERE pi.place_id = p.id), JSON_ARRAY()) AS images
      FROM places p JOIN municipalities m ON m.id = p.municipality_id
@@ -61,7 +64,9 @@ export async function listRoutes(query: { category?: string; search?: string; pa
   params.push(query.limit, (query.page - 1) * query.limit);
   const [rows] = await pool.execute(
     `SELECT r.*,
-       COALESCE((SELECT JSON_ARRAYAGG(m.name) FROM route_municipalities rm JOIN municipalities m ON m.id = rm.municipality_id WHERE rm.route_id = r.id), JSON_ARRAY()) AS municipalities,
+      COALESCE((SELECT COUNT(*) FROM reviews rv WHERE rv.route_id = r.id AND rv.deleted_at IS NULL), 0) AS review_count,
+      COALESCE((SELECT ROUND(AVG(rv.rating), 1) FROM reviews rv WHERE rv.route_id = r.id AND rv.deleted_at IS NULL), 0.0) AS average_rating,
+      COALESCE((SELECT JSON_ARRAYAGG(m.name) FROM route_municipalities rm JOIN municipalities m ON m.id = rm.municipality_id WHERE rm.route_id = r.id), JSON_ARRAY()) AS municipalities,
       COALESCE((SELECT JSON_ARRAYAGG(rp.place_id) FROM route_places rp WHERE rp.route_id = r.id), JSON_ARRAY()) AS place_ids,
       COALESCE((SELECT JSON_ARRAYAGG(rh.highlight) FROM route_highlights rh WHERE rh.route_id = r.id), JSON_ARRAY()) AS highlights
      FROM routes r WHERE ${conditions.join(' AND ')} ORDER BY r.created_at DESC LIMIT ? OFFSET ?`, params
@@ -71,7 +76,10 @@ export async function listRoutes(query: { category?: string; search?: string; pa
 
 export async function getPlaceById(id: number) {
   const [rows] = await pool.execute(
-    `SELECT p.*, m.name AS municipality,
+    `SELECT p.*,
+      COALESCE((SELECT COUNT(*) FROM reviews r WHERE r.place_id = p.id AND r.deleted_at IS NULL), 0) AS review_count,
+      COALESCE((SELECT ROUND(AVG(r.rating), 1) FROM reviews r WHERE r.place_id = p.id AND r.deleted_at IS NULL), 0.0) AS average_rating,
+      m.name AS municipality,
       COALESCE((SELECT JSON_ARRAYAGG(JSON_OBJECT('url', pi.image_url, 'altText', pi.alt_text))
            FROM place_images pi WHERE pi.place_id = p.id), JSON_ARRAY()) AS images
      FROM places p JOIN municipalities m ON m.id = p.municipality_id

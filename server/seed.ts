@@ -612,6 +612,80 @@ async function seed() {
     }
     console.log(`✅ ${routesData.length} rutas temáticas creadas.`);
 
+    // 4. Semilla de Reseñas Reales de la Comunidad
+    console.log('✍️ Registrando reseñas de muestra para atractivos turísticos...');
+    const sampleUsers = [
+      { name: 'Valentina Castro', email: 'valentina.castro@rutigo.co', city: 'Barranquilla' },
+      { name: 'Andrés Cepeda M.', email: 'andres.cepeda@rutigo.co', city: 'Puerto Colombia' },
+      { name: 'Camila Montoya', email: 'camila.montoya@rutigo.co', city: 'Usiacurí' }
+    ];
+
+    const userIds: number[] = [];
+    for (const u of sampleUsers) {
+      await conn.execute(
+        `INSERT INTO users (name, email, role, status, home_city, auth_provider)
+         VALUES (?, ?, 'tourist', 'active', ?, 'local')
+         ON DUPLICATE KEY UPDATE name = VALUES(name)`,
+        [u.name, u.email, u.city]
+      );
+      const [userRow] = await conn.execute('SELECT id FROM users WHERE email = ? LIMIT 1', [u.email]);
+      userIds.push((userRow as any[])[0].id);
+    }
+
+    const sampleReviews = [
+      { placeKey: 'malecon_rio', userIdx: 0, rating: 5, comment: 'La brisa del río Magdalena al atardecer es inigualable. Gran oferta gastronómica en Caimán del Río y muy seguro para caminar en familia.' },
+      { placeKey: 'malecon_rio', userIdx: 1, rating: 5, comment: 'Uno de los mejores espacios urbanos de Colombia. La iluminación nocturna y las zonas verdes están impecables.' },
+      { placeKey: 'ventana_mundo', userIdx: 1, rating: 5, comment: 'Imponente monumento de colores. Es una parada obligatoria para fotos al entrar a Barranquilla.' },
+      { placeKey: 'ventana_mundo', userIdx: 2, rating: 4, comment: 'Muy bonito y representativo de la ciudad. Recomiendo ir al caer la tarde cuando encienden las luces.' },
+      { placeKey: 'museo_carnaval', userIdx: 0, rating: 5, comment: 'Mágica experiencia conociendo la historia de nuestras reinas y disfraces tradicionales. Muy didáctico.' },
+      { placeKey: 'bocas_ceniza', userIdx: 1, rating: 5, comment: 'Ver el choque del río Magdalena con el mar Caribe en el tajamar es una experiencia sobrecogedora.' },
+      { placeKey: 'muelle_puerto', userIdx: 2, rating: 5, comment: 'La reconstrucción del muelle y la nueva plaza gastronómica 1888 quedaron espectaculares.' },
+      { placeKey: 'muelle_puerto', userIdx: 0, rating: 5, comment: 'Excelente ambiente colonial costero. La historia de la inmigración en Colombia se respira aquí.' },
+      { placeKey: 'casa_julio_florez', userIdx: 0, rating: 5, comment: 'Usiacurí es hermoso. La casa del poeta conserva una atmósfera de paz, historia y poesía única.' },
+      { placeKey: 'murales_macro', userIdx: 2, rating: 5, comment: 'Los techos pintados con aves y fauna del Caribe vistos desde el mirador son una obra de arte viva.' },
+      { placeKey: 'mirador_cielo', userIdx: 1, rating: 5, comment: 'La vista de 360 grados de todo el Atlántico y el mar es impresionante. Aire puro y tranquilidad.' },
+      { placeKey: 'centro_artesanal_iraca', userIdx: 0, rating: 5, comment: 'El trabajo de las tejedoras en palma de iraca es una joya artesanal. Vale totalmente la pena.' },
+      { placeKey: 'plaza_tubara', userIdx: 2, rating: 4, comment: 'Pueblo lleno de historia ancestral Mokaná. Los artesanos y la iglesia colonial valen la visita.' },
+      { placeKey: 'petroglifos_piedra_pintada', userIdx: 1, rating: 5, comment: 'Caminar por el sendero ecológico y ver los grabados indígenas de miles de años es fascinante.' },
+      { placeKey: 'cerro_de_la_vieja', userIdx: 0, rating: 5, comment: 'El punto más alto del departamento. El clima es fresco y la panorámica del mar es inolvidable.' },
+      { placeKey: 'parroquia_baranoa', userIdx: 2, rating: 4, comment: 'Hermosa arquitectura colonial en el corazón de Baranoa. Ambiente tranquilo y gente muy hospitalaria.' },
+      { placeKey: 'laguna_luruaco', userIdx: 1, rating: 5, comment: 'Paseo en bote relajante y las mejores arepas de huevo tradicionales de la costa Caribe.' },
+      { placeKey: 'taller_artesanal_mascaras', userIdx: 0, rating: 5, comment: 'Galapa es cuna del tallado en madera. Ver a los maestros crear las máscaras es un privilegio.' }
+    ];
+
+    for (const rev of sampleReviews) {
+      const placeId = placeKeyToId.get(rev.placeKey);
+      const uid = userIds[rev.userIdx];
+      if (placeId && uid) {
+        const [existing] = await conn.execute(
+          'SELECT id FROM reviews WHERE user_id = ? AND place_id = ? LIMIT 1',
+          [uid, placeId]
+        );
+        if ((existing as any[]).length === 0) {
+          await conn.execute(
+            'INSERT INTO reviews (user_id, place_id, rating, comment) VALUES (?, ?, ?, ?)',
+            [uid, placeId, rev.rating, rev.comment]
+          );
+        }
+      }
+    }
+
+    // Sincronizar review_count y average_rating en places con las reseñas reales
+    await conn.execute(`
+      UPDATE places p
+      SET review_count = (SELECT COUNT(*) FROM reviews r WHERE r.place_id = p.id AND r.deleted_at IS NULL),
+          average_rating = COALESCE((SELECT ROUND(AVG(r.rating), 1) FROM reviews r WHERE r.place_id = p.id AND r.deleted_at IS NULL), 0.0)
+    `);
+
+    // Sincronizar review_count y average_rating en routes
+    await conn.execute(`
+      UPDATE routes r
+      SET review_count = (SELECT COUNT(*) FROM reviews rv WHERE rv.route_id = r.id AND rv.deleted_at IS NULL),
+          average_rating = COALESCE((SELECT ROUND(AVG(rv.rating), 1) FROM reviews rv WHERE rv.route_id = r.id AND rv.deleted_at IS NULL), 0.0)
+    `);
+
+    console.log(`✅ Reseñas registradas y conteos sincronizados al 100%.`);
+
     await conn.commit();
     console.log('\n✨ ¡Semilla completada con éxito! La base de datos tiene todo el catálogo turístico cargado.');
   } catch (error) {

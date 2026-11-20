@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { logEvent } from '../services/logger';
@@ -28,6 +28,7 @@ export function LeafletMapView({
   mapRef,
 }: LeafletMapViewProps) {
   const webViewRef = useRef<WebView | null>(null);
+  const isMapLoadedRef = useRef(false);
 
   // Exponer método para centrar externamente (ej: botón "Mi ubicación")
   useEffect(() => {
@@ -36,7 +37,7 @@ export function LeafletMapView({
         centerOn: (lat: number, lng: number, zoom = 14) => {
           webViewRef.current?.injectJavaScript(`
             if (window.map) {
-              window.map.flyTo([${lat}, ${lng}], ${zoom}, { duration: 0.8 });
+              window.map.flyTo([${lat}, ${lng}], ${zoom}, { duration: 0.6 });
             }
             true;
           `);
@@ -45,9 +46,9 @@ export function LeafletMapView({
     }
   }, [mapRef]);
 
-  // Actualizar la vista y el marcador activo cuando cambia activePlace
+  // Actualizar instantáneamente el marcador activo vía JS (SIN recargar el HTML)
   useEffect(() => {
-    if (activePlace && webViewRef.current) {
+    if (activePlace && isMapLoadedRef.current && webViewRef.current) {
       webViewRef.current.injectJavaScript(`
         if (window.updateActivePlace) {
           window.updateActivePlace('${activePlace.id}', ${activePlace.location.lat}, ${activePlace.location.lng});
@@ -57,9 +58,9 @@ export function LeafletMapView({
     }
   }, [activePlace]);
 
-  // Actualizar la ruta trazada
+  // Actualizar la ruta trazada instantáneamente vía JS
   useEffect(() => {
-    if (webViewRef.current) {
+    if (isMapLoadedRef.current && webViewRef.current) {
       const coordsJson = JSON.stringify(
         showRoute ? routeCoords.map((c) => [c.latitude, c.longitude]) : []
       );
@@ -72,17 +73,27 @@ export function LeafletMapView({
     }
   }, [showRoute, routeCoords]);
 
-  const htmlContent = `
+  // Generamos el HTML una sola vez para que el WebView NO se destruya ni recargue al cambiar de lugar
+  const initialCenterLat = activePlace?.location.lat || userLocation?.lat || 10.9685;
+  const initialCenterLng = activePlace?.location.lng || userLocation?.lng || -74.7813;
+  const initialActiveId = activePlace?.id || '';
+
+  const htmlSource = useMemo(() => {
+    const placesJson = JSON.stringify(places);
+    const userLocJson = JSON.stringify(userLocation);
+
+    const html = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- CDN Cloudflare Ultrarrápido con Edge Nodes en Colombia -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #map { width: 100%; height: 100%; background: #F7F4F0; }
+    html, body, #map { width: 100%; height: 100%; background: #E8ECEF; }
     .custom-pin {
       display: flex;
       align-items: center;
@@ -92,17 +103,17 @@ export function LeafletMapView({
       border-radius: 50%;
       background: #00AEB7;
       border: 3px solid #FFFFFF;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.22);
       color: #FFFFFF;
       font-weight: 900;
       font-size: 14px;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.25s ease, background 0.25s ease;
     }
     .custom-pin.active {
       background: #FF7A59;
       transform: scale(1.3);
       border-color: #FFFFFF;
-      box-shadow: 0 6px 16px rgba(255,122,89,0.5);
+      box-shadow: 0 5px 15px rgba(255,122,89,0.5);
       z-index: 9999 !important;
     }
     .user-pin {
@@ -113,33 +124,29 @@ export function LeafletMapView({
       border: 3px solid #FFFFFF;
       box-shadow: 0 0 0 6px rgba(37,99,235,0.25);
     }
-    .leaflet-control-attribution { font-size: 9px; opacity: 0.6; }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <script>
-    const places = ${JSON.stringify(places)};
-    const userLoc = ${JSON.stringify(userLocation)};
-    let activeId = '${activePlace?.id || ''}';
+    const places = ${placesJson};
+    const userLoc = ${userLocJson};
+    let activeId = '${initialActiveId}';
     let markersMap = {};
     let routePolyline = null;
 
-    // Inicializar mapa centrado en Atlántico / Barranquilla
-    const centerLat = ${activePlace?.location.lat || userLocation?.lat || 10.9685};
-    const centerLng = ${activePlace?.location.lng || userLocation?.lng || -74.7813};
-
     const map = L.map('map', {
       zoomControl: false,
-      attributionControl: false
-    }).setView([centerLat, centerLng], 12);
+      attributionControl: false,
+      fadeAnimation: true,
+      zoomAnimation: true
+    }).setView([${initialCenterLat}, ${initialCenterLng}], 12);
     window.map = map;
 
-    // Teselas 100% planas de alta legibilidad (OpenStreetMap HOT: sin relieves, sin sombras, diseño plano)
-    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+    // Servidor de teselas global con CDN Fastly ultrarrápido y subdominios distribuidos
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      subdomains: 'abc',
-      attribution: '© OpenStreetMap contributors'
+      subdomains: ['a', 'b', 'c']
     }).addTo(map);
 
     // Marcador de ubicación del usuario
@@ -153,7 +160,7 @@ export function LeafletMapView({
       L.marker([userLoc.lat, userLoc.lng], { icon: userIcon }).addTo(map);
     }
 
-    // Marcadores de lugares turísticos
+    // Marcadores de atractivos turísticos
     places.forEach(p => {
       const isAct = p.id === activeId;
       const icon = L.divIcon({
@@ -181,7 +188,7 @@ export function LeafletMapView({
       if (document.getElementById('pin-' + id)) {
         document.getElementById('pin-' + id).classList.add('active');
       }
-      map.flyTo([lat, lng], 13, { duration: 0.6 });
+      map.flyTo([lat, lng], 13, { duration: 0.5 });
     };
 
     window.updateRoute = function(coords) {
@@ -193,10 +200,10 @@ export function LeafletMapView({
         routePolyline = L.polyline(coords, {
           color: '#FF7A59',
           weight: 5,
-          opacity: 0.85,
+          opacity: 0.9,
           lineJoin: 'round'
         }).addTo(map);
-        map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
+        map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
       }
     };
 
@@ -204,18 +211,22 @@ export function LeafletMapView({
   </script>
 </body>
 </html>
-  `;
+    `;
+    return { html };
+  }, [places.length]);
 
   return (
     <View style={StyleSheet.absoluteFill}>
       <MapWebView
         ref={webViewRef}
         originWhitelist={['*']}
-        source={{ html: htmlContent }}
+        source={htmlSource}
         style={styles.webView}
         javaScriptEnabled
         domStorageEnabled
         scrollEnabled={false}
+        cacheEnabled
+        androidHardwareAccelerationDisabled={false}
         onMessage={(event: WebViewMessageEvent) => {
           try {
             const data = JSON.parse(event.nativeEvent.data);
@@ -223,6 +234,7 @@ export function LeafletMapView({
               const found = places.find((p) => p.id === data.placeId);
               if (found) onSelectPlace(found);
             } else if (data.type === 'MAP_READY') {
+              isMapLoadedRef.current = true;
               logEvent('info', 'LEAFLET', 'Motor de mapa Leaflet inicializado y teselas listas');
               onReady?.();
             }
@@ -241,6 +253,6 @@ export function LeafletMapView({
 const styles = StyleSheet.create({
   webView: {
     flex: 1,
-    backgroundColor: '#F7F4F0',
+    backgroundColor: '#E8ECEF',
   },
 });
