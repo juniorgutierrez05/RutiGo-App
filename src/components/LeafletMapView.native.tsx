@@ -73,9 +73,9 @@ export function LeafletMapView({
     }
   }, [showRoute, routeCoords]);
 
-  // Generamos el HTML una sola vez para que el WebView NO se destruya ni recargue al cambiar de lugar
-  const initialCenterLat = activePlace?.location.lat || userLocation?.lat || 10.9685;
-  const initialCenterLng = activePlace?.location.lng || userLocation?.lng || -74.7813;
+  // Al abrir el mapa, siempre priorizar la ubicación real del usuario
+  const initialCenterLat = userLocation?.lat || activePlace?.location.lat || 10.9685;
+  const initialCenterLng = userLocation?.lng || activePlace?.location.lng || -74.7813;
   const initialActiveId = activePlace?.id || '';
 
   const htmlSource = useMemo(() => {
@@ -141,7 +141,7 @@ export function LeafletMapView({
       attributionControl: false,
       fadeAnimation: true,
       zoomAnimation: true
-    }).setView([${initialCenterLat}, ${initialCenterLng}], 12);
+    }).setView([${initialCenterLat}, ${initialCenterLng}], 14);
     window.map = map;
 
     // Servidor de teselas global con CDN Fastly ultrarrápido y subdominios distribuidos

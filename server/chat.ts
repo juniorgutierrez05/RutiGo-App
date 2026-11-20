@@ -151,8 +151,18 @@ export async function handleChatMessage(
   }
 
   const apiKey = getCleanApiKey();
-  const preferredModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-  const modelsToTry = Array.from(new Set([preferredModel, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro']));
+  const preferredModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const modelsToTry = Array.from(
+    new Set([
+      preferredModel,
+      'gemini-2.5-flash',
+      'gemini-flash-latest',
+      'gemini-2.5-flash-lite',
+      'gemini-2.5-pro',
+      'gemini-pro-latest',
+      'gemini-1.5-flash',
+    ])
+  );
 
   // 2. Obtener catálogo turístico real de la base de datos MySQL (Clever Cloud)
   let catalogContext = '';

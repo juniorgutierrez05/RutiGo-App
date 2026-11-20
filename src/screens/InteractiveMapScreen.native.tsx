@@ -20,7 +20,8 @@ const routeCache = new Map<string, RouteResult>();
 export function InteractiveMapScreen() {
   const { places, selectedPlace, userLocation, navigateTo, goBack, refreshLocation } = useApp();
   const insets = useSafeAreaInsets();
-  const [active, setActive] = useState<Place | null>(selectedPlace || places[0] || null);
+  // Al abrir el mapa sin un lugar preseleccionado, active inicia en null para centrar en la ubicación del usuario
+  const [active, setActive] = useState<Place | null>(selectedPlace || null);
   const [showRoute, setShowRoute] = useState(false);
   const [loadingRoute, setLoadingRoute] = useState(false);
   const [routeCoords, setRouteCoords] = useState<{latitude: number, longitude: number}[]>([]);
@@ -33,6 +34,10 @@ export function InteractiveMapScreen() {
       initialActivePlace: active?.name,
     });
     refreshLocation();
+    // Si no hay un lugar seleccionado explícito, centrar inmediatamente en la posición del usuario
+    if (!selectedPlace && userLocation?.lat && mapRef.current) {
+      mapRef.current.centerOn(userLocation.lat, userLocation.lng, 14);
+    }
   }, []);
 
   useEffect(() => {
@@ -40,7 +45,7 @@ export function InteractiveMapScreen() {
     setRouteCoords([]);
     setRouteInfo(null);
     if (active && mapRef.current) {
-      mapRef.current.centerOn(active.location.lat, active.location.lng, 13);
+      mapRef.current.centerOn(active.location.lat, active.location.lng, 14);
     }
   }, [active]);
 
@@ -185,7 +190,7 @@ export function InteractiveMapScreen() {
         <Ionicons name="locate" size={22} color="#1E1927" />
       </Pressable>
 
-      {active && (
+      {active ? (
         <View style={[styles.card, { bottom: Math.max(insets.bottom, 12) + 12 }]}>
           <Text style={styles.municipality}>{active.municipality}</Text>
           <Text style={styles.name}>{active.name}</Text>
@@ -195,7 +200,7 @@ export function InteractiveMapScreen() {
             <View style={styles.routeBadge}>
               <Ionicons name="navigate-circle" size={16} color="#E60124" />
               <Text style={styles.routeBadgeText}>
-                Ruta directa: {routeInfo.distanceKm.toFixed(1)} km · ~{routeInfo.durationMin} min
+                Ruta más corta: {routeInfo.distanceKm.toFixed(1)} km · ~{routeInfo.durationMin} min
               </Text>
             </View>
           )}
@@ -210,7 +215,7 @@ export function InteractiveMapScreen() {
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
                 <Text style={styles.buttonText}>
-                  {showRoute && routeCoords.length > 0 ? 'Recalcular ruta' : 'Ver ruta por calles'}
+                  {showRoute && routeCoords.length > 0 ? 'Recalcular ruta' : 'Ver ruta más corta'}
                 </Text>
               )}
             </Pressable>
@@ -224,6 +229,18 @@ export function InteractiveMapScreen() {
                 <Ionicons name="navigate-outline" size={14} color="#5DB872" />
               </View>
             </Pressable>
+          </View>
+        </View>
+      ) : (
+        <View style={[styles.card, { bottom: Math.max(insets.bottom, 12) + 12 }]}>
+          <View style={styles.userLocationNotice}>
+            <View style={styles.userLocationDot} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.userLocationTitle}>Estás aquí en el Atlántico</Text>
+              <Text style={styles.userLocationSub}>
+                Toca cualquier marcador 📍 en el mapa para ver el lugar y trazar la ruta más corta por calles.
+              </Text>
+            </View>
           </View>
         </View>
       )}
@@ -317,4 +334,33 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   map: { width: '100%', height: '100%' },
+  userLocationNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  userLocationDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#5DB872',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    shadowColor: '#5DB872',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  userLocationTitle: {
+    color: '#1E1927',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  userLocationSub: {
+    color: '#6B7280',
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 16,
+  },
 });
